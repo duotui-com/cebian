@@ -50,10 +50,7 @@ class NativeEnginePackSettingsViewModel @Inject constructor(
             // 下载服务在 :engine，进度必须走跨进程通道；进程内单例在主进程恒为空。
             DownloadProgressChannel.observe(context, NativeEnginePackDownloadChannel.ID).collect { bundle ->
                 val decoded = bundle?.let(NativeEnginePackDownloadChannel::decode)
-                val state = if (decoded != null &&
-                    isInProgress(decoded.phase) &&
-                    !DownloadProgressChannel.isFresh(bundle)
-                ) {
+                val state = if (decoded != null && !DownloadProgressChannel.isFresh(bundle)) {
                     DownloadProgressChannel.clear(context, NativeEnginePackDownloadChannel.ID)
                     null
                 } else {

@@ -109,8 +109,19 @@ class OcrModelDownloadService : Service() {
 
             downloader.executeDownload(modelId, wifiOnly)
 
+            // 先停掉转发，再显式补发终态：终态是在 IO 线程写进 controller 的，observer 在主线程上
+            // 还没轮到处理就被 cancel，那一次发射会被丢掉——这正是"下载完成页面收不到 READY →
+            // 不自动选中、进度卡直接消失"的根因。
             observer.cancel()
             val finalState = OcrModelDownloadController.state.value
+            if (finalState != null) {
+                progressRelay.publish(
+                    phase = finalState.phase.name,
+                    percent = null,
+                    payload = OcrModelDownloadChannel.encode(finalState),
+                    force = true,
+                )
+            }
             when (finalState?.phase) {
                 OcrModelDownloadPhase.READY -> {
                     stopForegroundCompat()
@@ -124,8 +135,8 @@ class OcrModelDownloadService : Service() {
                 }
                 else -> stopForegroundCompat()
             }
-            // 结束后清掉快照：避免下次打开页面看到一个早已结束的"下载中 x%"。
-            progressRelay.clear()
+            // 这里**不能**清快照：终态广播可能还在投递路上，清掉会让订阅方读到 null；
+            // 过期由订阅侧按时间戳判定（DownloadProgressChannel.isFresh）。
             OcrModelDownloadController.clearActive()
             stopSelfResult(lastStartId)
         }
@@ -156,10 +167,10 @@ class OcrModelDownloadService : Service() {
                 phase = failed.phase.name,
                 percent = null,
                 payload = OcrModelDownloadChannel.encode(failed),
+                force = true,
             )
         }
         OcrModelDownloadController.clearActive()
-        progressRelay.clear()
         stopForegroundCompat()
         stopSelf()
     }
@@ -168,7 +179,6 @@ class OcrModelDownloadService : Service() {
         job?.cancel()
         scope.cancel()
         OcrModelDownloadController.clearActive()
-        progressRelay.clear()
         super.onDestroy()
     }
 

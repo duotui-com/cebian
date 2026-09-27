@@ -91,8 +91,18 @@ class NativeEnginePackDownloadService : Service() {
                 }
             }
             downloader.executeDownload(packId, wifiOnly)
+            // 与 OCR 下载同理：终态在 IO 线程写入，observer 在主线程被 cancel 之前来不及转发，
+            // 必须显式补发一次，否则页面收不到 READY/FAILED。
             observer.cancel()
             val finalState = NativeEnginePackDownloadController.state.value
+            if (finalState != null) {
+                progressRelay.publish(
+                    phase = finalState.phase.name,
+                    percent = null,
+                    payload = NativeEnginePackDownloadChannel.encode(finalState),
+                    force = true,
+                )
+            }
             when (finalState?.phase) {
                 NativeEnginePackDownloadPhase.READY -> stopForegroundCompat()
                 NativeEnginePackDownloadPhase.FAILED,
@@ -101,7 +111,6 @@ class NativeEnginePackDownloadService : Service() {
                 else -> stopForegroundCompat()
             }
             NativeEnginePackDownloadController.clearActive()
-            progressRelay.clear()
             stopSelfResult(lastStartId)
         }
         return START_NOT_STICKY
@@ -111,7 +120,6 @@ class NativeEnginePackDownloadService : Service() {
         job?.cancel()
         scope.cancel()
         NativeEnginePackDownloadController.clearActive()
-        progressRelay.clear()
         super.onDestroy()
     }
 

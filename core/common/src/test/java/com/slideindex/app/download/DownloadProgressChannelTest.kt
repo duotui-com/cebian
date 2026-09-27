@@ -1,7 +1,11 @@
 package com.slideindex.app.download
 
 import android.os.Bundle
+import android.os.Looper
 import java.time.Duration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -13,6 +17,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowSystemClock
+import org.robolectric.Shadows.shadowOf
 
 /**
  * 下载进度跨进程通道。
@@ -99,6 +104,53 @@ class DownloadProgressChannelTest {
         assertNull(DownloadProgressChannel.snapshot(context, "relay"))
     }
 
+    /**
+     * 回归锁：终态**必须由广播自带载荷**送达。
+     *
+     * 曾经的做法是"只广播文件变更、订阅方回读快照文件"，结果下载收尾时快照被清掉，
+     * 订阅方读到 null → 下载完成不自动选中、进度卡直接消失。
+     */
+    @Test
+    fun `publish broadcasts the payload itself so delivery does not depend on the snapshot file`() {
+        DownloadProgressChannel.publish(context, "delivery", Bundle().apply { putString("phase", "READY") })
+
+        val intent = shadowOf(context as android.app.Application).broadcastIntents
+            .lastOrNull { it.action == DownloadProgressChannel.ACTION }
+
+        assertNotNull("必须发出通道广播", intent)
+        assertEquals("delivery", intent!!.getStringExtra(DownloadProgressChannel.EXTRA_CHANNEL))
+        assertNotNull(
+            "广播必须自带载荷：只通知『文件变了』的话，快照被清掉后订阅方只能读到 null",
+            intent.getStringExtra(DownloadProgressChannel.EXTRA_PAYLOAD),
+        )
+    }
+
     private fun snapshotBytes(channel: String): Long =
         DownloadProgressChannel.snapshot(context, channel)!!.getLong("bytes")
+
+    /**
+     * 端到端（进程内）：广播投递走通，且**快照被清掉也不影响这次投递**——
+     * 这正是"下载完成后卡片直接消失、模型没被自动选中"的那条路。
+     */
+    @Test
+    @Config(sdk = [34])
+    fun `live update still arrives when the snapshot is cleared right after publishing`() = runBlocking {
+        val received = mutableListOf<String?>()
+        val job = launch(Dispatchers.Unconfined) {
+            DownloadProgressChannel.observe(context, "live").collect { bundle ->
+                received += bundle?.getString("phase")
+            }
+        }
+        shadowOf(Looper.getMainLooper()).idle()
+
+        DownloadProgressChannel.publish(context, "live", Bundle().apply { putString("phase", "READY") })
+        DownloadProgressChannel.clear(context, "live")
+        shadowOf(Looper.getMainLooper()).idle()
+
+        job.cancel()
+        assertTrue(
+            "订阅者必须收到 READY（不能因为快照被清就丢事件）；实际收到：$received",
+            received.contains("READY"),
+        )
+    }
 }

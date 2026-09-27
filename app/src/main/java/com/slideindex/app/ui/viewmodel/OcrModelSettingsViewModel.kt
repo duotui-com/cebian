@@ -108,11 +108,9 @@ class OcrModelSettingsViewModel @Inject constructor(
             // OcrModelDownloadController 是进程内单例，在主进程永远是初始值。
             DownloadProgressChannel.observe(context, OcrModelDownloadChannel.ID).collect { bundle ->
                 val decoded = bundle?.let(OcrModelDownloadChannel::decode)
-                val state = if (decoded != null &&
-                    isInProgress(decoded.phase) &&
-                    !DownloadProgressChannel.isFresh(bundle)
-                ) {
-                    // 发布方进程被硬杀留下的过期"进行中"快照，清掉当作没有任务。
+                val state = if (decoded != null && !DownloadProgressChannel.isFresh(bundle)) {
+                    // 过期快照：可能是发布方被硬杀留下的"进行中"，也可能是很久以前的终态。
+                    // 都不能当作现状，清掉。
                     DownloadProgressChannel.clear(context, OcrModelDownloadChannel.ID)
                     null
                 } else {
