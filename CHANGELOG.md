@@ -34,6 +34,7 @@ All notable changes to Cebian are documented in this file.
 - **取词**：「布局与行为」「拾取与手感」合并为一张卡（去掉多余分区标题）；OCR 两行合并为一行「OCR 识别」，套首页「手势动画」的开关＋进入子页样式（副标题显示当前模型），分区标题由「文字识别」改为「OCR 与翻译」，「取词面板翻译」并进同一张卡
 
 ### Fixed
+- **OCR**：修 Android 17（`targetSdk 37`）上取词报「OCR 运行库未就绪」——引擎包解压后立刻把 native 库置为只读，否则 `System.load()` 会因「加载可写文件」（compat change `THROW_ERROR_FOR_WRITABLE_DCL` = 463348571）直接抛 `UnsatisfiedLinkError`；加载失败现在会把真实异常写进日志，不再只是一句「运行库未就绪」
 - **剪贴板**：修「LSPosed 白名单」页左上角返回连退两级直接跳回「剪贴板」页——该页由「剪贴板后台监听」进入，返回目标却写成了上上级的「剪贴板」页
 
 ## [1.23.0] - 2026-09-24

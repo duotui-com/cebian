@@ -153,6 +153,7 @@ Debug 包在 `OcrStartupSmokeVerifier` 下会做启动 OCR 冒烟（仅 `BuildCo
 | Lite 不提示下载 | 删包后二次检查返回 UpToDate（已用 pending 状态修复） |
 | 下载校验失败 | `native_engine_packs.json` 的 sha256/size 与 zip 不符 |
 | 1.9.20 用户下不了 v4 | 旧 APK 目录仍指向 v2 URL；需发含新 catalog 的 App 版本 |
+| 取词报「OCR 运行库未就绪」（Android 17 / `targetSdk 37`） | 引擎包 `.so` 落在可写目录：libcore `Runtime.load0` 对 `file.canWrite()` 的文件经 compat change `THROW_ERROR_FOR_WRITABLE_DCL`(463348571) 抛 `UnsatisfiedLinkError`（日志里先有一条 `Attempt to load writable file: …`）。解压后必须置只读，见 `NativeEnginePackLoader.sealReadOnly` / `NativeEnginePackExtractor` |
 
 ---
 

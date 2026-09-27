@@ -1,6 +1,7 @@
 package com.slideindex.app.nativeengine
 
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.util.zip.ZipFile
@@ -18,6 +19,10 @@ class NativeEnginePackCoordinator @Inject constructor(
     private val repository: NativeEnginePackRepository,
     private val migrationNoticeStore: NativeEnginePackMigrationNoticeStore,
 ) {
+    private companion object {
+        private const val TAG = "NativeEnginePack"
+    }
+
     private val loadMutex = Mutex()
     private val provisionMutex = Mutex()
 
@@ -55,6 +60,14 @@ class NativeEnginePackCoordinator @Inject constructor(
                     packRevision = if (packId == NativeEnginePackIds.OCR) revision else null,
                 )
                 true
+            }.onFailure { error ->
+                // 不要静默吞：Android 17 起「从可写路径加载 .so」会抛 UnsatisfiedLinkError，
+                // 吞掉之后上层只剩一句「OCR 运行库未就绪」，无从定位。
+                Log.e(
+                    TAG,
+                    "loadLibraries failed packId=$packId dir=${repository.nativeLibDir(packId)}",
+                    error,
+                )
             }.getOrDefault(false)
         }
     }
@@ -156,9 +169,16 @@ class NativeEnginePackCoordinator @Inject constructor(
 
 internal object NativeEnginePackExtractor {
     fun extractZip(zipFile: File, packId: String, repository: NativeEnginePackRepository) {
-        val packRoot = repository.ensurePackDirectory(packId)
-        val libTarget = repository.nativeLibDir(packId)
-        val assetsTarget = repository.assetsRoot(packId)
+        repository.ensurePackDirectory(packId)
+        extractZip(
+            zipFile = zipFile,
+            libTarget = repository.nativeLibDir(packId),
+            assetsTarget = repository.assetsRoot(packId),
+        )
+    }
+
+    /** 纯文件实现（便于单测）：按 ABI 分流解压，最后把 native 库置为只读。 */
+    internal fun extractZip(zipFile: File, libTarget: File, assetsTarget: File) {
         libTarget.mkdirs()
         assetsTarget.mkdirs()
 
@@ -179,10 +199,18 @@ internal object NativeEnginePackExtractor {
                         File(assetsTarget, normalized)
                 }
                 target.parentFile?.mkdirs()
+                // 老版本解压出来的库已被置为只读，覆盖之前先放开写权限。
+                if (target.isFile && !target.canWrite()) target.setWritable(true)
                 zip.getInputStream(entry).use { input ->
                     target.outputStream().use { output -> input.copyTo(output) }
                 }
             }
+        }
+
+        // 解压即置只读：Android 17 起 System.load() 会拒绝加载可写文件
+        // （判据见 NativeEnginePackLoader.sealReadOnly）。
+        libTarget.listFiles()?.forEach { file ->
+            if (file.isFile) NativeEnginePackLoader.sealReadOnly(file)
         }
     }
 
