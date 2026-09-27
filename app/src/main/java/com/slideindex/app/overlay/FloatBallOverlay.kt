@@ -1835,7 +1835,8 @@ object FloatBallOverlay {
         externalTracking: Boolean,
         fromLineStrip: Boolean,
         actionExecutor: ActionExecutor,
-        hostContext: Context
+        hostContext: Context,
+        panelSide: PanelSide? = null,
     ) {
         cancelCursorPickPreview()
         clearSplitIdleChrome()
@@ -1853,7 +1854,14 @@ object FloatBallOverlay {
         val onLaunch: (com.slideindex.app.launcher.QuickLauncherItem, Boolean) -> Unit = { item, longPressArmed ->
             releaseFloatBallLauncherCapture(fromLineStrip)
             displayView?.visibility = View.VISIBLE
-            actionExecutor.launchQuickItem(item, settings, longPressArmed = longPressArmed)
+            // 圆环里点开的条目（例如「快速启动器」槽位）要跟圆环落在同一侧，
+            // 否则打开的面板会按宿主默认落到左边。
+            actionExecutor.launchQuickItem(
+                item,
+                settings,
+                longPressArmed = longPressArmed,
+                panelSide = panelSide,
+            )
         }
         val shown = when (action) {
             GestureAction.AppSwitcher -> AppSwitcherOverlayWindow.show(
@@ -1939,7 +1947,8 @@ object FloatBallOverlay {
                 externalTracking = true,
                 fromLineStrip = fromLineStrip,
                 actionExecutor = actionExecutor,
-                hostContext = hostContext
+                hostContext = hostContext,
+                panelSide = panelSide,
             )
             return
         }

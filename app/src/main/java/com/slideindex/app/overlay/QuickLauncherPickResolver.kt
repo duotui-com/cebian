@@ -163,7 +163,8 @@ internal class QuickLauncherPickResolver(
                             item,
                             host.settings(),
                             longPressArmed = longPress,
-                            anchorRawY = event.rawY
+                            anchorRawY = event.rawY,
+                            panelSide = host.side(),
                         )
                     ) {
                         280L

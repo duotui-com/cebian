@@ -182,7 +182,13 @@ class ActionExecutor(
                         anchorRawY = y,
                         externalTracking = false,
                         onLaunch = { item, longPressArmed ->
-                            launchQuickItem(item, settings, longPressArmed = longPressArmed, anchorRawY = y)
+                            launchQuickItem(
+                                item,
+                                settings,
+                                longPressArmed = longPressArmed,
+                                anchorRawY = y,
+                                panelSide = panelSide,
+                            )
                         }
                     )
                 }
@@ -196,7 +202,13 @@ class ActionExecutor(
                         anchorRawY = y,
                         externalTracking = continueTouch,
                         onLaunch = { item, longPressArmed ->
-                            launchQuickItem(item, settings, longPressArmed = longPressArmed, anchorRawY = y)
+                            launchQuickItem(
+                                item,
+                                settings,
+                                longPressArmed = longPressArmed,
+                                anchorRawY = y,
+                                panelSide = panelSide,
+                            )
                         }
                     )
                 }
@@ -413,9 +425,12 @@ class ActionExecutor(
         item: QuickLauncherItem,
         settings: AppSettings,
         longPressArmed: Boolean = false,
-        anchorRawY: Float? = null
+        anchorRawY: Float? = null,
+        panelSide: PanelSide? = null,
     ): Boolean = launchHelper.launchQuickItem(item, settings, longPressArmed, anchorRawY) { action, appSettings, armed, y ->
-        execute(action, appSettings, armed, anchorRawX = null, anchorRawY = y)
+        // 从圆环/蜂窝/面板里点开的条目同样要知道“当前在哪一侧”，否则打开的面板只能按
+        // 宿主默认（左优先）落地：真机反馈右侧圆环里点快速启动器槽位，面板弹到左边。
+        execute(action, appSettings, armed, anchorRawX = null, anchorRawY = y, panelSide = panelSide)
     }
 
     fun switchToRecentTask(

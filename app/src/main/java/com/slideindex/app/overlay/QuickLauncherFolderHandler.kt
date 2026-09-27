@@ -502,7 +502,8 @@ internal class QuickLauncherFolderHandler(
                     childItem,
                     host.settings(),
                     longPressArmed = longPress,
-                    anchorRawY = event.rawY
+                    anchorRawY = event.rawY,
+                    panelSide = host.side(),
                 )
             ) {
                 280L

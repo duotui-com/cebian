@@ -203,7 +203,12 @@ internal class EdgeGestureSessionCoordinator(
             externalTracking = continuousPick,
             forceBrowseMode = forceBrowseMode,
             onLaunch = { item, longPressArmed ->
-                actionExecutor.launchQuickItem(item, settings, longPressArmed = longPressArmed)
+                actionExecutor.launchQuickItem(
+                    item,
+                    settings,
+                    longPressArmed = longPressArmed,
+                    panelSide = gestureSession.sessionSide,
+                )
             }
         )
     }
@@ -238,7 +243,12 @@ internal class EdgeGestureSessionCoordinator(
             anchorRawY = rawY,
             externalTracking = continuousPick,
             onLaunch = { item, longPressArmed ->
-                actionExecutor.launchQuickItem(item, settings, longPressArmed = longPressArmed)
+                actionExecutor.launchQuickItem(
+                    item,
+                    settings,
+                    longPressArmed = longPressArmed,
+                    panelSide = gestureSession.sessionSide,
+                )
             },
             edgePanelSide = gestureSession.sessionSide
         )
