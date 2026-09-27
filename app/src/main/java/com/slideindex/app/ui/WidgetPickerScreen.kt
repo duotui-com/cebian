@@ -327,13 +327,19 @@ fun WidgetPickerScreen(
 
   val filteredApps = remember(installedApps, searchQuery) {
     val query = searchQuery.trim().lowercase()
-    if (query.isEmpty()) installedApps
-    else installedApps.filter {
-      it.appLabel.lowercase().contains(query) ||
-        it.sortKey.contains(query) ||
-        it.initialKey.contains(query) ||
-        it.packageName.lowercase().contains(query)
+    val matched = if (query.isEmpty()) {
+      installedApps
+    } else {
+      installedApps.filter {
+        it.appLabel.lowercase().contains(query) ||
+          it.sortKey.contains(query) ||
+          it.initialKey.contains(query) ||
+          it.packageName.lowercase().contains(query)
+      }
     }
+    // 列表用「包名/Activity」做 key，同一包名重复（应用分身 / 工作资料）会直接崩，
+    // 这里按包名兜底去重；面板本身也是按包名增删的，重复条目没有意义。
+    matched.distinctBy { it.packageName }
   }
 
   val loadedCatalog = rememberLoadedShortcutCatalog(allApps)

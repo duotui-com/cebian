@@ -276,6 +276,10 @@ object AppShortcutLoader {
                     label = info.label,
                 )
             }
+            // 少数应用的同一个 Activity 声明了多条 CREATE_SHORTCUT filter，会被
+            // queryIntentActivities 重复返回；picker 用 qualifiedName（包名/类名）做 key，
+            // 重复会直接抛「Key ... was already used」把面板打崩。
+            .distinctBy { it.qualifiedName }
             .sortedBy { it.pinyinKey }
     }
 

@@ -152,7 +152,13 @@ object WidgetCatalog {
       val profiles = userManager?.userProfiles ?: emptyList()
       val list = mutableListOf<android.content.pm.LauncherActivityInfo>()
       if (launcherApps != null && profiles.isNotEmpty()) {
-        for (profile in profiles) {
+        // 「应用分身 / 工作资料」下同一包名会出现在多个 profile 里（例如微信分身），
+        // 逐个 profile 枚举会把同一个启动 Activity 收到多份。面板是按包名增删的
+        // （WidgetPickerTrampoline#toggleApp），重复条目不仅会让 LazyColumn 的
+        // 「包名/Activity」key 撞车闪退，还会让同一个应用的开关状态互相打架。
+        // 当前用户排在前面，去重时保留当前用户的实例（面板也只会用当前用户启动）。
+        val orderedProfiles = profiles.sortedBy { if (it == android.os.Process.myUserHandle()) 0 else 1 }
+        for (profile in orderedProfiles) {
           list.addAll(runCatching { launcherApps.getActivityList(null, profile) }.getOrDefault(emptyList()))
         }
       }
@@ -173,7 +179,9 @@ object WidgetCatalog {
           initialKey = initialKey,
           iconBitmap = iconBitmap,
         )
-      }.sortedBy { it.sortKey }
+      }
+        .distinctBy { it.packageName }
+        .sortedBy { it.sortKey }
     }.getOrDefault(emptyList())
     cachedInstalledApps = result
     result
