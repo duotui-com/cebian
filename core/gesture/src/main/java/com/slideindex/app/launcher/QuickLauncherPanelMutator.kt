@@ -93,4 +93,48 @@ object QuickLauncherPanelMutator {
         if (action.panelId.isBlank() || action.panelId in validPanelIds) return action
         return action.copy(panelId = fallbackPanelId)
     }
+
+    /**
+     * 把「打开快速启动器」动作里空/失效的面板引用钉到当前有效面板上。
+     *
+     * 空引用在运行期等价于「列表里的第一个面板」，一旦用户新增、删除或调整面板顺序就会漂移；
+     * 写入时归一化成具体 id，绑定关系才稳定。非快速启动器动作原样返回。
+     */
+    fun normalizeQuickLauncherAction(action: GestureAction, panels: List<QuickLauncherPanel>): GestureAction {
+        if (action !is GestureAction.QuickLauncher) return action
+        val resolved = QuickLauncherPanelDefaults.resolvePanelId(panels, action.panelId)
+        return if (resolved == action.panelId) action else action.copy(panelId = resolved)
+    }
+
+    /** 归一化条目内的快速启动器动作；文件夹会递归处理子项。其他类型原样返回。 */
+    fun normalizeQuickLauncherItem(item: QuickLauncherItem, panels: List<QuickLauncherPanel>): QuickLauncherItem =
+        when (item.type) {
+            QuickLauncherItemType.ACTION -> {
+                val action = QuickLauncherItemCodec.parseActionPayload(item.payload)
+                if (action == null) {
+                    item
+                } else {
+                    val normalized = normalizeQuickLauncherAction(action, panels)
+                    if (normalized == action) {
+                        item
+                    } else {
+                        item.copy(payload = QuickLauncherItemCodec.encodeActionPayload(normalized))
+                    }
+                }
+            }
+            QuickLauncherItemType.FOLDER -> {
+                val children = item.folderItems()
+                val normalized = children.map { normalizeQuickLauncherItem(it, panels) }
+                if (normalized == children) item else item.withFolderItems(normalized)
+            }
+            else -> item
+        }
+
+    fun normalizeQuickLauncherItems(
+        items: List<QuickLauncherItem>,
+        panels: List<QuickLauncherPanel>,
+    ): List<QuickLauncherItem> {
+        if (items.isEmpty()) return items
+        return items.map { normalizeQuickLauncherItem(it, panels) }
+    }
 }

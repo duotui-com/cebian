@@ -100,6 +100,19 @@ class SettingsRepository @Inject constructor(
                 .distinctUntilChanged()
                 .collect { enabled -> ServiceEnabledStore.write(context, enabled) }
         }
+        // 圆环槽位面板引用的一次性归一化：只碰自己的键，不阻塞快照收集（上面那批修复会先写盘，
+        // 若把这条也串进去会推迟 collect 启动，readSnapshot() 读到旧值的窗口跟着变大）。
+        cacheScope.launch {
+            runCatching {
+                overlay.migrateFvAppSwitcherQuickLauncherPanelsOnce()
+            }.onFailure {
+                android.util.Log.w(
+                    "SettingsRepository",
+                    "fv panel migration failed (${com.slideindex.app.util.AppProcess.name()})",
+                    it,
+                )
+            }
+        }
     }
 
     fun readSnapshot(): AppSettings = cachedSettings

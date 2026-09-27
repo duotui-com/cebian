@@ -435,8 +435,86 @@ class OverlaySettingsMutator @Inject constructor(
     suspend fun setQuickLauncherPanels(
         panels: List<com.slideindex.app.launcher.QuickLauncherPanel>,
     ) = editor.edit { prefs ->
+        val previousPanels = readQuickLauncherPanelsFromPrefs(prefs)
         prefs[SettingsPreferenceKeys.QUICK_LAUNCHER_PANELS] =
             com.slideindex.app.launcher.QuickLauncherPanelCodec.encodeAll(panels)
+        val remainingPanels = com.slideindex.app.launcher.QuickLauncherPanelDefaults.effectivePanels(panels)
+        val remainingIds = remainingPanels.map { it.id }.toSet()
+        val removedIds = previousPanels.map { it.id }.filterNot { it in remainingIds }
+        if (removedIds.isEmpty()) return@edit
+        // 面板被删除后，手势槽位/圆环槽位/其它面板里指向它的动作要钉到存活面板上，
+        // 否则运行期会静默回落到「第一个面板」，用户改面板顺序时行为还会跟着漂移。
+        remapQuickLauncherPanelReferences(
+            prefs = prefs,
+            removedPanelIds = removedIds,
+            fallbackPanelId = remainingPanels.first().id,
+        )
+    }
+
+    /**
+     * 把 [removedPanelIds] 指向的快速启动器动作改写到 [fallbackPanelId]。
+     *
+     * 动作分散在多个键里（手势规则、圆环槽位、快速启动器面板、悬浮球手势、指尖圆环、角落轮盘…），
+     * 但编码格式统一，所以按字符串遍历所有已存的 String / Set<String> 值做一次改写，
+     * 新增的存储位置也能自动覆盖；其它类型（数值、布尔等）不参与。
+     */
+    private fun remapQuickLauncherPanelReferences(
+        prefs: androidx.datastore.preferences.core.MutablePreferences,
+        removedPanelIds: List<String>,
+        fallbackPanelId: String,
+    ) {
+        val snapshot = prefs.asMap().toMap()
+        snapshot.forEach { (key, value) ->
+            when (value) {
+                is String -> {
+                    val updated = removedPanelIds.fold(value) { acc, removedId ->
+                        QuickLauncherItemCodec.remapPanelReferences(acc, removedId, fallbackPanelId)
+                    }
+                    if (updated != value) {
+                        @Suppress("UNCHECKED_CAST")
+                        prefs[key as Preferences.Key<String>] = updated
+                    }
+                }
+                is Set<*> -> {
+                    val strings = value.filterIsInstance<String>().toSet()
+                    if (strings.size != value.size) return@forEach
+                    val updated = removedPanelIds.fold(strings) { acc, removedId ->
+                        QuickLauncherItemCodec.remapPanelReferences(acc, removedId, fallbackPanelId)
+                    }
+                    if (updated != strings) {
+                        @Suppress("UNCHECKED_CAST")
+                        prefs[key as Preferences.Key<Set<String>>] = updated
+                    }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    /**
+     * 一次性修复历史数据：圆环槽位里「打开快速启动器」但没指定面板的旧条目，
+     * 钉到当时的第一个面板，避免以后用户增删/调整面板顺序时槽位悄悄换目标。
+     *
+     * 新写入已经在 [setFvAppSwitcherSlot] 归一化，这里只补齐存量。
+     */
+    suspend fun migrateFvAppSwitcherQuickLauncherPanelsOnce() = editor.edit { prefs ->
+        if (prefs[SettingsPreferenceKeys.FV_APP_SWITCHER_PANEL_REFERENCE_MIGRATED] == true) return@edit
+        prefs[SettingsPreferenceKeys.FV_APP_SWITCHER_PANEL_REFERENCE_MIGRATED] = true
+        val panels = readQuickLauncherPanelsFromPrefs(prefs)
+        listOf(
+            FvAppSwitcherAxis.VERTICAL to SettingsPreferenceKeys.FV_APP_SWITCHER_SLOTS,
+            FvAppSwitcherAxis.HORIZONTAL to SettingsPreferenceKeys.FV_APP_SWITCHER_HORIZONTAL_SLOTS,
+        ).forEach { (axis, slotsKey) ->
+            if (prefs[slotsKey].isNullOrEmpty()) return@forEach
+            val current = FvAppSwitcherSettings.fromPreferences(prefs, axis)
+            if (current.slots.isEmpty()) return@forEach
+            val normalized = current.slots.mapValues { (_, item) ->
+                com.slideindex.app.launcher.QuickLauncherPanelMutator.normalizeQuickLauncherItem(item, panels)
+            }
+            if (normalized != current.slots) {
+                FvAppSwitcherSettings.writeSlotsAxis(prefs, axis, current.copy(slots = normalized))
+            }
+        }
     }
 
     suspend fun updateQuickLauncherPanelItems(
@@ -544,6 +622,11 @@ class OverlaySettingsMutator @Inject constructor(
         index: Int,
         item: com.slideindex.app.launcher.QuickLauncherItem,
     ) = editor.edit { prefs ->
+        // 「打开快速启动器」但没挑面板时，把空引用钉到当前有效面板，避免以后面板顺序变化导致漂移。
+        val resolvedItem = com.slideindex.app.launcher.QuickLauncherPanelMutator.normalizeQuickLauncherItem(
+            item = item,
+            panels = readQuickLauncherPanelsFromPrefs(prefs),
+        )
         val linkSlots = prefs[SettingsPreferenceKeys.FV_APP_SWITCHER_LINK_SLOT_AXES]
             ?: FvAppSwitcherSettings.linkFlagsFromPreferences(prefs).linkSlotAxes
         val targetAxes = if (linkSlots) {
@@ -555,11 +638,11 @@ class OverlaySettingsMutator @Inject constructor(
             val currentSettings = FvAppSwitcherSettings.fromPreferences(prefs, targetAxis)
             val current = currentSettings.slots.toMutableMap()
             val overrides = currentSettings.slotIconOverrides.toMutableMap()
-            if (item.payload.isBlank()) {
+            if (resolvedItem.payload.isBlank()) {
                 current.remove(index)
                 overrides.remove(index)
             } else {
-                current[index] = item
+                current[index] = resolvedItem
             }
             FvAppSwitcherSettings.writeSlotsAxis(
                 prefs,

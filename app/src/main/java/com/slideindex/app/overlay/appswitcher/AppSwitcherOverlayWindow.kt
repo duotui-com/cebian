@@ -148,6 +148,7 @@ object AppSwitcherOverlayWindow {
                     apps = apps,
                     activityShortcuts = settings.activityShortcuts,
                     shellCommands = settings.shellCommands,
+                    quickLauncherPanels = settings.quickLauncherPanels,
                     onDismiss = { dialogHost.dismiss() },
                     onSelectItem = { selectedItem ->
                         settingsScope.launch {

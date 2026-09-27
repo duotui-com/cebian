@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -40,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,13 +51,23 @@ import androidx.compose.ui.unit.dp
 import com.slideindex.app.R
 import com.slideindex.app.activity.ActivityShortcut
 import com.slideindex.app.data.AppInfo
+import com.slideindex.app.gesture.GestureAction
 import com.slideindex.app.launcher.QuickLauncherItem
+import com.slideindex.app.launcher.QuickLauncherItemCodec
+import com.slideindex.app.launcher.QuickLauncherItemType
+import com.slideindex.app.launcher.QuickLauncherPanel
+import com.slideindex.app.launcher.QuickLauncherPanelDefaults
 import com.slideindex.app.shell.ShellCommand
+import com.slideindex.app.ui.Md3PickerIconLeading
+import com.slideindex.app.ui.Md3PickerListRow
+import com.slideindex.app.ui.PickerTrailingMode
+import com.slideindex.app.ui.gestureActionIcon
 import com.slideindex.app.ui.miuix.MiuixExpandableSearchFieldStrip
 import com.slideindex.app.ui.miuix.MiuixExpandableSearchIconAction
 import com.slideindex.app.ui.miuix.MiuixTabRowContourHost
 import com.slideindex.app.ui.miuix.MiuixTabRowWithContour
 import com.slideindex.app.ui.miuix.consumeExpandableSearchBack
+import com.slideindex.app.ui.pickerListSegmentedGap
 import com.slideindex.app.ui.quicklauncher.QuickLauncherEmbedParentConfirm
 import com.slideindex.app.ui.quicklauncher.QUICK_LAUNCHER_SHEET_ENTER_MS
 import com.slideindex.app.ui.quicklauncher.QUICK_LAUNCHER_SHEET_EXIT_MS
@@ -72,6 +86,7 @@ fun AppSwitcherSlotConfigSheet(
     apps: List<AppInfo>,
     activityShortcuts: List<ActivityShortcut> = emptyList(),
     shellCommands: List<ShellCommand> = emptyList(),
+    quickLauncherPanels: List<QuickLauncherPanel> = emptyList(),
     onDismiss: () -> Unit,
     onSelectItem: (QuickLauncherItem?) -> Unit,
     onOpenCustomIconEditor: () -> Unit = {},
@@ -82,6 +97,7 @@ fun AppSwitcherSlotConfigSheet(
 ) {
     var visible by remember { mutableStateOf(false) }
     var subScreen by remember { mutableStateOf<QuickLauncherAddSubScreen>(QuickLauncherAddSubScreen.Main) }
+    var panelPickVisible by remember { mutableStateOf(false) }
     var embedParentConfirm by remember { mutableStateOf<QuickLauncherEmbedParentConfirm?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -90,11 +106,16 @@ fun AppSwitcherSlotConfigSheet(
     val slotBound = currentItem != null && currentItem.payload.isNotBlank()
     val slotEmpty = !slotBound
     val customIconTitle = stringResource(R.string.animation_style_custom_icon)
+    val quickLauncherActionLabel = stringResource(R.string.gesture_action_quick_launcher)
+    val panels = remember(quickLauncherPanels) { QuickLauncherPanelDefaults.effectivePanels(quickLauncherPanels) }
+    val boundQuickLauncherPanelId = currentItem?.quickLauncherPanelId()
+    val selectedPanelId = boundQuickLauncherPanelId?.let { QuickLauncherPanelDefaults.resolvePanelId(panels, it) }
 
     val requestDismiss = remember { { visible = false } }
 
     val handleBack: () -> Unit = {
         when {
+            panelPickVisible -> panelPickVisible = false
             subScreen == QuickLauncherAddSubScreen.Main -> {
                 if (
                     !consumeExpandableSearchBack(
@@ -186,14 +207,24 @@ fun AppSwitcherSlotConfigSheet(
                         subScreen is QuickLauncherAddSubScreen.MyShortcuts ||
                             subScreen is QuickLauncherAddSubScreen.PresetShortcuts
                     val showPickerChrome =
-                        subScreen == QuickLauncherAddSubScreen.Main || isFolderSubScreen
+                        !panelPickVisible &&
+                            (subScreen == QuickLauncherAddSubScreen.Main || isFolderSubScreen)
+                    val panelDisplayNames = buildList {
+                        panels.forEachIndexed { index, panel ->
+                            add(
+                                panel.name.ifBlank {
+                                    stringResource(R.string.quick_launcher_panel_default_name, index + 1)
+                                },
+                            )
+                        }
+                    }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (subScreen != QuickLauncherAddSubScreen.Main) {
+                        if (panelPickVisible || subScreen != QuickLauncherAddSubScreen.Main) {
                             IconButton(onClick = handleBack) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -203,6 +234,7 @@ fun AppSwitcherSlotConfigSheet(
                         }
 
                         val title = when {
+                            panelPickVisible -> stringResource(R.string.quick_launcher_panel_pick_title)
                             subScreen == QuickLauncherAddSubScreen.Main -> stringResource(
                                 R.string.app_switcher_slot_title,
                                 slotIndex + 1,
@@ -237,11 +269,22 @@ fun AppSwitcherSlotConfigSheet(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
-                            if (subScreen == QuickLauncherAddSubScreen.Main) {
+                            if (!panelPickVisible && subScreen == QuickLauncherAddSubScreen.Main) {
                                 val statusText = if (slotBound) {
+                                    val boundLabel = if (currentItem.quickLauncherPanelId() != null) {
+                                        val panelIndex = panels
+                                            .indexOfFirst { it.id == selectedPanelId }
+                                            .coerceAtLeast(0)
+                                        stringResource(
+                                            R.string.gesture_action_quick_launcher_named,
+                                            panelDisplayNames.getOrElse(panelIndex) { "" },
+                                        )
+                                    } else {
+                                        currentItem.label.ifBlank { currentItem.payload }
+                                    }
                                     stringResource(
                                         R.string.app_switcher_slot_bound,
-                                        currentItem.label.ifBlank { currentItem.payload },
+                                        boundLabel,
                                     )
                                 } else {
                                     stringResource(R.string.app_switcher_slot_unconfigured)
@@ -256,7 +299,7 @@ fun AppSwitcherSlotConfigSheet(
                             }
                         }
 
-                        if (slotBound && subScreen == QuickLauncherAddSubScreen.Main) {
+                        if (slotBound && !panelPickVisible && subScreen == QuickLauncherAddSubScreen.Main) {
                             IconButton(onClick = onOpenCustomIconEditor) {
                                 Icon(
                                     imageVector = Icons.Outlined.Image,
@@ -301,7 +344,7 @@ fun AppSwitcherSlotConfigSheet(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         )
                     }
-                    if (subScreen == QuickLauncherAddSubScreen.Main) {
+                    if (!panelPickVisible && subScreen == QuickLauncherAddSubScreen.Main) {
                         MiuixTabRowWithContour(
                             tabs = listOf(
                                 stringResource(R.string.action_picker_tab_actions),
@@ -325,37 +368,110 @@ fun AppSwitcherSlotConfigSheet(
                             .weight(1f)
                             .fillMaxWidth(),
                     ) {
-                        QuickLauncherAddOverlaySheetBody(
-                            modifier = Modifier.fillMaxSize(),
-                            padding = PaddingValues(0.dp),
-                            nestedScrollConnection = null,
-                            searchQuery = searchQuery,
-                            apps = apps,
-                            addedAppPackages = emptySet(),
-                            addedShortcutKeys = emptySet(),
-                            addedActionKeys = emptySet(),
-                            activityShortcuts = activityShortcuts,
-                            shellCommands = shellCommands,
-                            onToggle = { item, _ ->
-                                onSelectItem(item)
-                                requestDismiss()
-                            },
-                            launchCreateShortcut = launchCreateShortcut,
-                            subScreen = subScreen,
-                            onSubScreenChange = { subScreen = it },
-                            selectedTab = selectedTab,
-                            singleSelect = true,
-                            pinNoneAtTop = true,
-                            slotEmpty = slotEmpty,
-                            onClearSlot = {
-                                onSelectItem(null)
-                                requestDismiss()
-                            },
-                            onReportEmbedParentConfirm = { embedParentConfirm = it },
-                        )
+                        if (panelPickVisible) {
+                            QuickLauncherPanelPickList(
+                                panels = panels,
+                                panelDisplayNames = panelDisplayNames,
+                                selectedPanelId = selectedPanelId,
+                                onSelect = { panel ->
+                                    onSelectItem(
+                                        QuickLauncherItem.action(
+                                            GestureAction.QuickLauncher(panel.id),
+                                            quickLauncherActionLabel,
+                                        ),
+                                    )
+                                    requestDismiss()
+                                },
+                            )
+                        } else {
+                            QuickLauncherAddOverlaySheetBody(
+                                modifier = Modifier.fillMaxSize(),
+                                padding = PaddingValues(0.dp),
+                                nestedScrollConnection = null,
+                                searchQuery = searchQuery,
+                                apps = apps,
+                                addedAppPackages = emptySet(),
+                                addedShortcutKeys = emptySet(),
+                                addedActionKeys = emptySet(),
+                                activityShortcuts = activityShortcuts,
+                                shellCommands = shellCommands,
+                                onToggle = { item, _ ->
+                                    if (item.quickLauncherPanelId() != null && panels.isNotEmpty()) {
+                                        // 圆环槽位不放「没挑面板」的快速启动器：先让用户选面板再落库。
+                                        panelPickVisible = true
+                                    } else {
+                                        onSelectItem(item)
+                                        requestDismiss()
+                                    }
+                                },
+                                launchCreateShortcut = launchCreateShortcut,
+                                subScreen = subScreen,
+                                onSubScreenChange = { subScreen = it },
+                                selectedTab = selectedTab,
+                                singleSelect = true,
+                                pinNoneAtTop = true,
+                                slotEmpty = slotEmpty,
+                                onClearSlot = {
+                                    onSelectItem(null)
+                                    requestDismiss()
+                                },
+                                onReportEmbedParentConfirm = { embedParentConfirm = it },
+                            )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+/**
+ * 圆环槽位里「打开快速启动器」的面板选择列表。
+ *
+ * 侧边手势槽位早就有这一步，圆环这边缺了它，才会出现「选了快速启动器但没选面板」的槽位。
+ */
+@Composable
+private fun QuickLauncherPanelPickList(
+    panels: List<QuickLauncherPanel>,
+    panelDisplayNames: List<String>,
+    selectedPanelId: String?,
+    onSelect: (QuickLauncherPanel) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(pickerListSegmentedGap()),
+    ) {
+        itemsIndexed(panels, key = { _, panel -> panel.id }) { index, panel ->
+            val selected = panel.id == selectedPanelId
+            Md3PickerListRow(
+                segmentIndex = index,
+                segmentCount = panels.size,
+                title = panelDisplayNames.getOrElse(index) { "" },
+                subtitle = pluralStringResource(
+                    R.plurals.quick_launcher_panel_pick_summary,
+                    panel.items.size,
+                    panel.columnsPerPage,
+                    panel.rowsPerPage,
+                    panel.items.size,
+                ),
+                selected = selected,
+                onClick = { onSelect(panel) },
+                leadingContent = {
+                    Md3PickerIconLeading(
+                        icon = gestureActionIcon(GestureAction.QuickLauncher(panel.id), outlined = true),
+                        selected = selected,
+                    )
+                },
+                trailingMode = PickerTrailingMode.Radio,
+            )
+        }
+    }
+}
+
+/** 条目若是「打开快速启动器」动作，返回其面板 id（可能是空串，表示旧的未指定状态）。 */
+private fun QuickLauncherItem.quickLauncherPanelId(): String? {
+    if (type != QuickLauncherItemType.ACTION) return null
+    val action = QuickLauncherItemCodec.parseActionPayload(payload)
+    return (action as? GestureAction.QuickLauncher)?.panelId
 }

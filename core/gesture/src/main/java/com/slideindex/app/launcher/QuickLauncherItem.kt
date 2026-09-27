@@ -173,6 +173,72 @@ object QuickLauncherItemCodec {
 
     fun actionKey(action: GestureAction): String = encodeActionPayload(action)
 
+    /**
+     * 把已编码内容里指向 [removedPanelId] 的「打开快速启动器」动作改写到 [fallbackPanelId]。
+     *
+     * 设置层里同一个动作有两种落库形态，都要覆盖：
+     * - 动作负载：`<动作 id>\u001C<面板 id>`（快速启动器条目、伸展面板、悬浮球手势等）
+     * - 手势规则相邻字段：`<动作 id>\u001F<面板 id>`（GestureRuleCodec 的字段分隔符）
+     *
+     * 只做精确匹配：命中后面板 id 之后出现的字符不能仍属于 id 字符，
+     * 避免把「同前缀但更长」的面板 id 误伤。
+     */
+    fun remapPanelReferences(raw: String, removedPanelId: String, fallbackPanelId: String): String {
+        if (raw.isEmpty() || removedPanelId.isEmpty() || removedPanelId == fallbackPanelId) return raw
+        if (removedPanelId !in raw) return raw
+        var result = raw
+        for (separator in PANEL_REFERENCE_SEPARATORS) {
+            result = replacePanelReference(result, separator, removedPanelId, fallbackPanelId)
+        }
+        return result
+    }
+
+    fun remapPanelReferences(
+        values: Set<String>,
+        removedPanelId: String,
+        fallbackPanelId: String,
+    ): Set<String> {
+        if (values.isEmpty()) return values
+        if (removedPanelId.isEmpty() || removedPanelId == fallbackPanelId) return values
+        if (values.none { removedPanelId in it }) return values
+        return values.mapTo(LinkedHashSet(values.size)) {
+            remapPanelReferences(it, removedPanelId, fallbackPanelId)
+        }
+    }
+
+    private val PANEL_REFERENCE_SEPARATORS = listOf(SHORTCUT_PAYLOAD_SEP, LIST_SEP)
+
+    private fun replacePanelReference(
+        raw: String,
+        separator: String,
+        removedPanelId: String,
+        fallbackPanelId: String,
+    ): String {
+        val replacement = "${GestureActionType.QUICK_LAUNCHER.id}$separator$fallbackPanelId"
+        val needle = "${GestureActionType.QUICK_LAUNCHER.id}$separator$removedPanelId"
+        var index = raw.indexOf(needle)
+        if (index < 0) return raw
+        val builder = StringBuilder(raw.length + replacement.length)
+        var cursor = 0
+        while (index >= 0) {
+            val end = index + needle.length
+            builder.append(raw, cursor, index)
+            if (end >= raw.length || !isPanelIdChar(raw[end])) {
+                builder.append(replacement)
+            } else {
+                // 命中的是「同前缀但更长」的面板 id，原样保留。
+                builder.append(raw, index, end)
+            }
+            cursor = end
+            index = raw.indexOf(needle, end)
+        }
+        builder.append(raw, cursor, raw.length)
+        return builder.toString()
+    }
+
+    private fun isPanelIdChar(char: Char): Boolean =
+        char.isLetterOrDigit() || char == '-' || char == '_'
+
     fun parseIntentPayload(payload: String): String? {
         if (!payload.startsWith(INTENT_PAYLOAD_PREFIX)) return null
         val body = payload.removePrefix(INTENT_PAYLOAD_PREFIX).takeIf { it.isNotBlank() } ?: return null

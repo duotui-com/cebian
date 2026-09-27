@@ -149,6 +149,9 @@ internal object SettingsPreferenceKeys {
     val FV_APP_SWITCHER_END_MARGIN_DEG = floatPreferencesKey("fv_app_switcher_end_margin_deg")
     val FV_APP_SWITCHER_SLOTS = stringSetPreferencesKey("fv_app_switcher_slots")
     val FV_APP_SWITCHER_SLOT_ICON_OVERRIDES = stringSetPreferencesKey("fv_app_switcher_slot_icon_overrides")
+    /** 圆环槽位「快速启动器未指定面板」历史数据的一次性归一化标记。 */
+    val FV_APP_SWITCHER_PANEL_REFERENCE_MIGRATED =
+        booleanPreferencesKey("fv_app_switcher_panel_reference_migrated")
     val FV_APP_SWITCHER_LINK_AXES = booleanPreferencesKey("fv_app_switcher_link_axes")
     val FV_APP_SWITCHER_LINK_APPEARANCE_AXES = booleanPreferencesKey("fv_app_switcher_link_appearance_axes")
     val FV_APP_SWITCHER_LINK_SLOT_AXES = booleanPreferencesKey("fv_app_switcher_link_slot_axes")
