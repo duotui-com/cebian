@@ -3,9 +3,10 @@ package com.slideindex.app.ui.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slideindex.app.download.DownloadProgressChannel
+import com.slideindex.app.download.NativeEnginePackDownloadChannel
 import com.slideindex.app.nativeengine.NativeEnginePackCatalogProvider
 import com.slideindex.app.nativeengine.NativeEnginePackCoordinator
-import com.slideindex.app.nativeengine.NativeEnginePackDownloadController
 import com.slideindex.app.nativeengine.NativeEnginePackDownloadPhase
 import com.slideindex.app.nativeengine.NativeEnginePackDownloadState
 import com.slideindex.app.nativeengine.NativeEnginePackDownloader
@@ -39,29 +40,50 @@ class NativeEnginePackSettingsViewModel @Inject constructor(
     private val _packRows = MutableStateFlow(loadPackRows())
     val packRows: StateFlow<List<NativeEnginePackRowState>> = _packRows.asStateFlow()
 
-    val downloadState: StateFlow<NativeEnginePackDownloadState?> =
-        NativeEnginePackDownloadController.state
+    private val _downloadState = MutableStateFlow<NativeEnginePackDownloadState?>(null)
+    val downloadState: StateFlow<NativeEnginePackDownloadState?> = _downloadState.asStateFlow()
 
     init {
         viewModelScope.launch {
             var previousPhase: NativeEnginePackDownloadPhase? = null
-            NativeEnginePackDownloadController.state.collect { state ->
-                val phase = state?.phase
-                if (phase == NativeEnginePackDownloadPhase.READY &&
-                    previousPhase != NativeEnginePackDownloadPhase.READY
+            var firstEmission = true
+            // 下载服务在 :engine，进度必须走跨进程通道；进程内单例在主进程恒为空。
+            DownloadProgressChannel.observe(context, NativeEnginePackDownloadChannel.ID).collect { bundle ->
+                val decoded = bundle?.let(NativeEnginePackDownloadChannel::decode)
+                val state = if (decoded != null &&
+                    isInProgress(decoded.phase) &&
+                    !DownloadProgressChannel.isFresh(bundle)
                 ) {
-                    refreshInstalled()
-                } else if (
-                    (phase == NativeEnginePackDownloadPhase.FAILED ||
-                        phase == NativeEnginePackDownloadPhase.CANCELLED) &&
-                    phase != previousPhase
-                ) {
-                    refreshInstalled()
+                    DownloadProgressChannel.clear(context, NativeEnginePackDownloadChannel.ID)
+                    null
+                } else {
+                    decoded
                 }
+                _downloadState.value = state
+                val phase = state?.phase
+                if (!firstEmission) {
+                    if (phase == NativeEnginePackDownloadPhase.READY &&
+                        previousPhase != NativeEnginePackDownloadPhase.READY
+                    ) {
+                        refreshInstalled()
+                    } else if (
+                        (phase == NativeEnginePackDownloadPhase.FAILED ||
+                            phase == NativeEnginePackDownloadPhase.CANCELLED) &&
+                        phase != previousPhase
+                    ) {
+                        refreshInstalled()
+                    }
+                }
+                firstEmission = false
                 previousPhase = phase
             }
         }
     }
+
+    private fun isInProgress(phase: NativeEnginePackDownloadPhase): Boolean =
+        phase == NativeEnginePackDownloadPhase.DOWNLOADING ||
+            phase == NativeEnginePackDownloadPhase.VERIFYING ||
+            phase == NativeEnginePackDownloadPhase.EXTRACTING
 
     fun refreshInstalled() {
         _packRows.value = loadPackRows()
@@ -69,16 +91,14 @@ class NativeEnginePackSettingsViewModel @Inject constructor(
 
     fun downloadPack(packId: String) {
         if (downloader.isDownloading(packId)) return
-        if (NativeEnginePackDownloadController.activePackId != null &&
-            NativeEnginePackDownloadController.activePackId != packId
-        ) {
-            NativeEnginePackDownloadController.update(
+        val active = _downloadState.value
+        if (active != null && active.packId != packId && isInProgress(active.phase)) {
+            _downloadState.value =
                 NativeEnginePackDownloadState(
                     packId = packId,
                     phase = NativeEnginePackDownloadPhase.FAILED,
                     errorMessage = "another_download_in_progress",
-                ),
-            )
+                )
             return
         }
         viewModelScope.launch {

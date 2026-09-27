@@ -2,13 +2,14 @@ package com.slideindex.app.ui.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.slideindex.app.download.DownloadProgressChannel
+import com.slideindex.app.download.OcrModelDownloadChannel
 import com.slideindex.app.nativeengine.NativeEnginePackCatalogProvider
 import com.slideindex.app.nativeengine.NativeEnginePackCoordinator
 import com.slideindex.app.nativeengine.NativeEnginePackIds
 import com.slideindex.app.nativeengine.NativeEnginePackVersionState
 import com.slideindex.app.ocr.OcrInferenceService
 import com.slideindex.app.ocr.OcrModelCatalogProvider
-import com.slideindex.app.ocr.OcrModelDownloadController
 import com.slideindex.app.ocr.OcrModelDownloadPhase
 import com.slideindex.app.ocr.OcrModelDownloadState
 import com.slideindex.app.ocr.OcrModelDownloader
@@ -95,30 +96,55 @@ class OcrModelSettingsViewModel @Inject constructor(
     private val _installedModelIds = MutableStateFlow(modelRepository.installedModelIds())
     val installedModelIds: StateFlow<Set<String>> = _installedModelIds.asStateFlow()
 
-    val downloadState: StateFlow<OcrModelDownloadState?> = OcrModelDownloadController.state
+    private val _downloadState = MutableStateFlow<OcrModelDownloadState?>(null)
+    val downloadState: StateFlow<OcrModelDownloadState?> = _downloadState.asStateFlow()
 
     init {
         refreshInstalled()
         viewModelScope.launch {
             var previousPhase: OcrModelDownloadPhase? = null
-            OcrModelDownloadController.state.collect { state ->
-                val phase = state?.phase
-                if (phase == OcrModelDownloadPhase.READY &&
-                    previousPhase != OcrModelDownloadPhase.READY
+            var firstEmission = true
+            // 进度来自 :engine（下载服务所在进程）的跨进程通道；
+            // OcrModelDownloadController 是进程内单例，在主进程永远是初始值。
+            DownloadProgressChannel.observe(context, OcrModelDownloadChannel.ID).collect { bundle ->
+                val decoded = bundle?.let(OcrModelDownloadChannel::decode)
+                val state = if (decoded != null &&
+                    isInProgress(decoded.phase) &&
+                    !DownloadProgressChannel.isFresh(bundle)
                 ) {
-                    refreshInstalled()
-                    selectModel(state.modelId)
-                } else if (
-                    (phase == OcrModelDownloadPhase.FAILED ||
-                        phase == OcrModelDownloadPhase.CANCELLED) &&
-                    phase != previousPhase
-                ) {
-                    refreshInstalled()
+                    // 发布方进程被硬杀留下的过期"进行中"快照，清掉当作没有任务。
+                    DownloadProgressChannel.clear(context, OcrModelDownloadChannel.ID)
+                    null
+                } else {
+                    decoded
                 }
+                _downloadState.value = state
+                val phase = state?.phase
+                // 首次发射（快照）只当基线：历史快照不该在打开页面时改用户选中。
+                if (!firstEmission) {
+                    if (phase == OcrModelDownloadPhase.READY &&
+                        previousPhase != OcrModelDownloadPhase.READY
+                    ) {
+                        refreshInstalled()
+                        selectModel(state.modelId)
+                    } else if (
+                        (phase == OcrModelDownloadPhase.FAILED ||
+                            phase == OcrModelDownloadPhase.CANCELLED) &&
+                        phase != previousPhase
+                    ) {
+                        refreshInstalled()
+                    }
+                }
+                firstEmission = false
                 previousPhase = phase
             }
         }
     }
+
+    private fun isInProgress(phase: OcrModelDownloadPhase): Boolean =
+        phase == OcrModelDownloadPhase.DOWNLOADING ||
+            phase == OcrModelDownloadPhase.VERIFYING ||
+            phase == OcrModelDownloadPhase.FINALIZING
 
     fun refreshInstalled() {
         _installedModelIds.value = modelRepository.installedModelIds()
@@ -142,16 +168,15 @@ class OcrModelSettingsViewModel @Inject constructor(
 
     fun downloadModel(modelId: String) {
         if (downloader.isDownloading(modelId)) return
-        if (OcrModelDownloadController.activeModelId != null &&
-            OcrModelDownloadController.activeModelId != modelId
-        ) {
-            OcrModelDownloadController.update(
+        // 跨进程看：正在跑的是通道里那个任务，而不是本进程的 activeModelId。
+        val active = _downloadState.value
+        if (active != null && active.modelId != modelId && isInProgress(active.phase)) {
+            _downloadState.value =
                 OcrModelDownloadState(
                     modelId = modelId,
                     phase = OcrModelDownloadPhase.FAILED,
                     errorMessage = "another_download_in_progress",
-                ),
-            )
+                )
             return
         }
         val wifiOnly = settings.value.ocrDownloadWifiOnly

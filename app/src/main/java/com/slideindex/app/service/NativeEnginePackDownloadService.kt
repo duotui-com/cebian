@@ -7,6 +7,8 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.slideindex.app.download.DownloadProgressRelay
+import com.slideindex.app.download.NativeEnginePackDownloadChannel
 import com.slideindex.app.nativeengine.NativeEngineEntryPoint
 import com.slideindex.app.nativeengine.NativeEnginePackDownloadController
 import com.slideindex.app.nativeengine.NativeEnginePackDownloadPhase
@@ -18,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class NativeEnginePackDownloadService : Service() {
@@ -28,6 +31,11 @@ class NativeEnginePackDownloadService : Service() {
     private val downloader: NativeEnginePackDownloader by lazy {
         EntryPointAccessors.fromApplication(applicationContext, NativeEngineEntryPoint::class.java)
             .nativeEnginePackDownloader()
+    }
+
+    /** 进度发到主进程设置页（下载服务在 :engine，主进程读不到进程内单例）。 */
+    private val progressRelay by lazy {
+        DownloadProgressRelay(applicationContext, NativeEnginePackDownloadChannel.ID)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -68,7 +76,22 @@ class NativeEnginePackDownloadService : Service() {
         )
 
         job = scope.launch {
+            val observer = launch {
+                NativeEnginePackDownloadController.state.collectLatest { state ->
+                    if (state == null) return@collectLatest
+                    progressRelay.publish(
+                        phase = state.phase.name,
+                        percent = if (state.phase == NativeEnginePackDownloadPhase.DOWNLOADING) {
+                            state.progress?.times(100f)?.toInt()
+                        } else {
+                            null
+                        },
+                        payload = NativeEnginePackDownloadChannel.encode(state),
+                    )
+                }
+            }
             downloader.executeDownload(packId, wifiOnly)
+            observer.cancel()
             val finalState = NativeEnginePackDownloadController.state.value
             when (finalState?.phase) {
                 NativeEnginePackDownloadPhase.READY -> stopForegroundCompat()
@@ -78,6 +101,7 @@ class NativeEnginePackDownloadService : Service() {
                 else -> stopForegroundCompat()
             }
             NativeEnginePackDownloadController.clearActive()
+            progressRelay.clear()
             stopSelfResult(lastStartId)
         }
         return START_NOT_STICKY
@@ -87,6 +111,7 @@ class NativeEnginePackDownloadService : Service() {
         job?.cancel()
         scope.cancel()
         NativeEnginePackDownloadController.clearActive()
+        progressRelay.clear()
         super.onDestroy()
     }
 

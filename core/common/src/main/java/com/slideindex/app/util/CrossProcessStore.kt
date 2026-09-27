@@ -145,24 +145,41 @@ object CrossProcessStore {
             .onFailure { Log.w(TAG, "notifyChanged(${file.name}) failed", it) }
     }
 
-    /** 只注册一次；收到其它进程的写通知后按路径分发。 */
+    /** 已注册的变更回调。广播 receiver 只装一次，但**回调可以有多个**。 */
+    private val listeners = java.util.concurrent.CopyOnWriteArrayList<(File) -> Unit>()
+
+    private val registerLock = Any()
+
+    /**
+     * 收到其它进程的写通知后，按路径分发给所有注册者。
+     *
+     * 注意：早期实现是 `if (receiver != null) return`，也就是只保留**第一个**回调，
+     * 后续注册被静默丢弃——谁先注册谁生效，别的功能（OTP 记录、Shell 历史、下载进度…）
+     * 永远收不到重载通知。这里改成多播。
+     */
     fun registerListener(context: Context, onChanged: (File) -> Unit) {
-        if (receiver != null) return
-        val ctx = context.applicationContext
-        val listener = object : BroadcastReceiver() {
-            override fun onReceive(receiverContext: Context?, intent: Intent?) {
-                if (intent?.action != ACTION) return
-                // 自己写的不用重载。
-                if (intent.getStringExtra(EXTRA_FROM) == currentProcessName()) return
-                val path = intent.getStringExtra(EXTRA_PATH) ?: return
-                runCatching { onChanged(File(path)) }
-                    .onFailure { Log.w(TAG, "onChanged($path) failed", it) }
+        listeners += onChanged
+        synchronized(registerLock) {
+            if (receiver != null) return
+            val ctx = context.applicationContext
+            val listener = object : BroadcastReceiver() {
+                override fun onReceive(receiverContext: Context?, intent: Intent?) {
+                    if (intent?.action != ACTION) return
+                    // 自己写的不用重载。
+                    if (intent.getStringExtra(EXTRA_FROM) == currentProcessName()) return
+                    val path = intent.getStringExtra(EXTRA_PATH) ?: return
+                    val changed = File(path)
+                    for (callback in listeners) {
+                        runCatching { callback(changed) }
+                            .onFailure { Log.w(TAG, "onChanged($path) failed", it) }
+                    }
+                }
             }
+            runCatching {
+                ContextCompat.registerReceiver(ctx, listener, IntentFilter(ACTION), ContextCompat.RECEIVER_NOT_EXPORTED)
+                receiver = listener
+            }.onFailure { Log.w(TAG, "registerListener failed", it) }
         }
-        runCatching {
-            ContextCompat.registerReceiver(ctx, listener, IntentFilter(ACTION), ContextCompat.RECEIVER_NOT_EXPORTED)
-            receiver = listener
-        }.onFailure { Log.w(TAG, "registerListener failed", it) }
     }
 
     /** 只关心某个文件时的重载写法（回调在后台线程执行，可直接做磁盘读取）。 */

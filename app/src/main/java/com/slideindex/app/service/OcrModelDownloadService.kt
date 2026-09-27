@@ -9,6 +9,8 @@ import android.os.IBinder
 import androidx.annotation.RequiresApi
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.slideindex.app.download.DownloadProgressRelay
+import com.slideindex.app.download.OcrModelDownloadChannel
 import com.slideindex.app.ocr.OcrEntryPoint
 import com.slideindex.app.ocr.OcrModelDownloadController
 import com.slideindex.app.ocr.OcrModelDownloadPhase
@@ -35,6 +37,11 @@ class OcrModelDownloadService : Service() {
     private val downloader: OcrModelDownloader by lazy {
         EntryPointAccessors.fromApplication(applicationContext, OcrEntryPoint::class.java)
             .ocrModelDownloader()
+    }
+
+    /** 把进度发到主进程（设置页），`:engine` 里的单例主进程读不到。 */
+    private val progressRelay by lazy {
+        DownloadProgressRelay(applicationContext, OcrModelDownloadChannel.ID)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -88,6 +95,15 @@ class OcrModelDownloadService : Service() {
                         OcrModelDownloadNotifications.notify(this@OcrModelDownloadService, state)
                     }
                     startForegroundCompat(state)
+                    progressRelay.publish(
+                        phase = state.phase.name,
+                        payload = OcrModelDownloadChannel.encode(state),
+                        percent = if (state.phase == OcrModelDownloadPhase.DOWNLOADING) {
+                            progress
+                        } else {
+                            null
+                        },
+                    )
                 }
             }
 
@@ -108,6 +124,8 @@ class OcrModelDownloadService : Service() {
                 }
                 else -> stopForegroundCompat()
             }
+            // 结束后清掉快照：避免下次打开页面看到一个早已结束的"下载中 x%"。
+            progressRelay.clear()
             OcrModelDownloadController.clearActive()
             stopSelfResult(lastStartId)
         }
@@ -127,15 +145,21 @@ class OcrModelDownloadService : Service() {
         job?.cancel()
         val modelId = OcrModelDownloadController.activeModelId
         if (!modelId.isNullOrBlank()) {
-            OcrModelDownloadController.update(
-                OcrModelDownloadState(
-                    modelId = modelId,
-                    phase = OcrModelDownloadPhase.FAILED,
-                    errorMessage = "download_timeout"
-                )
+            val failed = OcrModelDownloadState(
+                modelId = modelId,
+                phase = OcrModelDownloadPhase.FAILED,
+                errorMessage = "download_timeout"
+            )
+            OcrModelDownloadController.update(failed)
+            // 超时也要让页面看见失败，而不是只剩"进度卡住了"。
+            progressRelay.publish(
+                phase = failed.phase.name,
+                percent = null,
+                payload = OcrModelDownloadChannel.encode(failed),
             )
         }
         OcrModelDownloadController.clearActive()
+        progressRelay.clear()
         stopForegroundCompat()
         stopSelf()
     }
@@ -144,6 +168,7 @@ class OcrModelDownloadService : Service() {
         job?.cancel()
         scope.cancel()
         OcrModelDownloadController.clearActive()
+        progressRelay.clear()
         super.onDestroy()
     }
 

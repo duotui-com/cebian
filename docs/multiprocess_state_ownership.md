@@ -28,6 +28,7 @@
 | 应用 → 模块状态通知 | 广播（`notifyModuleHostState`） | 无回执，模块按超时自判 |
 | 引擎 OCR/翻译 | `IEngineOcr`（AIDL） | 超时 + 回退 |
 | 浮层状态回读（主进程读 overlay 状态） | `OverlayStatePort` 镜像 | 过期即视为未知，不得当作"空状态"使用 |
+| `:engine` 下载进度 → 设置页 | `DownloadProgressChannel`（快照文件 + 广播） | 发送端 `runCatching` + 日志；快照超过 5 分钟视为死任务并清掉 |
 
 **硬规则**：新增任何"设置页要影响浮层"的能力，只能走 §2 第一条通道；
 `ui/` 包下**禁止**出现 `SlideIndexAccessibilityService.<浮层/预览 API>` 的直接调用。
@@ -48,6 +49,7 @@
 | 截屏/取词会话状态 | `:overlay` | `ScreenCaptureService` | 取词/截屏流程 | — | ✅ 已核查：服务已在 `:overlay`（manifest `android:process=":overlay"`），设计文档写的"留在主进程"已过时 |
 | 剪贴板监听状态 | `:clipboard` → 主进程 | 监听前台服务心跳 | 设置页镜像（`ClipboardMonitorStatusPort`） | 镜像过期 | ✅ 已是带心跳的镜像；只需保证过期显示为"未知" |
 | 小组件实例与预览位图 | `:overlay` | `SlideIndexAppWidgetHost` | 主进程编辑器占位卡 | 编辑器永远停在"加载中…" | ⚠️ 唯一确认未修的一条，见 §7 |
+| OCR 模型 / 引擎包下载进度 | `:engine` | `OcrModelDownloadService` / `NativeEnginePackDownloadService`（前台服务） | 设置页对应的两个 ViewModel | 页面**永远**看不到进度，只有通知有（进程内单例在主进程恒为空） | ✅ 已接通道：`DownloadProgressChannel`；进度的"进行中"快照带时间戳，过期即丢弃 |
 
 ## 4. 失联与自愈
 

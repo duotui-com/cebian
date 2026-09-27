@@ -11,13 +11,33 @@ internal object NotificationHistoryIntentSerialization {
     const val TAG = "NotifHistoryCapture"
     val URI_FLAGS = Intent.URI_INTENT_SCHEME or Intent.URI_ALLOW_UNSAFE
 
+    /**
+     * 同类序列化失败只在首次打印完整堆栈。
+     *
+     * 一条通知通常带 1 个 contentIntent + 3~4 个 action，如果每个都失败一次并打整段异常，
+     * 每条通知就是 5 段堆栈（线上实测日志占比极高），纯属白烧 CPU。
+     */
+    private val loggedFailureKinds: MutableSet<String> =
+        java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
+    private fun logSerializationFailure(kind: String, source: String, error: Throwable) {
+        if (loggedFailureKinds.add(kind)) {
+            Log.w(TAG, "serialize $kind failed source=$source（后续同类失败只记一行）", error)
+        } else {
+            Log.d(
+                TAG,
+                "serialize $kind failed source=$source reason=${error.javaClass.simpleName}: ${error.message}",
+            )
+        }
+    }
+
     fun serializeIntentUri(intent: Intent, source: String): String? {
         return runCatching {
             Intent(intent).toUri(URI_FLAGS)
         }.onSuccess { uri ->
             Log.d(TAG, "Captured URI $source: ${uri.take(120)}")
         }.onFailure { error ->
-            Log.w(TAG, "Failed to serialize URI $source", error)
+            logSerializationFailure("intent-uri", source, error)
         }.getOrNull()?.takeIf { it.isNotBlank() }
     }
 
@@ -33,7 +53,7 @@ internal object NotificationHistoryIntentSerialization {
         }.onSuccess {
             Log.d(TAG, "Captured parcel $source (${it.length} chars)")
         }.onFailure { error ->
-            Log.w(TAG, "Failed to serialize parcel $source", error)
+            logSerializationFailure("intent-parcel", source, error)
         }.getOrNull()?.takeIf { it.isNotBlank() }
     }
 
@@ -44,19 +64,16 @@ internal object NotificationHistoryIntentSerialization {
     }
 
     fun serializePendingIntent(pendingIntent: PendingIntent, source: String): String? {
-        return runCatching {
-            val parcel = Parcel.obtain()
-            try {
-                pendingIntent.writeToParcel(parcel, 0)
-                Base64.encodeToString(parcel.marshall(), Base64.NO_WRAP)
-            } finally {
-                parcel.recycle()
-            }
-        }.onSuccess {
-            Log.d(TAG, "Captured PendingIntent $source (${it.length} chars)")
-        }.onFailure { error ->
-            Log.w(TAG, "Failed to serialize PendingIntent $source", error)
-        }.getOrNull()?.takeIf { it.isNotBlank() }
+        // PendingIntent 内部持有 IIntentSender(Binder)，Parcel.marshall() 必然抛
+        // "Tried to marshall a Parcel that contains objects (binders or FDs)"：
+        // 这条路在结构上就不可能成功，而以前对每条通知的每个 action 都要失败一次并打全栈。
+        // 调用方只把结果当"能不能重放点击"的诊断字段，直接返回 null 与原来等价，但不再烧 CPU。
+        Log.d(
+            TAG,
+            "Skip PendingIntent parcel $source (binder-backed, creator=" +
+                runCatching { pendingIntent.creatorPackage }.getOrNull() + ")",
+        )
+        return null
     }
 
     fun serializeBundle(bundle: Bundle?, source: String): String? {
@@ -72,7 +89,7 @@ internal object NotificationHistoryIntentSerialization {
         }.onSuccess {
             Log.d(TAG, "Captured bundle $source (${it.length} chars)")
         }.onFailure { error ->
-            Log.w(TAG, "Failed to serialize bundle $source", error)
+            logSerializationFailure("bundle", source, error)
         }.getOrNull()?.takeIf { it.isNotBlank() }
     }
 
