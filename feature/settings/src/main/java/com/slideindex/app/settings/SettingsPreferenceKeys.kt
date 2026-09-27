@@ -456,6 +456,7 @@ internal object SettingsPreferenceKeys {
         intPreferencesKey("float_ball_pick_panel_exit_animation_ms")
     val FLOAT_BALL_POINTER_SLOP_DP = floatPreferencesKey("float_ball_pointer_slop_dp")
     val FLOAT_BALL_HOVER_PAUSE_DELAY_MS = intPreferencesKey("float_ball_hover_pause_delay_ms")
+    val FLOAT_BALL_LONG_PRESS_MS = intPreferencesKey("float_ball_long_press_ms")
     val FLOAT_BALL_REGIONAL_CANCEL_SLOP_DP = floatPreferencesKey("float_ball_regional_cancel_slop_dp")
     val FLOAT_BALL_DOWN_SWIPE_SHORT_PERCENT = floatPreferencesKey("float_ball_down_swipe_short_percent")
     val FLOAT_BALL_SIDE_SWIPE_SHORT_PERCENT = floatPreferencesKey("float_ball_side_swipe_short_percent")

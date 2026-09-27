@@ -56,6 +56,30 @@ class SlideIndexAccessibilityService : AccessibilityService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var edgeOverlayHost: EdgeOverlayHost? = null
 
+    /**
+     * 浮层租约心跳：服务活着就每 2s 续租一次。
+     *
+     * 停掉心跳意味着"本服务随时可能消失"，OverlayHostLease 会在租约过期后
+     * 把本进程残留的浮层窗口（含全屏直触的 presentation）强制摘掉，
+     * 避免服务已经死了、窗口却继续吞整屏触摸。
+     */
+    private val overlayHostLeaseRunnable = object : Runnable {
+        override fun run() {
+            com.slideindex.app.overlay.OverlayHostLease.renew()
+            mainHandler.postDelayed(this, OVERLAY_HOST_LEASE_RENEW_MS)
+        }
+    }
+
+    private fun startOverlayHostLease() {
+        com.slideindex.app.overlay.OverlayHostLease.renew()
+        mainHandler.removeCallbacks(overlayHostLeaseRunnable)
+        mainHandler.postDelayed(overlayHostLeaseRunnable, OVERLAY_HOST_LEASE_RENEW_MS)
+    }
+
+    private fun stopOverlayHostLease() {
+        mainHandler.removeCallbacks(overlayHostLeaseRunnable)
+    }
+
     /** 当前由输入层接管并转发过来的目标（SIDE_* / TARGET_*），用于会话结束时精确取消。 */
     private var activeForwardedTarget: Int = NO_FORWARDED_TARGET
 
@@ -361,19 +385,44 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             instance?.edgeOverlayHost?.reloadApps()
         }
 
+        /**
+         * 预览/浮层指令的可见失败出口。
+         *
+         * 这些指令只能在 `:overlay` 进程生效（浮层宿主在那儿）。历史上它们在别的进程
+         * 会命中 `instance == null` 而静默丢弃，用户只觉得"功能坏了"；这里统一留日志，
+         * 让"错进程调用/服务离线"必然可见。
+         */
+        private fun requireOverlayProcess(scope: String) {
+            if (instance == null) {
+                Log.e(TAG, "浮层指令被丢弃（本进程没有无障碍服务实例，多半是错进程调用）: $scope")
+            }
+        }
+
+        private fun overlayHostOrNull(scope: String): com.slideindex.app.overlay.EdgeOverlayHost? {
+            val host = instance?.edgeOverlayHost
+            if (host == null) {
+                Log.e(TAG, "浮层指令被丢弃（服务未连接）: $scope")
+            }
+            return host
+        }
+
         fun setFloatBallStripZonePreview(active: Boolean) {
+            requireOverlayProcess("setFloatBallStripZonePreview")
             com.slideindex.app.overlay.FloatBallOverlay.setStripZonePreviewActive(active)
         }
 
         fun previewFloatBallPositionYFraction(fraction: Float) {
+            requireOverlayProcess("previewFloatBallPositionYFraction")
             com.slideindex.app.overlay.FloatBallOverlay.previewPositionYFraction(fraction)
         }
 
         fun endFloatBallPositionYPreview(restoreIfNeeded: Boolean) {
+            requireOverlayProcess("endFloatBallPositionYPreview")
             com.slideindex.app.overlay.FloatBallOverlay.endPositionYPreview(restoreIfNeeded)
         }
 
         fun clearFloatBallPositionYPreviewRestore() {
+            requireOverlayProcess("clearFloatBallPositionYPreviewRestore")
             com.slideindex.app.overlay.FloatBallOverlay.clearPositionYPreviewRestore()
         }
 
@@ -385,6 +434,7 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             lineWidthFraction: Float? = null,
             lineOpacity: Float? = null
         ) {
+            requireOverlayProcess("previewFloatBallAppearance")
             com.slideindex.app.overlay.FloatBallOverlay.previewAppearance(
                 sizeDp = sizeDp,
                 opacity = opacity,
@@ -396,15 +446,17 @@ class SlideIndexAccessibilityService : AccessibilityService() {
         }
 
         fun endFloatBallAppearancePreview(restoreIfNeeded: Boolean) {
+            requireOverlayProcess("endFloatBallAppearancePreview")
             com.slideindex.app.overlay.FloatBallOverlay.endAppearancePreview(restoreIfNeeded)
         }
 
         fun clearFloatBallAppearancePreviewRestore() {
+            requireOverlayProcess("clearFloatBallAppearancePreviewRestore")
             com.slideindex.app.overlay.FloatBallOverlay.clearAppearancePreviewRestore()
         }
 
         fun setCornerZonePreviewActive(active: Boolean) {
-            instance?.edgeOverlayHost?.setCornerZonePreviewActive(active)
+            overlayHostOrNull("setCornerZonePreviewActive")?.setCornerZonePreviewActive(active)
         }
 
         fun applyCornerZonePreviewDimensions(
@@ -413,7 +465,7 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             horizontalEdgeWidthDp: Float,
             horizontalEdgeHeightDp: Float
         ) {
-            instance?.edgeOverlayHost?.applyCornerZonePreviewDimensions(
+            overlayHostOrNull("applyCornerZonePreviewDimensions")?.applyCornerZonePreviewDimensions(
                 verticalEdgeWidthDp,
                 verticalEdgeHeightDp,
                 horizontalEdgeWidthDp,
@@ -422,11 +474,11 @@ class SlideIndexAccessibilityService : AccessibilityService() {
         }
 
         fun previewIndexHeightFraction(fraction: Float) {
-            instance?.edgeOverlayHost?.previewIndexHeightFraction(fraction)
+            overlayHostOrNull("previewIndexHeightFraction")?.previewIndexHeightFraction(fraction)
         }
 
         fun clearIndexHeightPreview() {
-            instance?.edgeOverlayHost?.clearIndexHeightPreview()
+            overlayHostOrNull("clearIndexHeightPreview")?.clearIndexHeightPreview()
         }
 
         fun mergeTriggerHandleLayoutPreview(
@@ -439,7 +491,7 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             longSwipeDistanceDp: Float? = null,
             design: com.slideindex.app.gesture.TriggerHandleDesign? = null
         ) {
-            instance?.edgeOverlayHost?.mergeTriggerHandleLayoutPreview(
+            overlayHostOrNull("mergeTriggerHandleLayoutPreview")?.mergeTriggerHandleLayoutPreview(
                 side = side,
                 handleId = handleId,
                 edgeWidthDp = edgeWidthDp,
@@ -452,11 +504,11 @@ class SlideIndexAccessibilityService : AccessibilityService() {
         }
 
         fun clearTriggerHandleLayoutPreview() {
-            instance?.edgeOverlayHost?.clearTriggerHandleLayoutPreview()
+            overlayHostOrNull("clearTriggerHandleLayoutPreview")?.clearTriggerHandleLayoutPreview()
         }
 
         fun clearOverlayLayoutPreview() {
-            instance?.edgeOverlayHost?.clearOverlayLayoutPreview()
+            overlayHostOrNull("clearOverlayLayoutPreview")?.clearOverlayLayoutPreview()
         }
 
         fun setPreviewMode(
@@ -464,11 +516,11 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             content: LayoutPreviewContent = LayoutPreviewContent.TRIGGER_ONLY,
             focus: LayoutPreviewFocus? = null
         ) {
-            instance?.edgeOverlayHost?.setPreviewMode(enabled, content, focus)
+            overlayHostOrNull("setPreviewMode")?.setPreviewMode(enabled, content, focus)
         }
 
         fun setGestureAnglesPreview(angles: com.slideindex.app.gesture.GestureAngles?) {
-            instance?.edgeOverlayHost?.setGestureAnglesPreview(angles)
+            overlayHostOrNull("setGestureAnglesPreview")?.setGestureAnglesPreview(angles)
         }
 
         fun recoverOverlaysIfIdle() {
@@ -658,11 +710,14 @@ class SlideIndexAccessibilityService : AccessibilityService() {
         private const val TAG = "SlideIndexA11y"
         private const val CONFIG_CHANGE_SUPPRESSION_RETRY_MS = 400L
         private const val SCROLL_BOTTOM_STROKE_COUNT = 10
+        /** 浮层租约续租间隔，需明显小于 OverlayHostLease 的超时时间。 */
+        private const val OVERLAY_HOST_LEASE_RENEW_MS = 2_000L
     }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
+        startOverlayHostLease()
         com.slideindex.app.overlay.OverlayStatePort.publish(this, "onServiceConnected")
         watchdog = SlideIndexAccessibilityWatchdog(this) { edgeOverlayHost }
         foregroundTracker = SlideIndexAccessibilityForegroundTracker(
@@ -745,17 +800,21 @@ class SlideIndexAccessibilityService : AccessibilityService() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         Log.w(TAG, "onUnbind: accessibility service unbound by system")
-        edgeOverlayHost?.stop()
+        // 心跳先停：之后如果还有窗口没拆掉，OverlayHostLease 会在租约过期时兜底摘除。
+        stopOverlayHostLease()
+        // 每一段都独立兜异常：任何一步抛异常都不能让后面的窗口留在 WindowManager 里
+        // （残留的全屏直触窗会吞掉整屏触摸，这是最危险的故障形态）。
+        runCatching { edgeOverlayHost?.stop() }
         edgeOverlayHost = null
         if (::watchdog.isInitialized) {
-            watchdog.unregisterScreenLockReceiver()
-            watchdog.releaseWakeLock()
+            runCatching { watchdog.unregisterScreenLockReceiver() }
+            runCatching { watchdog.releaseWakeLock() }
         }
-        ScreenSearchFloating.destroy()
-        if (::backTapGestureHost.isInitialized) backTapGestureHost.stop()
+        runCatching { ScreenSearchFloating.destroy() }
+        if (::backTapGestureHost.isInitialized) runCatching { backTapGestureHost.stop() }
         instance = null
-        com.slideindex.app.overlay.OverlayStatePort.publish(this, "onUnbind")
-        notifyModuleHostState(ready = false)
+        runCatching { com.slideindex.app.overlay.OverlayStatePort.publish(this, "onUnbind") }
+        runCatching { notifyModuleHostState(ready = false) }
         return true
     }
 
@@ -763,6 +822,7 @@ class SlideIndexAccessibilityService : AccessibilityService() {
         super.onRebind(intent)
         Log.i(TAG, "onRebind: accessibility service rebound by system")
         instance = this
+        startOverlayHostLease()
         com.slideindex.app.overlay.OverlayStatePort.publish(this, "onRebind")
         if (edgeOverlayHost == null) {
             edgeOverlayHost = EdgeOverlayHost(this, serviceScope, deps).also { it.start() }
@@ -780,20 +840,21 @@ class SlideIndexAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         mainHandler.removeCallbacks(configChangeSuppressionRunnable)
         mainHandler.removeCallbacks(configChangeFinalSettleRunnable)
-        ClipboardAccess.repository?.stopListening()
+        stopOverlayHostLease()
+        runCatching { ClipboardAccess.repository?.stopListening() }
         if (::watchdog.isInitialized) {
-            watchdog.unregisterScreenLockReceiver()
-            watchdog.releaseWakeLock()
+            runCatching { watchdog.unregisterScreenLockReceiver() }
+            runCatching { watchdog.releaseWakeLock() }
         }
-        edgeOverlayHost?.stop()
+        runCatching { edgeOverlayHost?.stop() }
         edgeOverlayHost = null
-        ScreenSearchFloating.destroy()
-        if (::backTapGestureHost.isInitialized) backTapGestureHost.stop()
-        serviceScope.cancel()
+        runCatching { ScreenSearchFloating.destroy() }
+        if (::backTapGestureHost.isInitialized) runCatching { backTapGestureHost.stop() }
+        runCatching { serviceScope.cancel() }
         instance = null
-        com.slideindex.app.overlay.OverlayStatePort.publish(this, "onDestroy")
-        notifyModuleHostState(ready = false)
-        super.onDestroy()
+        runCatching { com.slideindex.app.overlay.OverlayStatePort.publish(this, "onDestroy") }
+        runCatching { notifyModuleHostState(ready = false) }
+        runCatching { super.onDestroy() }
     }
 
     /**

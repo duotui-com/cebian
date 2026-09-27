@@ -1685,6 +1685,10 @@
     <string name="float_ball_gesture_down_swipe_distance">下滑短滑距离（屏高%）</string>
     <string name="float_ball_gesture_side_swipe_distance">侧滑短滑距离（屏宽%）</string>
     <string name="float_ball_gesture_up_swipe_distance">上滑短滑距离（屏高%）</string>
+    <string name="float_ball_gesture_long_press_section">长按</string>
+    <string name="preview_unavailable_hint">预览不可用：请确认「边栏」无障碍服务已开启</string>
+    <string name="float_ball_gesture_long_press_ms">长按触发时长</string>
+    <string name="float_ball_gesture_long_press_ms_value">%1$d ms</string>
     <string name="float_ball_gesture_swipe_up_short">上滑（短）</string>
     <string name="float_ball_gesture_swipe_up_long">上滑（长）</string>
     <string name="float_ball_gesture_swipe_up_return">上滑后返回</string>
@@ -2241,6 +2245,9 @@
     <string name="widget_panel_edit_mode">编辑模式</string>
     <string name="widget_panel_edit_hint">长按空白处进入编辑</string>
     <string name="widget_loading">加载中…</string>
+    <string name="widget_preview_hint">小组件在面板中显示</string>
+    <string name="widget_panel_preview_title">在面板中预览</string>
+    <string name="widget_panel_preview_desc">在屏幕上弹出小组件面板，查看真实效果</string>
     <string name="shell_panel_title">Shell 命令面板</string>
     <string name="shell_panel_entry_title">Shell 命令面板</string>
     <string name="shell_panel_entry_desc">保存常用 shell 命令，一键执行</string>

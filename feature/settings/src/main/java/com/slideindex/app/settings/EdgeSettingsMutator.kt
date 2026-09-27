@@ -89,8 +89,8 @@ class EdgeSettingsMutator @Inject constructor(
         bottomFraction: Float,
         landscape: Boolean = false,
     ) = editTriggerHandleProfile(landscape) { current ->
-        val minBound = 0.05f
-        val maxBound = 0.95f
+        val minBound = 0f
+        val maxBound = 1f
         var top = topFraction.coerceIn(minBound, maxBound)
         var bottom = bottomFraction.coerceIn(minBound, maxBound)
         if (bottom < top) {

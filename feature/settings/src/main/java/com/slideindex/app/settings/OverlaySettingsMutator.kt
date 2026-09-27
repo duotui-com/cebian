@@ -1022,6 +1022,10 @@ class OverlaySettingsMutator @Inject constructor(
         it[SettingsPreferenceKeys.FLOAT_BALL_HOVER_PAUSE_DELAY_MS] = value.coerceIn(200, 1000)
     }
 
+    suspend fun setFloatBallLongPressMs(value: Int) = editor.edit {
+        it[SettingsPreferenceKeys.FLOAT_BALL_LONG_PRESS_MS] = value.coerceIn(200, 2000)
+    }
+
     suspend fun setFloatBallRegionalCancelSlopDp(value: Float) = editor.edit {
         it[SettingsPreferenceKeys.FLOAT_BALL_REGIONAL_CANCEL_SLOP_DP] = value.coerceIn(3f, 30f)
     }

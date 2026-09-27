@@ -49,7 +49,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import com.slideindex.app.MainActivity
 import com.slideindex.app.di.AppDependencies
-import com.slideindex.app.overlay.FloatingPointerAreaPreviewOverlay
 import com.slideindex.app.settings.AppRootSettings
 import com.slideindex.app.settings.HomeMainSettings
 import com.slideindex.app.settings.BottomNavMode
@@ -262,14 +261,15 @@ fun MainNavHost(
             permissions.accessibilityGranted &&
             floatingPointerAreaPreviewEnabled
         ) {
-            FloatingPointerAreaPreviewOverlay.show(deps)
-        } else if (FloatingPointerAreaPreviewOverlay.isShowing) {
-            FloatingPointerAreaPreviewOverlay.hide()
+            // 浮层窗口必须由 :overlay 创建：跟手位置来自那边的边缘触摸事件。
+            activity.setFloatingPointerAreaPreview(true)
+        } else {
+            activity.setFloatingPointerAreaPreview(false)
         }
     }
 
     DisposableEffect(Unit) {
-        onDispose { FloatingPointerAreaPreviewOverlay.hide() }
+        onDispose { activity.setFloatingPointerAreaPreview(false) }
     }
 
     val coroutineScope = rememberCoroutineScope()

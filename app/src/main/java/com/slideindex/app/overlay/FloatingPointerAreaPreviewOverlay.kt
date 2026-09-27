@@ -50,6 +50,7 @@ object FloatingPointerAreaPreviewOverlay {
     private var displayOwner: OverlayComposeOwner? = null
     private var settingsState: androidx.compose.runtime.MutableState<AppSettings>? = null
     private var triggerPositionState: androidx.compose.runtime.MutableState<Offset>? = null
+    private var sensitivityPreviewState: androidx.compose.runtime.MutableState<Float?>? = null
     private var settingsCollectJob: Job? = null
     private var showToken = 0
 
@@ -75,6 +76,8 @@ object FloatingPointerAreaPreviewOverlay {
         val triggerHolder = mutableStateOf(
             Offset(0f, bounds.second * DEFAULT_TRIGGER_Y_NORM)
         )
+        // 滑条拖动期的临时灵敏度：非空时覆盖已保存值，松手后清空回到真实设置。
+        val sensitivityHolder = mutableStateOf<Float?>(null)
 
         val overlayContext = OverlayCompose.themedContext(hostContext)
         val owner = OverlayComposeOwner()
@@ -83,8 +86,16 @@ object FloatingPointerAreaPreviewOverlay {
                 OverlayAwareModuleTheme {
                     val settings by settingsHolder
                     val triggerPosition by triggerHolder
+                    val sensitivityPreview by sensitivityHolder
+                    val effectiveSettings = sensitivityPreview?.let { value ->
+                        settings.copy(
+                            floatingPointer = settings.floatingPointer.copy(
+                                floatingPointerSensitivityFraction = value,
+                            ),
+                        )
+                    } ?: settings
                     FloatingPointerAreaPreviewDisplay(
-                        settings = settings,
+                        settings = effectiveSettings,
                         screenWidth = bounds.first,
                         screenHeight = bounds.second,
                         density = dm.density,
@@ -113,6 +124,7 @@ object FloatingPointerAreaPreviewOverlay {
         displayOwner = owner
         settingsState = settingsHolder
         triggerPositionState = triggerHolder
+        sensitivityPreviewState = sensitivityHolder
 
         settingsCollectJob?.cancel()
         settingsCollectJob = overlayScope.launch {
@@ -138,12 +150,23 @@ object FloatingPointerAreaPreviewOverlay {
         windowManager = null
         settingsState = null
         triggerPositionState = null
+        sensitivityPreviewState = null
         view?.let { runCatching { wm?.removeView(it) } }
         OverlayCompose.teardownOverlayCompose(view, owner)
     }
 
     fun updateSettings(settings: AppSettings) {
         settingsState?.value = settings
+    }
+
+    /** 拖动"灵敏度"滑条时的实时预览值；null 表示回到已保存设置。 */
+    fun previewSensitivity(fraction: Float?) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            mainHandler.post { previewSensitivity(fraction) }
+            return
+        }
+        if (!isShowing) return
+        sensitivityPreviewState?.value = fraction
     }
 
     fun onEdgeTriggerTouch(rawX: Float, rawY: Float) {

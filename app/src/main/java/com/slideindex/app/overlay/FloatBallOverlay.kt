@@ -1235,6 +1235,9 @@ object FloatBallOverlay {
         touchLayoutParams = touchLp
         lineTouchHost = lineTouchLayout
         lineTouchLayoutParams = lineTouchLp
+        // 手势"按住才成立"状态卡死（UP/CANCEL 丢失）时，收回全屏触摸窗。
+        touchLayout.onCaptureStalled = { recoverStuckTouchCapture() }
+        lineTouchLayout.onCaptureStalled = { recoverStuckTouchCapture() }
         ballIconView = ballIcon
         cursorPreviewView = cursorPreview
         appContext = hostContext
@@ -1251,6 +1254,18 @@ object FloatBallOverlay {
         lineTouchHost?.cancelGesture()
         collapseBallTouchHostFromFullscreen()
         collapseLineTouchHostFromFullscreen()
+    }
+
+    /**
+     * 取词/侧边条手势卡死（UP/CANCEL 丢失）兜底。
+     *
+     * 手势没收到收尾事件时，触摸窗会一直停在全屏可触摸状态，整屏都会被它吃掉。
+     * 这里按"取消"语义收尾：清掉拖拽状态 → 解除全屏捕获 → 回到空闲布局。
+     */
+    private fun recoverStuckTouchCapture() {
+        clearLauncherAssociatedDragState()
+        releaseAllTouchCaptures()
+        settingsState?.value?.let { recoverIdleTouchCaptureLayouts(it) }
     }
 
     /** 空闲态：从全屏捕获缩回触钮区，并同步 WM 几何（z-order 重挂前必须调用）。 */

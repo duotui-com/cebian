@@ -283,6 +283,8 @@ data class FloatBallSettings(
     val floatBallPointerSlopDp: Float = 4f,
     /** Hover dwell time before cursor locks start position for text pick or screenshot (ms). */
     val floatBallHoverPauseDelayMs: Int = 400,
+    /** 悬浮球/侧边条长按手势的触发时长（ms）。 */
+    val floatBallLongPressMs: Int = 500,
     /** Deadzone distance from pause origin to cancel screenshot / enter drag (dp). */
     val floatBallRegionalCancelSlopDp: Float = 16f,
     /** FV down_swipe_short_distance_2：短滑阈值 = percent × 40dp / 100。 */

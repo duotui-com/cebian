@@ -182,15 +182,34 @@ class MainNavContext(
     }
 
     fun stopGestureAnglesPreview() {
-        SlideIndexAccessibilityService.setGestureAnglesPreview(null)
+        clearGestureAnglesPreview()
     }
 
     fun startGestureAnglesPreview(angles: GestureAngles) {
-        SlideIndexAccessibilityService.setGestureAnglesPreview(angles)
+        previewGestureAngles(angles)
     }
 
     fun updateGestureAnglesPreview(angles: GestureAngles) {
-        SlideIndexAccessibilityService.setGestureAnglesPreview(angles)
+        previewGestureAngles(angles)
+    }
+
+    // 悬浮指针"行程范围预览"：窗口与跟手位置都在 :overlay，拖动期只推实时灵敏度。
+    fun previewFloatingPointerAreaSensitivityStart() {
+        activity.setFloatingPointerAreaPreview(true)
+    }
+
+    fun previewFloatingPointerAreaSensitivity(fraction: Float) {
+        activity.setFloatingPointerAreaPreview(true, fraction)
+    }
+
+    /** 松手：清掉临时灵敏度，预览继续跟随已保存设置。 */
+    fun previewFloatingPointerAreaSensitivityEnd() {
+        activity.setFloatingPointerAreaPreview(true, Float.NaN)
+    }
+
+    /** 小组件编辑器点"预览"：由 :overlay 弹出小组件面板显示真身。 */
+    fun showWidgetPanelPreview() {
+        activity.showWidgetPanelPreview()
     }
 
     fun stopTriggerPreview() {
@@ -200,23 +219,33 @@ class MainNavContext(
     }
 
     fun startFloatBallStripZonePreview() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.setFloatBallStripZonePreview(true)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_STRIP_ZONE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, true)
+        }
     }
 
     fun stopFloatBallStripZonePreview() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.setFloatBallStripZonePreview(false)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_STRIP_ZONE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, false)
+        }
     }
 
     fun previewFloatBallPositionY(fraction: Float) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.previewFloatBallPositionYFraction(fraction)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_POSITION_Y) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_POSITION_Y_FRACTION, fraction)
+        }
     }
 
     fun endFloatBallPositionYPreview(restoreIfNeeded: Boolean) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.endFloatBallPositionYPreview(restoreIfNeeded)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_POSITION_Y) { intent ->
+            if (restoreIfNeeded) intent.putExtra(OverlayService.EXTRA_PREVIEW_RESTORE, true)
+        }
     }
 
     fun clearFloatBallPositionYPreviewRestore() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.clearFloatBallPositionYPreviewRestore()
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_POSITION_Y) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CLEAR_RESTORE, true)
+        }
     }
 
     fun previewFloatBallAppearance(
@@ -227,30 +256,49 @@ class MainNavContext(
         lineWidthFraction: Float? = null,
         lineOpacity: Float? = null,
     ) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.previewFloatBallAppearance(
-            sizeDp = sizeDp,
-            opacity = opacity,
-            visibleFraction = visibleFraction,
-            lineHeightFraction = lineHeightFraction,
-            lineWidthFraction = lineWidthFraction,
-            lineOpacity = lineOpacity,
-        )
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_APPEARANCE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, true)
+            if (sizeDp != null) intent.putExtra(OverlayService.EXTRA_PREVIEW_SIZE_DP, sizeDp)
+            if (opacity != null) intent.putExtra(OverlayService.EXTRA_PREVIEW_OPACITY, opacity)
+            if (visibleFraction != null) {
+                intent.putExtra(OverlayService.EXTRA_PREVIEW_VISIBLE_FRACTION, visibleFraction)
+            }
+            if (lineHeightFraction != null) {
+                intent.putExtra(OverlayService.EXTRA_PREVIEW_LINE_HEIGHT_FRACTION, lineHeightFraction)
+            }
+            if (lineWidthFraction != null) {
+                intent.putExtra(OverlayService.EXTRA_PREVIEW_LINE_WIDTH_FRACTION, lineWidthFraction)
+            }
+            if (lineOpacity != null) intent.putExtra(OverlayService.EXTRA_PREVIEW_LINE_OPACITY, lineOpacity)
+        }
     }
 
     fun endFloatBallAppearancePreview(restoreIfNeeded: Boolean) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.endFloatBallAppearancePreview(restoreIfNeeded)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_APPEARANCE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, false)
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_RESTORE, restoreIfNeeded)
+        }
     }
 
     fun clearFloatBallAppearancePreviewRestore() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.clearFloatBallAppearancePreviewRestore()
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_APPEARANCE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CLEAR_RESTORE, true)
+        }
     }
 
+    // 浮层预览必须跨进程送达 :overlay —— 设置界面在独立进程，
+    // 直连 SlideIndexAccessibilityService.instance 只会命中 null 静默失效。
+
     fun startCornerZonePreview() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.setCornerZonePreviewActive(true)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CORNER_ZONE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_ACTIVE, true)
+        }
     }
 
     fun stopCornerZonePreview() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.setCornerZonePreviewActive(false)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CORNER_ZONE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_ACTIVE, false)
+        }
     }
 
     fun updateCornerZonePreview(
@@ -259,28 +307,29 @@ class MainNavContext(
         horizontalEdgeWidthDp: Float,
         horizontalEdgeHeightDp: Float,
     ) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.applyCornerZonePreviewDimensions(
-            verticalEdgeWidthDp,
-            verticalEdgeHeightDp,
-            horizontalEdgeWidthDp,
-            horizontalEdgeHeightDp,
-        )
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CORNER_ZONE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_ACTIVE, true)
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_V_WIDTH, verticalEdgeWidthDp)
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_V_HEIGHT, verticalEdgeHeightDp)
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_H_WIDTH, horizontalEdgeWidthDp)
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_H_HEIGHT, horizontalEdgeHeightDp)
+        }
     }
 
     fun previewIndexHeightFraction(fraction: Float) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.previewIndexHeightFraction(fraction)
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_INDEX_HEIGHT) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_INDEX_FRACTION, fraction)
+        }
     }
 
     fun clearIndexHeightPreview() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.clearIndexHeightPreview()
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_INDEX_HEIGHT) { }
     }
 
     fun previewTriggerHandleEdgeWidth(side: PanelSide, handleId: String, edgeWidthDp: Float) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.mergeTriggerHandleLayoutPreview(
-            side = side,
-            handleId = handleId,
-            edgeWidthDp = edgeWidthDp,
-        )
+        previewTriggerHandle(side, handleId) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_EDGE_WIDTH_DP, edgeWidthDp)
+        }
     }
 
     fun previewTriggerHandleVerticalRange(
@@ -289,12 +338,10 @@ class MainNavContext(
         topFraction: Float,
         bottomFraction: Float,
     ) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.mergeTriggerHandleLayoutPreview(
-            side = side,
-            handleId = handleId,
-            topFraction = topFraction,
-            bottomFraction = bottomFraction,
-        )
+        previewTriggerHandle(side, handleId) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_TOP_FRACTION, topFraction)
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_BOTTOM_FRACTION, bottomFraction)
+        }
     }
 
     fun previewTriggerHandleSwipeDistances(
@@ -303,12 +350,14 @@ class MainNavContext(
         shortSwipeDistanceDp: Float? = null,
         longSwipeDistanceDp: Float? = null,
     ) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.mergeTriggerHandleLayoutPreview(
-            side = side,
-            handleId = handleId,
-            shortSwipeDistanceDp = shortSwipeDistanceDp,
-            longSwipeDistanceDp = longSwipeDistanceDp,
-        )
+        previewTriggerHandle(side, handleId) { intent ->
+            if (shortSwipeDistanceDp != null) {
+                intent.putExtra(OverlayService.EXTRA_PREVIEW_SHORT_SWIPE_DP, shortSwipeDistanceDp)
+            }
+            if (longSwipeDistanceDp != null) {
+                intent.putExtra(OverlayService.EXTRA_PREVIEW_LONG_SWIPE_DP, longSwipeDistanceDp)
+            }
+        }
     }
 
     fun previewTriggerHandleDesign(
@@ -316,19 +365,43 @@ class MainNavContext(
         handleId: String,
         design: com.slideindex.app.gesture.TriggerHandleDesign,
     ) {
-        com.slideindex.app.service.SlideIndexAccessibilityService.mergeTriggerHandleLayoutPreview(
-            side = side,
-            handleId = handleId,
-            design = design,
-        )
+        previewTriggerHandle(side, handleId) { intent ->
+            intent.putExtra(
+                OverlayService.EXTRA_PREVIEW_DESIGN,
+                com.slideindex.app.gesture.TriggerHandleDesignCodec.encode(design),
+            )
+        }
+    }
+
+    /** 手势角度预览：同样必须跨进程。 */
+    fun previewGestureAngles(angles: com.slideindex.app.gesture.GestureAngles) {
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_GESTURE_ANGLES) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_GESTURE_ANGLES, angles.toFloatArray())
+        }
+    }
+
+    fun clearGestureAnglesPreview() {
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_GESTURE_ANGLES) { }
     }
 
     fun clearTriggerHandleLayoutPreview() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.clearTriggerHandleLayoutPreview()
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CLEAR) { }
     }
 
     fun clearOverlayLayoutPreview() {
-        com.slideindex.app.service.SlideIndexAccessibilityService.clearOverlayLayoutPreview()
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CLEAR) { }
+    }
+
+    private fun previewTriggerHandle(
+        side: PanelSide,
+        handleId: String,
+        configure: (android.content.Intent) -> Unit,
+    ) {
+        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_TRIGGER_HANDLE) { intent ->
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_SIDE, side.name)
+            intent.putExtra(OverlayService.EXTRA_PREVIEW_HANDLE_ID, handleId)
+            configure(intent)
+        }
     }
 
     private fun triggerPreviewFocus(

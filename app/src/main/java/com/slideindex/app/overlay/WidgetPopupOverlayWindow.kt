@@ -118,17 +118,12 @@ object WidgetPopupOverlayWindow {
     val screenWidthPx = hostContext.resources.displayMetrics.widthPixels
     val effectivePages = WidgetPanelDefaults.effectivePages(settings.widgetPanelPages)
     val initialPage = effectivePages.firstOrNull() ?: WidgetPanelPage()
-    val initialMetrics = WidgetPanelLayoutMetrics.compute(
+    val initialBox = WidgetPanelLayoutMetrics.computePanelBox(
       screenWidthPx = screenWidthPx,
       page = initialPage,
-      density = density
+      density = density,
+      pageCount = effectivePages.size,
     )
-    val panelWidthPx = initialMetrics.panelWidthPx
-    val panelPaddingPx = (12f * density).roundToInt() * 2
-    val indicatorHeightPx = if (effectivePages.size > 1) (14f * density).roundToInt() else 0
-    val hintHeightPx = if (initialPage.items.isEmpty()) (20f * density).roundToInt() else 0
-    val panelHeightPx = panelPaddingPx + initialMetrics.viewportHeightPx + indicatorHeightPx + hintHeightPx
-    val marginTopPx = (initialPage.marginTopDp * density).roundToInt()
 
     val root = WidgetPopupRootLayout(hostContext, onDismissOutside = { dismiss() })
     val card = WidgetPopupCardLayout(
@@ -140,10 +135,12 @@ object WidgetPopupOverlayWindow {
       onSavePages = { pages -> savePages(pages) }
     )
     root.cardView = card
+    // 各页的列数/单元宽度/可见行数/上边距可以不同，切页或改设置时按当前页重算整卡尺寸。
+    card.onPageMetricsChanged = { page -> applyCardBoxForPage(page) }
 
-    val cardLp = FrameLayout.LayoutParams(panelWidthPx, panelHeightPx).apply {
+    val cardLp = FrameLayout.LayoutParams(initialBox.widthPx, initialBox.heightPx).apply {
       gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-      topMargin = marginTopPx
+      topMargin = initialBox.topMarginPx
     }
     root.addView(card, cardLp)
 
@@ -393,6 +390,30 @@ object WidgetPopupOverlayWindow {
     val deps = overlayDeps ?: return
     pendingPagesToSave = pages
     deps.widgetPanelPersistence.schedulePersist(pages)
+  }
+
+  /** 按 [page] 的几何重算卡片尺寸与上边距；数值没变则不动，避免多余布局。 */
+  private fun applyCardBoxForPage(page: WidgetPanelPage) {
+    val card = cardLayout ?: return
+    val ctx = appContext ?: return
+    val density = ctx.resources.displayMetrics.density
+    val pageCount = WidgetPanelDefaults
+      .effectivePages(currentSettings?.widgetPanelPages ?: emptyList())
+      .size
+    val box = WidgetPanelLayoutMetrics.computePanelBox(
+      screenWidthPx = ctx.resources.displayMetrics.widthPixels,
+      page = page,
+      density = density,
+      pageCount = pageCount,
+    )
+    val lp = card.layoutParams as? FrameLayout.LayoutParams ?: return
+    if (lp.width == box.widthPx && lp.height == box.heightPx && lp.topMargin == box.topMarginPx) {
+      return
+    }
+    lp.width = box.widthPx
+    lp.height = box.heightPx
+    lp.topMargin = box.topMarginPx
+    card.layoutParams = lp
   }
 
   private fun cleanup() {

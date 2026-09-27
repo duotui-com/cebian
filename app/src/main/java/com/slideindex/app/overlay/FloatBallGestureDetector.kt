@@ -53,6 +53,7 @@ internal class FloatBallGestureDetector(
     private var sideSwipeShortPx = 60f
     private var upSwipeShortPx = 60f
     private var slopPx = 8f
+    private var longPressMs = LONG_PRESS_MS
     private var configuredActions: Map<FloatBallGestureType, GestureAction> = emptyMap()
 
     private var downX = 0f
@@ -146,6 +147,7 @@ internal class FloatBallGestureDetector(
         sideSwipeShortPx = swipeThresholdPx(settings.floatBallSideSwipeShortPercent, density)
         upSwipeShortPx = swipeThresholdPx(settings.floatBallUpSwipeShortPercent, density)
         slopPx = settings.floatBallPointerSlopDp.coerceIn(4f, 32f) * density
+        longPressMs = settings.floatBallLongPressMs.coerceIn(200, 2000).toLong()
         configuredActions = settings.floatBallGestureActions
         this.onPickStart = onPickStart
         this.onPickDrag = onPickDrag
@@ -192,7 +194,7 @@ internal class FloatBallGestureDetector(
                 onGestureHint?.invoke(null)
                 onPickPreviewStart?.invoke(downX, downY)
                 onPickPreviewMove?.invoke(downX, downY, downX, downY)
-                handler.postDelayed(longPressRunnable, LONG_PRESS_MS)
+                handler.postDelayed(longPressRunnable, longPressMs)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {

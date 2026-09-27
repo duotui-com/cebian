@@ -11,6 +11,9 @@ import com.slideindex.app.floatball.FloatBallGestureType
 import com.slideindex.app.settings.FloatBallSide
 import kotlin.math.roundToInt
 
+/** 取词手势"按住才成立"状态最长允许无输入事件的时间，超过即判定 UP/CANCEL 丢失。 */
+private const val STRIP_CAPTURE_IDLE_TIMEOUT_MS = 10_000L
+
 /**
  * 线条触摸窗：空闲时 WM 层仅为线条触发区；滑出 slop 进入取词后由 [FloatBallOverlay] 扩全屏跟手，手势锁到 UP/CANCEL。
  */
@@ -24,7 +27,20 @@ internal class FloatBallStripHost(
 ) : FrameLayout(context) {
     private val gestureDetector = FloatBallGestureDetector()
     var stripTouchable: Boolean = true
+
+    /** 手势卡死（UP/CANCEL 丢失）时回调，由 [FloatBallOverlay] 收回全屏触摸窗。 */
+    var onCaptureStalled: (() -> Unit)? = null
+
     private var gestureActive = false
+
+    private val captureWatchdog = StuckGestureWatchdog(
+        timeoutMs = STRIP_CAPTURE_IDLE_TIMEOUT_MS,
+        isHolding = { gestureActive || gestureDetector.isLauncherCaptureMode() },
+        onStall = {
+            cancelGesture()
+            onCaptureStalled?.invoke()
+        }
+    )
     private var idleChromeView: View? = null
 
     /** 空闲态线条视觉叠在触摸窗内，避免全屏 display 挡触摸。 */
@@ -120,6 +136,7 @@ internal class FloatBallStripHost(
     fun beginLauncherCaptureMode() {
         gestureActive = true
         gestureDetector.enterLauncherCaptureMode()
+        captureWatchdog.onStateChanged()
     }
 
     fun isLauncherCaptureMode(): Boolean = gestureDetector.isLauncherCaptureMode()
@@ -134,6 +151,7 @@ internal class FloatBallStripHost(
             gestureActive = false
             gestureDetector.cancel()
         }
+        captureWatchdog.onStateChanged()
     }
 
     fun lockPickFromPause() {
@@ -175,7 +193,7 @@ internal class FloatBallStripHost(
                 else -> return false
             }
         }
-        return super.dispatchTouchEvent(event)
+        return super.dispatchTouchEvent(event).also { captureWatchdog.onInput() }
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
@@ -215,6 +233,10 @@ internal class FloatBallStripHost(
      * 这里再用同一份 `hitTestLine` 复核一次，几何变化导致未命中就丢弃（不产生残留状态）。
      */
     fun handleForwardedTouch(event: MotionEvent): Boolean {
+        return dispatchForwardedTouch(event).also { captureWatchdog.onInput() }
+    }
+
+    private fun dispatchForwardedTouch(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 if (!hitTestLine(event.rawX, event.rawY)) return false

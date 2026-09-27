@@ -370,7 +370,6 @@ class WidgetCanvasLayout(context: Context) : ViewGroup(context) {
     val widthSize = MeasureSpec.getSize(widthMeasureSpec)
     val heightMode = MeasureSpec.getMode(heightMeasureSpec)
     val heightSize = MeasureSpec.getSize(heightMeasureSpec)
-    val preferredCellPx = 1
 
     val innerWidthAvailable = if (widthMode != MeasureSpec.UNSPECIFIED && widthSize > 0) {
       widthSize - paddingLeft - paddingRight
@@ -382,13 +381,12 @@ class WidgetCanvasLayout(context: Context) : ViewGroup(context) {
       (canvasPage!!.cellWidthDp * resources.displayMetrics.density).roundToInt()
     } else 0
 
-    currentGridStepPx = if (desiredCellPx > 0) {
-      desiredCellPx
-    } else if (innerWidthAvailable > 0 && pageColumnCount > 0) {
-      WidgetSizeHelper.computeGridStepPx(innerWidthAvailable, pageColumnCount)
-    } else {
-      preferredCellPx
-    }
+    // 固定单元宽度只在放不下时按可用宽度收缩，避免最右一列被容器裁掉。
+    currentGridStepPx = WidgetGridMetrics.resolveGridStepPx(
+      innerWidthPx = innerWidthAvailable,
+      columnCount = pageColumnCount,
+      desiredCellPx = desiredCellPx,
+    )
 
     val contentW = pageColumnCount * currentGridStepPx
     val contentH = pageRowCount * currentGridStepPx

@@ -30,6 +30,9 @@ import com.slideindex.app.util.GestureActionIconBitmap
 import com.slideindex.app.util.HapticHelper
 import com.slideindex.app.util.OverlayBrightnessControl
 
+/** 会话/触钮取词"按住才成立"状态最长允许无任何输入事件的时间，超过即判定 UP/CANCEL 丢失。 */
+private const val INTERACTION_IDLE_TIMEOUT_MS = 10_000L
+
 /**
  * 边缘手势 Overlay 编排层：触摸分发、会话生命周期与各面板 Controller 协调。
  */
@@ -227,6 +230,19 @@ class EdgeGestureOverlayView(
         composeOverlayDialogShowing = layoutCoordinator::composeOverlayDialogShowing
     )
 
+    /**
+     * "按住才成立"的手势兜底：会话/触钮取词超过 [INTERACTION_IDLE_TIMEOUT_MS]
+     * 收不到任何输入事件，说明 UP/CANCEL 丢了，直接强制复位。
+     * 不复位的话全屏直触的 presentation 会一直吞掉整屏触摸。
+     */
+    private val interactionWatchdog: StuckGestureWatchdog by lazy(LazyThreadSafetyMode.NONE) {
+        StuckGestureWatchdog(
+            timeoutMs = INTERACTION_IDLE_TIMEOUT_MS,
+            isHolding = { edgeCaptureTouchActive || gestureSession.isActive() },
+            onStall = { forceRecoverInteractionState() }
+        )
+    }
+
     init {
         isClickable = true
         isFocusableInTouchMode = true
@@ -310,10 +326,13 @@ class EdgeGestureOverlayView(
     var onPresentationTouchRequirementChanged: (() -> Unit)? = null
 
     private fun notifyPresentationTouchRequirementChanged() {
+        // 交互态变化时同步看门狗：按住才成立的状态要续租，退出交互态要撤销。
+        interactionWatchdog.onStateChanged()
         onPresentationTouchRequirementChanged?.invoke()
     }
 
-    fun handleOverlayTouch(event: MotionEvent): Boolean = touchDispatcher.handleTouch(event)
+    fun handleOverlayTouch(event: MotionEvent): Boolean =
+        touchDispatcher.handleTouch(event).also { interactionWatchdog.onInput() }
 
     /**
      * 处理由 LSPosed 模块在输入层接管并转发过来的触摸事件（屏幕原始坐标）。
@@ -324,7 +343,7 @@ class EdgeGestureOverlayView(
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             layoutCoordinator.applyExpandedOverlayLayout()
         }
-        return touchDispatcher.handleTouch(event)
+        return touchDispatcher.handleTouch(event).also { interactionWatchdog.onInput() }
     }
 
     /** 模块侧判定会话需要提前结束（多指、屏幕关闭等）时调用。 */
@@ -336,7 +355,7 @@ class EdgeGestureOverlayView(
     fun handleCaptureStripTouch(event: MotionEvent, triggerIndex: Int): Boolean {
         val handle = settings.triggerHandles(side).getOrNull(triggerIndex) ?: return false
         val (localX, localY) = rawToLocal(event.rawX, event.rawY)
-        return when (event.actionMasked) {
+        val handled = when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 layoutCoordinator.syncZoneLayout()
                 if (!touchDispatcher.beginCaptureStripTouch(
@@ -354,6 +373,8 @@ class EdgeGestureOverlayView(
             }
             else -> touchDispatcher.handleTouch(event)
         }
+        interactionWatchdog.onInput()
+        return handled
     }
 
     @SuppressLint("ClickableViewAccessibility") // Overlay gesture surface; not a clickable control
@@ -386,6 +407,7 @@ class EdgeGestureOverlayView(
         edgeCaptureTouchActive = false
         adjustPanelController.forceRecover()
         gestureSession.forceReset(notifySessionEnd = false)
+        interactionWatchdog.cancel()
         notifyPresentationTouchRequirementChanged()
         layoutCoordinator.syncZoneLayout()
         invalidate()

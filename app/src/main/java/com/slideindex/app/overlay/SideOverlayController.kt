@@ -125,6 +125,15 @@ class SideOverlayController(
 
     fun isEdgeInitialized(): Boolean = windowManager.presentationView != null
 
+    /**
+     * 触钮是否"真的挂上了"。
+     *
+     * presentation 存在只说明宿主在，还要有触摸捕获窗才算能用——两者不齐时
+     * 用户看到的就是"设置里开着、屏幕上没有"，需要自愈重挂。
+     */
+    fun hasTriggerAttachments(): Boolean =
+        windowManager.presentationView != null && windowManager.touchCaptureWindows.isNotEmpty()
+
     /** 输入层接管转发的触摸事件；窗口未就绪时返回 false（模块会据此放行）。 */
     fun handleForwardedTouch(event: android.view.MotionEvent): Boolean {
         val view = windowManager.presentationView ?: return false
@@ -143,6 +152,20 @@ class SideOverlayController(
         // leave-open 面板抬手后 active=false，但 panelMode 仍非 NONE，不能当 idle 清掉。
         if (view.isSessionActive() || view.keepsOverlayExpanded() || previewMode) return
         view.forceRecoverInteractionState()
+        windowManager.detachPresentationUnlessRequired()
+    }
+
+    /**
+     * 硬复位：无视 idle 判定，强制结束本侧交互会话并收回全屏直触。
+     *
+     * 用于熄屏/锁屏这类硬边界——正常收尾依赖 UP/CANCEL，一旦丢事件，
+     * presentation 会一直保持可触摸并吞掉整屏触摸。
+     */
+    fun forceResetInteraction() {
+        val view = windowManager.presentationView ?: return
+        view.forceRecoverInteractionState()
+        windowManager.syncPresentationTouchState()
+        windowManager.syncCaptureWindowLayout()
         windowManager.detachPresentationUnlessRequired()
     }
 

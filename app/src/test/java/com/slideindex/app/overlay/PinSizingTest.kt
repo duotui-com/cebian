@@ -2,10 +2,12 @@ package com.slideindex.app.overlay
 
 import android.graphics.Rect
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.math.roundToInt
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [31])
@@ -51,5 +53,34 @@ class PinSizingTest {
         val placement = resolvePinPlacementRect(screenRect, layoutMeta)!!
         assertEquals(placement.width(), width)
         assertEquals(placement.height(), height)
+    }
+
+    @Test
+    fun measureTextPinSizePx_keepsShortTextCompact() {
+        val (width, height) = measureTextPinSizePx(
+            text = "短文本",
+            screenWidthPx = 1080,
+            screenHeightPx = 2400,
+            density = 3f,
+            scaledDensity = 3f,
+        )
+
+        // 旧实现固定 55% 屏宽 × 240dp，短文本应明显更小。
+        assertTrue(width < (1080 * 0.55f).roundToInt())
+        assertTrue(height < (240 * 3f).roundToInt())
+    }
+
+    @Test
+    fun measureTextPinSizePx_clampsLongTextToMaxBox() {
+        val (width, height) = measureTextPinSizePx(
+            text = "很长的钉图文字内容，需要换行显示。".repeat(120),
+            screenWidthPx = 1080,
+            screenHeightPx = 2400,
+            density = 3f,
+            scaledDensity = 3f,
+        )
+
+        assertTrue(width <= (1080 * 0.55f).roundToInt())
+        assertTrue(height <= (2400 * 0.5f).roundToInt())
     }
 }

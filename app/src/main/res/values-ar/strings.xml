@@ -1651,6 +1651,10 @@
     <string name="float_ball_gesture_down_swipe_distance">مسافة السحب القصير للأسفل (٪ من ارتفاع الشاشة)</string>
     <string name="float_ball_gesture_side_swipe_distance">مسافة السحب القصير للجانب (٪ من عرض الشاشة)</string>
     <string name="float_ball_gesture_up_swipe_distance">مسافة السحب القصير لأعلى (٪ من ارتفاع الشاشة)</string>
+    <string name="float_ball_gesture_long_press_section">الضغط المطول</string>
+    <string name="preview_unavailable_hint">المعاينة غير متاحة: تأكد من تفعيل خدمة إمكانية الوصول</string>
+    <string name="float_ball_gesture_long_press_ms">مدة تشغيل الضغط المطول</string>
+    <string name="float_ball_gesture_long_press_ms_value">%1$d مللي ثانية</string>
     <string name="float_ball_gesture_swipe_up_short">السحب لأعلى (قصير)</string>
     <string name="float_ball_gesture_swipe_up_long">السحب لأعلى (طويل)</string>
     <string name="float_ball_gesture_swipe_up_return">السحب لأعلى ثم الرجوع</string>
@@ -2208,6 +2212,9 @@
     <string name="widget_panel_edit_mode">وضع التحرير</string>
     <string name="widget_panel_edit_hint">اضغط مطولًا على منطقة فارغة للدخول إلى وضع التحرير</string>
     <string name="widget_loading">جارٍ التحميل…</string>
+    <string name="widget_preview_hint">تظهر الأدوات في اللوحة</string>
+    <string name="widget_panel_preview_title">معاينة في اللوحة</string>
+    <string name="widget_panel_preview_desc">افتح لوحة الأدوات على الشاشة لعرض الشكل الحقيقي</string>
     <string name="shell_panel_title">لوحة أوامر Shell</string>
     <string name="shell_panel_entry_title">لوحة أوامر Shell</string>
     <string name="shell_panel_entry_desc">حفظ أوامر shell الشائعة، وتنفيذها بنقرة واحدة</string>

@@ -29,6 +29,8 @@ internal class SlideIndexAccessibilityWatchdog(
                     TriggerEnvironmentState.lockScreenActive = true
                     com.slideindex.app.overlay.OverlayStatePort.publish(service, "screenOff")
                     GlobalOverlayDismissHelper.dismissAllPanels()
+                    // 熄屏是硬边界：无条件收掉侧边会话/全屏直触，避免丢 UP 后整屏被浮层吃掉。
+                    runCatching { overlayHost()?.forceRecoverInteractionState() }
                     // 触钮 + 悬浮球/边角轮盘一并按锁屏抑制策略刷新，避免解锁后只恢复触钮。
                     overlayHost()?.refreshOverlaySuppression()
                 }

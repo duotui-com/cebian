@@ -3,8 +3,10 @@ package com.slideindex.app.overlay
 import com.slideindex.app.floatball.FloatBallGestureType
 import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.settings.FloatBallSide
+import com.slideindex.app.settings.FloatBallSettings
 import com.slideindex.app.settings.FreeWindowMode
 import com.slideindex.app.settings.FreeWindowSettings
+import android.os.Looper
 import android.view.MotionEvent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -13,8 +15,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLooper
+import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [34])
@@ -384,6 +388,25 @@ class FloatBallGestureDetectorTest {
         assertFalse(pickCancelled)
         down.recycle()
         up.recycle()
+    }
+
+    @Test
+    fun `custom long press duration delays long press`() {
+        var fired: FloatBallGestureType? = null
+        val detector = newDetector(
+            settings = AppSettings(
+                freeWindow = FreeWindowSettings(freeWindowModeId = FreeWindowMode.STANDARD.id),
+                floatBall = FloatBallSettings(floatBallLongPressMs = 1200),
+            ),
+            onGesture = { type, _, _ -> fired = type },
+        )
+        val down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 100f, 200f, 0)
+        detector.onTouchEvent(down)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(600))
+        assertNull(fired)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(700))
+        assertEquals(FloatBallGestureType.LONG_PRESS, fired)
+        down.recycle()
     }
 
     @Test

@@ -372,6 +372,19 @@ class MainActivity : ComponentActivity() {
         overlayServiceController.sendPreviewIntent(action, content, focus)
     }
 
+    /** 滑条拖动期的实时预览：由 [com.slideindex.app.service.OverlayServiceController] 送到 :overlay。 */
+    internal fun sendOverlayPreviewExtras(action: String, configure: (Intent) -> Unit) {
+        overlayServiceController.sendPreviewExtras(action, configure)
+    }
+
+    internal fun setFloatingPointerAreaPreview(active: Boolean, sensitivity: Float? = null) {
+        overlayServiceController.setFloatingPointerAreaPreview(active, sensitivity)
+    }
+
+    internal fun showWidgetPanelPreview() {
+        overlayServiceController.showWidgetPanelPreview()
+    }
+
     internal fun refreshPermissionState() {
         overlayServiceController.refreshPermissionState()
     }

@@ -80,6 +80,7 @@ fun WidgetPanelSettingsScreen(
   viewModel: WidgetPanelEditorViewModel,
   onBack: () -> Unit,
   onWidthFractionChange: (Float) -> Unit = {},
+  onPreviewWidget: () -> Unit = {},
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   WidgetPanelSettingsContent(
@@ -90,6 +91,7 @@ fun WidgetPanelSettingsScreen(
     onBlurEnabledChange = viewModel::setBlurEnabled,
     onBlurRadiusChange = viewModel::setBlurRadius,
     onGridInteractionActiveChange = viewModel::setGridInteractionActive,
+    onPreviewWidget = onPreviewWidget,
   )
 }
 
@@ -140,12 +142,15 @@ fun WidgetPanelSettingsContent(
   onSavePages: (List<WidgetPanelPage>) -> Unit,
   onSelectPage: (Int) -> Unit,
   onBlurEnabledChange: (Boolean) -> Unit,
+  onPreviewWidget: () -> Unit = {},
   onBlurRadiusChange: (Int) -> Unit = {},
   onGridInteractionActiveChange: (Boolean) -> Unit = {},
 ) {
   val settingsDesc = stringResource(R.string.widget_panel_settings_desc)
   val blurTitle = stringResource(R.string.widget_panel_blur)
   val blurDesc = stringResource(R.string.widget_panel_blur_desc)
+  val previewTitle = stringResource(R.string.widget_panel_preview_title)
+  val previewDesc = stringResource(R.string.widget_panel_preview_desc)
 
   SettingsLazyScreenScaffold(
     title = stringResource(R.string.widget_panel_settings_title),
@@ -156,6 +161,21 @@ fun WidgetPanelSettingsContent(
     settingsLazyTipCard(
       key = "widget-panel-desc",
       text = settingsDesc,
+    )
+    // 编辑器进程渲染不了真身（AppWidgetHostView 只在 :overlay），所以预览做成一个显式入口：
+    // 点它让 :overlay 把小组件面板浮出来。卡片本身不再挂任何预览按钮，避免抢拖拽/缩放手势。
+    groupedCardItems(
+      keyPrefix = "widget-panel-preview",
+      items = listOf(
+        settingsCardScopeItem("widget-panel-preview") {
+          SettingNavigationRow(
+            icon = { label -> Icon(HubLeadingIcons.widgetPanel(true), contentDescription = label) },
+            title = previewTitle,
+            subtitle = previewDesc,
+            onClick = onPreviewWidget,
+          )
+        },
+      ),
     )
     groupedCardItems(
       keyPrefix = "widget-panel-blur",

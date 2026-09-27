@@ -210,6 +210,7 @@ fun OverlaySettings.toMinimalAppSettings(): AppSettings = AppSettings(
         floatBallPickPanelExitAnimationMs = floatBallPickPanelExitAnimationMs,
         floatBallPointerSlopDp = floatBallPointerSlopDp,
         floatBallHoverPauseDelayMs = floatBallHoverPauseDelayMs,
+        floatBallLongPressMs = floatBallLongPressMs,
         floatBallRegionalCancelSlopDp = floatBallRegionalCancelSlopDp,
         floatBallDownSwipeShortPercent = floatBallDownSwipeShortPercent,
         floatBallSideSwipeShortPercent = floatBallSideSwipeShortPercent,

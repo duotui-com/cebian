@@ -8,7 +8,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
+import android.graphics.Paint
 import android.graphics.PixelFormat
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import androidx.core.graphics.createBitmap
 import android.graphics.Rect
 import android.os.Handler
@@ -110,6 +114,13 @@ private enum class ScreenPinDropZone {
 }
 
 private const val TEXT_PIN_MAX_WIDTH_FRACTION = 0.55f
+private const val TEXT_PIN_MAX_HEIGHT_FRACTION = 0.5f
+private const val TEXT_PIN_MIN_WIDTH_DP = 96f
+private const val TEXT_PIN_MIN_HEIGHT_DP = 44f
+/** 与 [ScreenPinContent] 中文本渲染保持一致的字号与内边距。 */
+private const val TEXT_PIN_TEXT_SIZE_SP = 15f
+private const val TEXT_PIN_CONTENT_PADDING_DP = 12f
+private const val TEXT_PIN_SIZE_EPSILON_DP = 2f
 private const val RICH_PIN_MAX_HEIGHT_FRACTION = 0.5f
 private const val RICH_PIN_IMAGE_MAX_HEIGHT_DP = 220f
 private const val PIN_CONTROL_ALPHA_MIN = 0.1f
@@ -193,6 +204,53 @@ private class PinInstance(
     var offsetX: Int,
     var offsetY: Int
 )
+
+/**
+ * 钉文字面板：按内容实际占用测量面板尺寸。
+ *
+ * 与 [ScreenPinContent] 的文本渲染（15sp 字号、12dp 内边距）保持同一口径：
+ * 短文本收紧到刚好放得下，长文本在 [TEXT_PIN_MAX_WIDTH_FRACTION] ×
+ * [TEXT_PIN_MAX_HEIGHT_FRACTION] 的范围内换行，超出部分仍由面板内部滚动承载。
+ *
+ * @return 面板内容区宽高（含内边距），单位为像素。
+ */
+internal fun measureTextPinSizePx(
+    text: String,
+    screenWidthPx: Int,
+    screenHeightPx: Int,
+    density: Float,
+    scaledDensity: Float,
+): Pair<Int, Int> {
+    val paddingPx = (TEXT_PIN_CONTENT_PADDING_DP * density).roundToInt().coerceAtLeast(0)
+    val maxContentW = (screenWidthPx * TEXT_PIN_MAX_WIDTH_FRACTION).roundToInt()
+        .minus(paddingPx * 2)
+        .coerceAtLeast(1)
+    val maxContentH = (screenHeightPx * TEXT_PIN_MAX_HEIGHT_FRACTION).roundToInt()
+        .minus(paddingPx * 2)
+        .coerceAtLeast(1)
+    val minContentW = (TEXT_PIN_MIN_WIDTH_DP * density).roundToInt().coerceAtLeast(1)
+    val minContentH = (TEXT_PIN_MIN_HEIGHT_DP * density).roundToInt().coerceAtLeast(1)
+    val epsilonPx = (TEXT_PIN_SIZE_EPSILON_DP * density).roundToInt().coerceAtLeast(0)
+
+    val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = TEXT_PIN_TEXT_SIZE_SP * scaledDensity
+    }
+    // 先在最大宽度下排版：宽约束越大行数越少，取其中最长行作为自然宽度，
+    // 再以该宽度收窄面板不会引入额外换行。
+    val layout = StaticLayout.Builder
+        .obtain(text, 0, text.length, paint, maxContentW)
+        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+        .setIncludePad(false)
+        .build()
+    var widestLine = 0f
+    for (line in 0 until layout.lineCount) {
+        widestLine = maxOf(widestLine, layout.getLineWidth(line))
+    }
+
+    val contentW = (widestLine.roundToInt() + epsilonPx).coerceIn(minContentW, maxContentW)
+    val contentH = (layout.height + epsilonPx).coerceIn(minContentH, maxContentH)
+    return (contentW + paddingPx * 2) to (contentH + paddingPx * 2)
+}
 
 private class DropOverlayState {
     var deleteBounds: Rect = Rect()
@@ -453,11 +511,20 @@ object ScreenPinManager {
                 }
             }
             is PinContent.Text -> {
-                val defaultW = (metrics.widthPixels * TEXT_PIN_MAX_WIDTH_FRACTION).roundToInt().coerceAtLeast(1)
-                val defaultH = (240 * metrics.density).roundToInt().coerceAtLeast(1)
-                val w = placement?.expandedWidthPx?.takeIf { it > 0 } ?: defaultW
-                val h = placement?.expandedHeightPx?.takeIf { it > 0 } ?: defaultH
-                w to h
+                // 恢复路径（通知栏/暂存）带显式尺寸时保留用户尺寸，否则按文字内容自适应。
+                val explicitW = placement?.expandedWidthPx?.takeIf { it > 0 }
+                val explicitH = placement?.expandedHeightPx?.takeIf { it > 0 }
+                if (explicitW != null && explicitH != null) {
+                    explicitW to explicitH
+                } else {
+                    measureTextPinSizePx(
+                        text = content.body,
+                        screenWidthPx = metrics.widthPixels,
+                        screenHeightPx = metrics.heightPixels,
+                        density = metrics.density,
+                        scaledDensity = metrics.density * hostContext.resources.configuration.fontScale,
+                    )
+                }
             }
             is PinContent.Rich -> {
                 val defaultW = (metrics.widthPixels * TEXT_PIN_MAX_WIDTH_FRACTION).roundToInt().coerceAtLeast(1)

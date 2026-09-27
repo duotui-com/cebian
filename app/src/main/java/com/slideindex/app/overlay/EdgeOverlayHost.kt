@@ -14,12 +14,15 @@ import com.slideindex.app.settings.AppSettings
 import android.util.Log
 import com.slideindex.app.overlay.corner.CornerGestureHost
 import com.slideindex.app.service.OverlayService
+import com.slideindex.app.service.SlideIndexAccessibilityService
 import com.slideindex.app.util.OverlaySnoozeController
 import com.slideindex.app.util.PermissionHelper
 import com.slideindex.app.util.TaskManagerUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -41,9 +44,26 @@ class EdgeOverlayHost(
     private var previewContent: LayoutPreviewContent = LayoutPreviewContent.TRIGGER_ONLY
     private var previewFocus: LayoutPreviewFocus? = null
     private var displayRotationMonitor: OverlayDisplayRotationMonitor? = null
+    private var triggerHealJob: Job? = null
+    /** 宿主被显式 stop 后不再自动重建；租约兜底拆卸不属于此列。 */
+    private var stopRequested = false
 
     fun start() {
-        if (overlayManager != null) return
+        stopRequested = false
+        startCollectorsAndLease()
+        ensureStarted()
+    }
+
+    /**
+     * 幂等创建窗口宿主。
+     *
+     * 租约兜底或"服务未连接"拆掉窗口后，下一次设置回流 / 预览入口会调到这里重建，
+     * 避免出现"窗口被拆掉但没有任何路径重挂"的半死状态（表现为触钮、悬浮球、
+     * 边角轮盘全部失灵，只能靠用户手动开关或重启恢复）。
+     */
+    private fun ensureStarted() {
+        if (stopRequested || overlayManager != null) return
+        if (!PermissionHelper.isAccessibilityServiceEnabled(context)) return
         OverlayPerformanceMonitorBinding.onOverlayShown(
             deps.settingsRepository.readSnapshot(),
             context
@@ -62,11 +82,6 @@ class EdgeOverlayHost(
         scope.launch(Dispatchers.Default) {
             deps.appRepository.loadApps()
         }
-        appsJob = scope.launch {
-            deps.appRepository.apps.collectLatest { apps ->
-                overlayManager?.syncApps(apps)
-            }
-        }
         // 启动期只做被动探测：不因为"预热"就把 Shizuku binder 抢过来。
         // 取 binder 会顺带拉起主进程，并让 :overlay 依赖主进程里的 provider ——
         // 覆盖安装后主进程启动慢被判死时，:overlay 会被系统连带杀掉（悬浮球消失）。
@@ -82,36 +97,74 @@ class EdgeOverlayHost(
         OverlaySnoozeController.onStateChanged = {
             refreshOverlaySuppression()
         }
-        settingsJob = scope.launch {
-            combine(
-                deps.settingsRepository.gestureSettings,
-                deps.settingsRepository.overlaySettings
-            ) { _, _ ->
-                deps.settingsRepository.readSnapshot()
-            }.collectLatest { settings ->
-                if (!PermissionHelper.isAccessibilityServiceEnabled(context)) {
-                    overlayManager?.destroy()
-                    floatBallController?.stop()
-                    cornerGestureHost?.stop()
-                    return@collectLatest
-                }
-                val effectiveSettings = settings
-                    .withGestureAnglesPreview()
-                    .withOverlayLayoutPreview()
-                floatBallController?.apply(effectiveSettings)
-                updatePerformanceMonitor(effectiveSettings.debugPerformanceMonitorEnabled)
-                overlayManager?.applySettings(effectiveSettings)
-                if (KeyboardTriggerImeState.imeVisible) {
-                    FloatBallOverlay.onKeyboardImeChanged()
-                }
-                if (previewActive) {
-                    overlayManager?.setPreviewMode(true, previewContent, previewFocus)
+    }
+
+    /** 一次性资源：设置/应用订阅与失联租约。窗口宿主拆掉后这些订阅仍需存活，用于触发重建。 */
+    private fun startCollectorsAndLease() {
+        if (triggerHealJob == null) {
+            // 周期自愈：触钮"设置里开着、屏幕上没有"时自己挂回来。
+            // 只发生在事件丢失/半重建之后，正常路径下是一次很便宜的判断。
+            triggerHealJob = scope.launch {
+                while (isActive) {
+                    delay(TRIGGER_HEAL_INTERVAL_MS)
+                    if (stopRequested) return@launch
+                    if (!PermissionHelper.isAccessibilityServiceEnabled(context)) continue
+                    ensureStarted()
+                    runCatching { overlayManager?.healTriggerAttachments() }
                 }
             }
         }
+        if (appsJob == null) {
+            appsJob = scope.launch {
+                deps.appRepository.apps.collectLatest { apps ->
+                    overlayManager?.syncApps(apps)
+                }
+            }
+        }
+        if (settingsJob == null) {
+            settingsJob = scope.launch {
+                combine(
+                    deps.settingsRepository.gestureSettings,
+                    deps.settingsRepository.overlaySettings
+                ) { _, _ ->
+                    deps.settingsRepository.readSnapshot()
+                }.collectLatest { settings ->
+                    if (!PermissionHelper.isAccessibilityServiceEnabled(context)) {
+                        // 服务不可用：拆掉窗口，但保留订阅，恢复后由 ensureStarted() 重建。
+                        teardownOverlayWindows()
+                        return@collectLatest
+                    }
+                    ensureStarted()
+                    val effectiveSettings = settings
+                        .withGestureAnglesPreview()
+                        .withOverlayLayoutPreview()
+                    floatBallController?.apply(effectiveSettings)
+                    updatePerformanceMonitor(effectiveSettings.debugPerformanceMonitorEnabled)
+                    overlayManager?.applySettings(effectiveSettings)
+                    if (KeyboardTriggerImeState.imeVisible) {
+                        FloatBallOverlay.onKeyboardImeChanged()
+                    }
+                    if (previewActive) {
+                        overlayManager?.setPreviewMode(true, previewContent, previewFocus)
+                    }
+                }
+            }
+        }
+        // 租约兜底：无障碍服务被系统解绑/回收时，即使 stop() 没走到，
+        // 也会由 OverlayHostLease 把这里的窗口摘掉，避免全屏直触窗留下吞触摸。
+        OverlayHostLease.register(
+            key = HOST_LEASE_KEY,
+            // 同进程内直接看服务实例：比读 Settings.Secure 更准，也不会在
+            // 覆盖安装/系统重绑的窗口期被一次性误判成"服务已死"而拆家。
+            isOwnerAlive = { SlideIndexAccessibilityService.accessibilityInstance() != null },
+            teardown = ::teardownOverlayWindows,
+        )
     }
 
     fun stop() {
+        stopRequested = true
+        triggerHealJob?.cancel()
+        triggerHealJob = null
         OverlaySnoozeController.onStateChanged = null
         OverlaySnoozeController.cancel()
         OverlayPerformanceMonitorBinding.onOverlayHidden(context)
@@ -119,14 +172,26 @@ class EdgeOverlayHost(
         settingsJob = null
         appsJob?.cancel()
         appsJob = null
-        floatBallController?.stop()
-        floatBallController = null
-        cornerGestureHost?.stop()
-        cornerGestureHost = null
-        displayRotationMonitor?.stop()
-        displayRotationMonitor = null
+        teardownOverlayWindows()
         OverlayCompose.clearWindowContextCache()
-        overlayManager?.destroy()
+        // 放在最后：万一上面的拆卸半途失败，租约超时还能兜底把残留窗口再摘一次。
+        OverlayHostLease.unregister(HOST_LEASE_KEY)
+    }
+
+    /**
+     * 幂等：把本宿主创建的所有浮层窗口摘掉。
+     *
+     * 正常拆卸由 [stop] 调用；服务失联时由 [OverlayHostLease] 兜底调用，
+     * 所以每一步都必须自己吞异常，不能因为某一步失败就漏掉后面的窗口。
+     */
+    private fun teardownOverlayWindows() {
+        runCatching { floatBallController?.stop() }
+        floatBallController = null
+        runCatching { cornerGestureHost?.stop() }
+        cornerGestureHost = null
+        runCatching { displayRotationMonitor?.stop() }
+        displayRotationMonitor = null
+        runCatching { overlayManager?.destroy() }
         overlayManager = null
         OverlayService.foregroundPackage = null
         previewActive = false
@@ -145,6 +210,11 @@ class EdgeOverlayHost(
 
     fun recoverTriggerInteraction(forceReAddChrome: Boolean = false) {
         overlayManager?.recoverTriggerInteraction(forceReAddChrome)
+    }
+
+    /** 硬复位取消所有侧边交互：熄屏/锁屏等硬边界与失联兜底使用。 */
+    fun forceRecoverInteractionState() {
+        overlayManager?.forceRecoverInteractionState()
     }
 
     fun onKeyboardImeChanged(visibilityChanged: Boolean = false) {
@@ -200,6 +270,7 @@ class EdgeOverlayHost(
     }
 
     fun setCornerZonePreviewActive(active: Boolean) {
+        ensureStarted()
         cornerGestureHost?.setZonePreviewActive(active)
     }
 
@@ -209,6 +280,7 @@ class EdgeOverlayHost(
         horizontalEdgeWidthDp: Float,
         horizontalEdgeHeightDp: Float
     ) {
+        ensureStarted()
         cornerGestureHost?.applyZonePreviewDimensions(
             verticalEdgeWidthDp,
             verticalEdgeHeightDp,
@@ -237,6 +309,8 @@ class EdgeOverlayHost(
             floatBallController?.apply(settings)
         }
         overlayManager?.onEnvironmentChanged()
+        // 环境（前台应用/熄屏/桌面）变化是触钮最容易被收掉的时机：顺手检查有没有该挂没挂的边。
+        overlayManager?.healTriggerAttachments()
     }
 
     fun recoverOverlaysIfIdle() {
@@ -291,6 +365,7 @@ class EdgeOverlayHost(
 
     fun applyOverlayLayoutPreviewSettings() {
         if (!PermissionHelper.isAccessibilityServiceEnabled(context)) return
+        ensureStarted()
         val settings = deps.settingsRepository.readSnapshot()
             .withGestureAnglesPreview()
             .withOverlayLayoutPreview()
@@ -348,5 +423,9 @@ class EdgeOverlayHost(
 
     private companion object {
         const val TAG = "EdgeOverlayHost"
+        const val HOST_LEASE_KEY = "edge-overlay-host"
+
+        /** 触钮自愈巡检间隔：足够快（用户几乎察觉不到）又足够便宜。 */
+        const val TRIGGER_HEAL_INTERVAL_MS = 12_000L
     }
 }

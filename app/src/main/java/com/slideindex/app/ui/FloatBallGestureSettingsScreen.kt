@@ -60,12 +60,15 @@ fun FloatBallGestureSettingsScreen(
 
     onSideSwipeShortPercentChange: (Float) -> Unit,
 
-    onUpSwipeShortPercentChange: (Float) -> Unit
+    onUpSwipeShortPercentChange: (Float) -> Unit,
+
+    onLongPressMsChange: (Int) -> Unit
 
 ) {
 
     val distanceSectionTitle = stringResource(R.string.float_ball_gesture_distance_section)
     val actionsSectionTitle = stringResource(R.string.float_ball_gesture_actions_section)
+    val longPressSectionTitle = stringResource(R.string.float_ball_gesture_long_press_section)
 
     SettingsScreenScaffold(
         title = stringResource(R.string.float_ball_gesture_settings_title),
@@ -128,6 +131,30 @@ fun FloatBallGestureSettingsScreen(
                     }
                 )
             }
+        )
+
+        settingsLazySmallTitle(
+            key = "section-long-press",
+            title = longPressSectionTitle
+        )
+        groupedCardItems(
+            keyPrefix = "float-ball-gesture-long-press",
+            items = listOf(
+                settingsCardScopeItem("long-press-ms") {
+                    SettingsSliderRow(
+                        title = stringResource(R.string.float_ball_gesture_long_press_ms),
+                        value = settings.floatBallLongPressMs.toFloat(),
+                        valueRange = 200f..2000f,
+                        steps = 17,
+                        enabled = true,
+                        label = stringResource(
+                            R.string.float_ball_gesture_long_press_ms_value,
+                            settings.floatBallLongPressMs
+                        ),
+                        onValueChange = { onLongPressMsChange(it.roundToInt()) }
+                    )
+                }
+            )
         )
 
         settingsLazySmallTitle(

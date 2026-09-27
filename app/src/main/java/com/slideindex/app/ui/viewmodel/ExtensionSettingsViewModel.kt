@@ -557,6 +557,10 @@ class ExtensionSettingsViewModel @Inject constructor(
         settingsRepository.setFloatBallDownSwipeShortPercent(value)
     }
 
+    fun setFloatBallLongPressMs(value: Int) = launchSettingsWrite {
+        settingsRepository.setFloatBallLongPressMs(value)
+    }
+
     fun setFloatBallSideSwipeShortPercent(value: Float) = launchSettingsWrite {
         settingsRepository.setFloatBallSideSwipeShortPercent(value)
     }

@@ -11,6 +11,13 @@ object WidgetPanelLayoutMetrics {
         val viewportHeightPx: Int,
     )
 
+    /** 一个页面在屏幕上占用的整块面板尺寸（含指示器/空态提示与上边距）。 */
+    data class PanelBox(
+        val widthPx: Int,
+        val heightPx: Int,
+        val topMarginPx: Int,
+    )
+
     fun compute(
         screenWidthPx: Int,
         page: WidgetPanelPage,
@@ -48,4 +55,43 @@ object WidgetPanelLayoutMetrics {
             viewportHeightPx = viewportHeightPx,
         )
     }
+
+    /**
+     * 面板的窗口尺寸。页面的列数/单元宽度/可见行数都可以逐页不同，
+     * 所以切页或设置变化时必须按「当前页」重算，否则内容宽于旧尺寸就会被裁掉一列。
+     */
+    fun computePanelBox(
+        screenWidthPx: Int,
+        page: WidgetPanelPage,
+        density: Float,
+        pageCount: Int,
+        panelPaddingDp: Float = DEFAULT_PANEL_PADDING_DP,
+        panelInnerPaddingDp: Float = DEFAULT_PANEL_INNER_PADDING_DP,
+        horizontalInsetDp: Float = DEFAULT_HORIZONTAL_INSET_DP,
+        indicatorHeightDp: Float = DEFAULT_INDICATOR_HEIGHT_DP,
+        hintHeightDp: Float = DEFAULT_HINT_HEIGHT_DP,
+    ): PanelBox {
+        val metrics = compute(
+            screenWidthPx = screenWidthPx,
+            page = page,
+            density = density,
+            panelPaddingDp = panelPaddingDp,
+            panelInnerPaddingDp = panelInnerPaddingDp,
+            horizontalInsetDp = horizontalInsetDp,
+        )
+        val panelPaddingPx = (panelPaddingDp * density).roundToInt() * 2
+        val indicatorHeightPx = if (pageCount > 1) (indicatorHeightDp * density).roundToInt() else 0
+        val hintHeightPx = if (page.items.isEmpty()) (hintHeightDp * density).roundToInt() else 0
+        return PanelBox(
+            widthPx = metrics.panelWidthPx,
+            heightPx = panelPaddingPx + metrics.viewportHeightPx + indicatorHeightPx + hintHeightPx,
+            topMarginPx = (page.marginTopDp * density).roundToInt(),
+        )
+    }
+
+    const val DEFAULT_PANEL_PADDING_DP = 12f
+    const val DEFAULT_PANEL_INNER_PADDING_DP = 4f
+    const val DEFAULT_HORIZONTAL_INSET_DP = 16f
+    const val DEFAULT_INDICATOR_HEIGHT_DP = 14f
+    const val DEFAULT_HINT_HEIGHT_DP = 20f
 }

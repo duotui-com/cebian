@@ -77,6 +77,7 @@ class WidgetPopupCardLayout(
     private var currentPageIndex = 0
 
     private val headerTextView: TextView
+    private val recyclerContainer: FrameLayout
     private val recyclerView: RecyclerView
     private val adapter: WidgetPageAdapter
     private val dotsLayout: LinearLayout
@@ -86,6 +87,12 @@ class WidgetPopupCardLayout(
 
     private val density = resources.displayMetrics.density
     private val cornerRadiusPx = 24f * density
+
+    /**
+     * 当前页几何变化（切页、列数/单元宽度/可见行数改动）时回调，
+     * 让浮窗按新页面重算整卡尺寸，避免内容宽于旧卡宽而被裁掉一列。
+     */
+    var onPageMetricsChanged: ((WidgetPanelPage) -> Unit)? = null
 
     init {
         outlineProvider = object : ViewOutlineProvider() {
@@ -124,7 +131,7 @@ class WidgetPopupCardLayout(
             density = density,
         )
 
-        val recyclerContainer = FrameLayout(context).apply {
+        recyclerContainer = FrameLayout(context).apply {
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(v: View, outline: Outline) {
                     outline.setRoundRect(0, 0, v.width, v.height, 12f * density)
@@ -163,6 +170,7 @@ class WidgetPopupCardLayout(
                         currentPageIndex = pos
                         updateDots()
                         updateHeader()
+                        applyPageMetrics(pages[pos])
                     }
                 }
             }
@@ -207,6 +215,22 @@ class WidgetPopupCardLayout(
 
         updateHeader()
         updateDots()
+        applyPageMetrics(pages.getOrElse(currentPageIndex) { WidgetPanelPage() })
+    }
+
+    /** 同步当前页的滚动区高度，并通知浮窗按该页重算整卡尺寸。 */
+    fun applyPageMetrics(page: WidgetPanelPage) {
+        val metrics = WidgetPanelLayoutMetrics.compute(
+            screenWidthPx = resources.displayMetrics.widthPixels,
+            page = page,
+            density = density,
+        )
+        val lp = recyclerContainer.layoutParams as? LinearLayout.LayoutParams
+        if (lp != null && lp.height != metrics.viewportHeightPx) {
+            lp.height = metrics.viewportHeightPx
+            recyclerContainer.layoutParams = lp
+        }
+        onPageMetricsChanged?.invoke(page)
     }
 
     fun applyCardBackground() {
@@ -382,6 +406,7 @@ class WidgetPopupCardLayout(
         updateDots()
         updateHeader()
         applyCardBackground()
+        applyPageMetrics(pages.getOrElse(currentPageIndex) { WidgetPanelPage() })
     }
 
     private fun persist(updated: List<WidgetPanelPage>) {
@@ -389,6 +414,7 @@ class WidgetPopupCardLayout(
         onSavePages(updated)
         updateDots()
         updateHeader()
+        applyPageMetrics(pages.getOrElse(currentPageIndex) { WidgetPanelPage() })
     }
 
     private fun launchWidgetPicker(pageIndex: Int) {

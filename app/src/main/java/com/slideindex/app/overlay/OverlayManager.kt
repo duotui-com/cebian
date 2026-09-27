@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
+import android.util.Log
 import com.slideindex.app.data.AppRepository
 import com.slideindex.app.launcher.QuickLauncherItem
 import com.slideindex.app.settings.AppSettings
@@ -14,6 +15,7 @@ import com.slideindex.app.overlay.compositor.OverlayScene
 import com.slideindex.app.overlay.compositor.OverlaySceneController
 import com.slideindex.app.util.TaskManagerUtil
 import com.slideindex.app.util.TriggerVisibility
+import com.slideindex.app.service.OverlayService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -128,6 +130,65 @@ class OverlayManager(
         rightController?.forceCollapseIfIdle()
         bottomController?.forceCollapseIfIdle()
         topController?.forceCollapseIfIdle()
+    }
+
+    /**
+     * 自愈：设置要求有触钮、当前也没被抑制，但某一边一个窗口都没挂上时，重新挂。
+     *
+     * 为什么需要它：触钮的挂载只发生在 `refreshTriggerVisibilityNow()` 里
+     * `triggersShown` 由 false 变 true 的那一次；一旦那次被跳过（trampoline 守卫、
+     * 进程被 lmk 杀掉后的半重建、事件丢失），`triggersShown` 会一直停在某个不一致的值上，
+     * 于是悬浮球/角轮盘都出来了、触钮却永远不出现，只能靠用户手动开关恢复。
+     *
+     * 由周期巡检、环境变化与预览入口调用；只有真的重挂了才返回 true。
+     */
+    fun healTriggerAttachments(
+        metrics: ScreenMetricsSnapshot = OverlayScreenMetrics.snapshot(context)
+    ): Boolean {
+        if (!currentSettings.serviceEnabled) return false
+        if (OverlayTrampolineGuard.blocksOverlayPresentationTouch()) return false
+        if (shouldSuppressTrigger()) return false
+
+        val sides = listOf(
+            PanelSide.LEFT to leftController,
+            PanelSide.RIGHT to rightController,
+            PanelSide.BOTTOM to bottomController,
+            PanelSide.TOP to topController,
+        )
+        val missing = sides.filter { (side, controller) ->
+            controller != null &&
+                currentSettings.runtimeTriggerHandles(side, metrics.isLandscape).isNotEmpty() &&
+                !controller.hasTriggerAttachments()
+        }
+        if (missing.isEmpty()) return false
+
+        Log.w(
+            TAG,
+            "触钮缺失，自愈重挂: ${missing.map { it.first }} " +
+                "(serviceEnabled=${currentSettings.serviceEnabled}, " +
+                "triggersShown=$triggersShown, " +
+                "triggersSuppressed=$triggersSuppressed, " +
+                "foreground=${OverlayService.foregroundPackage})",
+        )
+        triggersSuppressed = false
+        triggersShown = true
+        ensureSideEdgesForHandles(currentSettings, metrics)
+        updateForwardingCapability()
+        refreshTriggerVisibility()
+        return true
+    }
+
+    /**
+     * 硬复位所有侧边交互状态（是否 idle 都不管）。
+     *
+     * 熄屏/锁屏等硬边界调用：正常收尾依赖 UP/CANCEL，丢事件后
+     * 全屏直触的 presentation 会一直吞触摸，必须无条件收回。
+     */
+    fun forceRecoverInteractionState() {
+        leftController?.forceResetInteraction()
+        rightController?.forceResetInteraction()
+        bottomController?.forceResetInteraction()
+        topController?.forceResetInteraction()
     }
 
     /** 路由输入层接管转发的触摸事件；返回 false 表示当前没有可处理该边的 overlay。 */
@@ -256,6 +317,11 @@ class OverlayManager(
             return
         }
         if (OverlayTrampolineGuard.blocksOverlayPresentationTouch()) {
+            // 这里跳过挂载时若触钮还没挂上，必须留痕：否则"设置开着、屏幕上没有"
+            // 会一直查不出是谁跳过的（历史故障就是这么来的）。
+            if (!triggersShown) {
+                Log.w(TAG, "触钮挂载被 trampoline 守卫跳过（triggersShown=false），等待自愈或环境变化重试")
+            }
             forwardingSideMask = 0
             return
         }
@@ -345,6 +411,8 @@ class OverlayManager(
         recoverOverlaysIfIdle()
         resumeEdgeCapturesAfterPassthrough()
         val metrics = OverlayScreenMetrics.snapshot(context)
+        // 先自愈"该有却没挂上"的边，再做 layout/chrome 收尾。
+        healTriggerAttachments(metrics)
         ensureSideEdgesForHandles(currentSettings, metrics)
         bringEdgeChromeAbovePanels(forceReAdd = forceReAddChrome)
     }
@@ -556,6 +624,7 @@ class OverlayManager(
 
     private companion object {
         private const val REFRESH_VISIBILITY_DEBOUNCE_MS = 150L
+        private const val TAG = "OverlayManager"
     }
 
     private fun performClickPassthrough(rawX: Float, rawY: Float, onComplete: () -> Unit) {

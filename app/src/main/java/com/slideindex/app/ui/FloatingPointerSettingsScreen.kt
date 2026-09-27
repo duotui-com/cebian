@@ -31,6 +31,9 @@ fun FloatingPointerSettingsScreen(
     areaPreviewEnabled: Boolean,
     previewAccessibilityGranted: Boolean,
     onAreaPreviewEnabledChange: (Boolean) -> Unit,
+    onSensitivityPreviewStart: () -> Unit = {},
+    onSensitivityPreviewChange: (Float) -> Unit = {},
+    onSensitivityPreviewStop: () -> Unit = {},
     onBack: () -> Unit,
     onOpenPointerSettings: () -> Unit,
     onOpenJoystickSettings: () -> Unit,
@@ -97,6 +100,10 @@ fun FloatingPointerSettingsScreen(
                                 R.string.floating_pointer_percent_value,
                                 (settings.floatingPointerSensitivityFraction * 100).roundToInt()
                             ),
+                            triggersLayoutPreview = true,
+                            onLayoutPreviewStart = onSensitivityPreviewStart,
+                            onLayoutPreviewValueChange = onSensitivityPreviewChange,
+                            onLayoutPreviewStop = onSensitivityPreviewStop,
                             onValueChange = onPointerSensitivityChange
                         )
                     }

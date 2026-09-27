@@ -171,7 +171,7 @@ fun TriggerAppearanceSettingsScreen(
                                 stringResource(R.string.handle_length)
                             },
                             values = selectedHandle.topFraction..selectedHandle.bottomFraction,
-                            valueRange = 0.05f..0.95f,
+                            valueRange = 0f..1f,
                             startLabel = if (side.isVerticalEdge) {
                                 stringResource(R.string.handle_span_horizontal_start)
                             } else {

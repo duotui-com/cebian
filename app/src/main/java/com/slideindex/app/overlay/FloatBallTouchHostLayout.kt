@@ -10,6 +10,9 @@ import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.settings.FloatBallSide
 import kotlin.math.roundToInt
 
+/** 取词手势"按住才成立"状态最长允许无输入事件的时间，超过即判定 UP/CANCEL 丢失。 */
+private const val CAPTURE_IDLE_TIMEOUT_MS = 10_000L
+
 /**
  * 球体触摸窗：空闲时 WM 层仅为球区；滑出 slop 进入取词后由 [FloatBallOverlay] 扩全屏跟手，手势锁到 UP/CANCEL。
  */
@@ -26,7 +29,19 @@ internal class FloatBallTouchHostLayout(
 
     var ballStripTouchable: Boolean = true
 
+    /** 手势卡死（UP/CANCEL 丢失）时回调，由 [FloatBallOverlay] 收回全屏触摸窗。 */
+    var onCaptureStalled: (() -> Unit)? = null
+
     private var gestureCaptureActive = false
+
+    private val captureWatchdog = StuckGestureWatchdog(
+        timeoutMs = CAPTURE_IDLE_TIMEOUT_MS,
+        isHolding = { gestureCaptureActive || ballDetector.isLauncherCaptureMode() },
+        onStall = {
+            forceEndGestureCapture()
+            onCaptureStalled?.invoke()
+        }
+    )
 
     private var onBallDragStart: ((touchDownX: Float, touchDownY: Float, fingerX: Float, fingerY: Float) -> Unit)? = null
     private var onBallDrag: ((fingerX: Float, fingerY: Float) -> Unit)? = null
@@ -128,6 +143,7 @@ internal class FloatBallTouchHostLayout(
 
     fun endGestureCapture() {
         gestureCaptureActive = false
+        captureWatchdog.onStateChanged()
     }
 
     fun forceEndGestureCapture() {
@@ -183,6 +199,7 @@ internal class FloatBallTouchHostLayout(
     fun beginLauncherCaptureMode() {
         gestureCaptureActive = true
         ballDetector.enterLauncherCaptureMode()
+        captureWatchdog.onStateChanged()
     }
 
     fun isLauncherCaptureMode(): Boolean = ballDetector.isLauncherCaptureMode()
@@ -214,7 +231,7 @@ internal class FloatBallTouchHostLayout(
                 else -> return false
             }
         }
-        return super.dispatchTouchEvent(event)
+        return super.dispatchTouchEvent(event).also { captureWatchdog.onInput() }
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
@@ -247,6 +264,10 @@ internal class FloatBallTouchHostLayout(
         return ballDetector.onTouchEvent(event)
     }
 
+    fun handleForwardedTouch(event: MotionEvent): Boolean {
+        return dispatchForwardedTouch(event).also { captureWatchdog.onInput() }
+    }
+
     /**
      * 输入层接管（system_server 模块）转发来的球体触摸。
      *
@@ -254,7 +275,7 @@ internal class FloatBallTouchHostLayout(
      * 这里仍按同一份 `hitTestBall` 再验一次，避免几何在两次判定之间变化时出现"空处起手势"。
      * 未命中即返回 false，调用方丢弃该事件（最坏只丢一次触摸，不产生残留状态）。
      */
-    fun handleForwardedTouch(event: MotionEvent): Boolean {
+    private fun dispatchForwardedTouch(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 if (!hitTestBall(event.rawX, event.rawY)) return false

@@ -10,7 +10,15 @@ data class GestureAngles(
     val right: GestureAngle = GestureAngle.DEFAULT_LEFT,
     val bottom: GestureAngle = GestureAngle.DEFAULT_BOTTOM,
     val top: GestureAngle = GestureAngle.DEFAULT_TOP,
-)
+) {
+    /** 左右下上各 4 个点，共 16 个 float；跨进程预览传参用。 */
+    fun toFloatArray(): FloatArray = floatArrayOf(
+        left.p1, left.p2, left.p3, left.p4,
+        right.p1, right.p2, right.p3, right.p4,
+        bottom.p1, bottom.p2, bottom.p3, bottom.p4,
+        top.p1, top.p2, top.p3, top.p4,
+    )
+}
 
 data class GestureAngle(
     val p1: Float = DEFAULT_P1,

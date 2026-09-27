@@ -485,6 +485,8 @@ internal object SettingsSnapshotReader {
             floatBallPointerSlopDp = prefs[SettingsPreferenceKeys.FLOAT_BALL_POINTER_SLOP_DP] ?: 4f,
             floatBallHoverPauseDelayMs =
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_HOVER_PAUSE_DELAY_MS]?.coerceIn(200, 1000) ?: 400,
+            floatBallLongPressMs =
+                prefs[SettingsPreferenceKeys.FLOAT_BALL_LONG_PRESS_MS]?.coerceIn(200, 2000) ?: 500,
             floatBallRegionalCancelSlopDp =
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_REGIONAL_CANCEL_SLOP_DP]?.coerceIn(3f, 30f) ?: 16f,
             floatBallDownSwipeShortPercent =

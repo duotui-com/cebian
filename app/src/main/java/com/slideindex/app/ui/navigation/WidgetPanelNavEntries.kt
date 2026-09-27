@@ -11,6 +11,7 @@ fun NavEntryBuilder.widgetPanelNavEntries(ctx: MainNavContext) {
         WidgetPanelSettingsScreen(
             viewModel = viewModel,
             onBack = { ctx.navigateBackTo(AppNavKey.ExtensionHub) },
+            onPreviewWidget = { ctx.showWidgetPanelPreview() },
         )
     }
 }

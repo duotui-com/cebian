@@ -836,6 +836,10 @@
     <string name="float_ball_gesture_down_swipe_distance">Down swipe short distance (screen height %)</string>
     <string name="float_ball_gesture_side_swipe_distance">Side swipe short distance (screen width %)</string>
     <string name="float_ball_gesture_up_swipe_distance">Up swipe short distance (screen height %)</string>
+    <string name="float_ball_gesture_long_press_section">Long press</string>
+    <string name="preview_unavailable_hint">Preview unavailable: make sure the SlideIndex accessibility service is enabled</string>
+    <string name="float_ball_gesture_long_press_ms">Long-press duration</string>
+    <string name="float_ball_gesture_long_press_ms_value">%1$d ms</string>
     <string name="float_ball_gesture_swipe_up_short">Swipe up (short)</string>
     <string name="float_ball_gesture_swipe_up_long">Swipe up (long)</string>
     <string name="float_ball_gesture_swipe_up_return">Swipe up to return</string>
@@ -2472,6 +2476,9 @@
     <string name="widget_panel_edit_mode">Edit mode</string>
     <string name="widget_panel_edit_hint">Long-press empty space to edit</string>
     <string name="widget_loading">Loading…</string>
+    <string name="widget_preview_hint">Widgets are shown in the panel</string>
+    <string name="widget_panel_preview_title">Preview in panel</string>
+    <string name="widget_panel_preview_desc">Open the widget panel on screen to see the real thing</string>
     <string name="shell_panel_entry_title">Shell command panel</string>
     <string name="shell_panel_entry_desc">Save common shell commands for one-tap run</string>
     <string name="shell_panel_entry_desc_count">Saved commands: %1$d</string>

@@ -1,0 +1,121 @@
+package com.slideindex.app.overlay
+
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import android.util.Log
+
+/**
+ * 浮层宿主的进程级租约兜底。
+ *
+ * 无障碍服务和它创建的浮层窗口都跑在 `:overlay` 进程里。一旦系统把无障碍服务解绑/回收，
+ * 而拆卸流程没有走完（回调里抛异常、连接被直接丢弃等），窗口会继续留在 WindowManager 里：
+ * 其中 presentation 是**全屏可触摸**的，会一直吞掉整屏的按下与滑动，表现就是
+ * "整台手机点不动、滑不动"，而服务已经没了，没有任何代码路径能把它救回来。
+ *
+ * 这里做两层兜底：
+ * 1. 无障碍服务存活期间定时 [renew] 续租，守护循环发现租约过期即判定"服务已经不在了"；
+ * 2. 各浮层宿主启动时 [register] 一个幂等的拆卸句柄，租约过期时由守护循环
+ *    在本进程主线程执行，把残留窗口摘干净。
+ *
+ * 守护循环和续租都在主线程空闲时才可能超时：主线程被卡住时两者一起停摆，
+ * 不会出现"误判服务已死"的自我拆台。
+ */
+object OverlayHostLease {
+    private const val TAG = "OverlayHostLease"
+
+    /** 租约超时：连续这么久没有续租就认为宿主服务已经不在。 */
+    private const val LEASE_TIMEOUT_MS = 6_000L
+    private const val CHECK_INTERVAL_MS = 2_000L
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private class Registration(
+        val isOwnerAlive: () -> Boolean,
+        val teardown: () -> Unit
+    )
+
+    private val registrations = LinkedHashMap<String, Registration>()
+
+    @Volatile
+    private var lastRenewMs = 0L
+
+    private var watchdogScheduled = false
+
+    private val watchdog = Runnable {
+        watchdogScheduled = false
+        if (registrations.isEmpty()) return@Runnable
+        val idleMs = SystemClock.uptimeMillis() - lastRenewMs
+        val leaseExpired = lastRenewMs > 0L && idleMs > LEASE_TIMEOUT_MS
+        val ownerAlive = registrations.values.any { registration ->
+            runCatching { registration.isOwnerAlive() }.getOrDefault(true)
+        }
+        if (!ownerAlive || leaseExpired) {
+            val pending = registrations.values.map { it.teardown }
+            registrations.clear()
+            Log.w(
+                TAG,
+                "浮层宿主失联（无障碍服务 enabled=$ownerAlive，心跳 ${idleMs}ms），" +
+                    "强制拆卸 ${pending.size} 个宿主"
+            )
+            pending.forEach { teardown ->
+                runCatching { teardown() }
+                    .onFailure { Log.e(TAG, "租约超时拆卸失败", it) }
+            }
+            return@Runnable
+        }
+        scheduleWatchdog()
+    }
+
+    /** 无障碍服务存活期间调用（主线程，每 2s 一次），刷新租约。 */
+    fun renew() {
+        lastRenewMs = SystemClock.uptimeMillis()
+    }
+
+    /**
+     * 登记一个浮层宿主。同一 [key] 重复登记会覆盖旧的。
+     *
+     * [isOwnerAlive] 每 2s 复核一次宿主服务是否还在（例如读无障碍服务开关），
+     * 返回 false 时立刻拆卸，不再等租约超时；[teardown] 必须是幂等的。
+     *
+     * 宿主正常 [unregister] 后守护循环自动停止。
+     */
+    fun register(key: String, isOwnerAlive: () -> Boolean, teardown: () -> Unit) {
+        mainHandler.post {
+            registrations[key] = Registration(isOwnerAlive, teardown)
+            renew()
+            scheduleWatchdog()
+        }
+    }
+
+    fun unregister(key: String) {
+        mainHandler.post {
+            registrations.remove(key)
+            if (registrations.isEmpty()) {
+                watchdogScheduled = false
+                mainHandler.removeCallbacks(watchdog)
+            }
+        }
+    }
+
+    /** 仅测试使用：清空状态。 */
+    internal fun resetForTest() {
+        mainHandler.removeCallbacks(watchdog)
+        registrations.clear()
+        watchdogScheduled = false
+        lastRenewMs = 0L
+    }
+
+    /** 仅测试使用：手动触发一次守护检查。 */
+    internal fun runWatchdogNowForTest() {
+        mainHandler.removeCallbacks(watchdog)
+        watchdogScheduled = false
+        watchdog.run()
+    }
+
+    private fun scheduleWatchdog() {
+        if (watchdogScheduled) return
+        watchdogScheduled = true
+        mainHandler.postDelayed(watchdog, CHECK_INTERVAL_MS)
+    }
+}

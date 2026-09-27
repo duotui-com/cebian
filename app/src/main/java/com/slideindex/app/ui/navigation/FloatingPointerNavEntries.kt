@@ -38,6 +38,16 @@ fun NavEntryBuilder.floatingPointerNavEntries(ctx: MainNavContext) {
             areaPreviewEnabled = areaPreviewEnabled,
             previewAccessibilityGranted = permissions.accessibilityGranted,
             onAreaPreviewEnabledChange = { ctx.setFloatingPointerAreaPreviewEnabled(it) },
+            // 行程范围预览开启时，拖动灵敏度滑条实时反映到浮层上。
+            onSensitivityPreviewStart = {
+                if (areaPreviewEnabled) ctx.previewFloatingPointerAreaSensitivityStart()
+            },
+            onSensitivityPreviewChange = { value ->
+                if (areaPreviewEnabled) ctx.previewFloatingPointerAreaSensitivity(value)
+            },
+            onSensitivityPreviewStop = {
+                if (areaPreviewEnabled) ctx.previewFloatingPointerAreaSensitivityEnd()
+            },
             onBack = { ctx.backStack.removeLastOrNull() },
             onOpenPointerSettings = { ctx.navigate(AppNavKey.FloatingPointerPointer) },
             onOpenJoystickSettings = { ctx.navigate(AppNavKey.FloatingPointerJoystick) },

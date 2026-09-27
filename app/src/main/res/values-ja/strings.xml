@@ -1656,6 +1656,10 @@
     <string name="float_ball_gesture_down_swipe_distance">下スワイプ短距離（画面高さ %）</string>
     <string name="float_ball_gesture_side_swipe_distance">横スワイプ短距離（画面幅 %）</string>
     <string name="float_ball_gesture_up_swipe_distance">上スワイプ短距離（画面高さ %）</string>
+    <string name="float_ball_gesture_long_press_section">長押し</string>
+    <string name="preview_unavailable_hint">プレビューを利用できません：アクセシビリティサービスが有効か確認してください</string>
+    <string name="float_ball_gesture_long_press_ms">長押し時間</string>
+    <string name="float_ball_gesture_long_press_ms_value">%1$d ms</string>
     <string name="float_ball_gesture_swipe_up_short">上スワイプ（短）</string>
     <string name="float_ball_gesture_swipe_up_long">上スワイプ（長）</string>
     <string name="float_ball_gesture_swipe_up_return">上スワイプで戻る</string>
@@ -2213,6 +2217,9 @@
     <string name="widget_panel_edit_mode">編集モード</string>
     <string name="widget_panel_edit_hint">空白部分を長押しして編集</string>
     <string name="widget_loading">読み込み中…</string>
+    <string name="widget_preview_hint">ウィジェットはパネルに表示されます</string>
+    <string name="widget_panel_preview_title">パネルでプレビュー</string>
+    <string name="widget_panel_preview_desc">画面上にウィジェットパネルを表示して実物を確認</string>
     <string name="shell_panel_title">シェルコマンドパネル</string>
     <string name="shell_panel_entry_title">シェルコマンドパネル</string>
     <string name="shell_panel_entry_desc">よく使うシェルコマンドを保存してワンタップ実行</string>
