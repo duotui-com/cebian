@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application>
+        <!--
+          ML Kit 的自动初始化只有一个 ContentProvider（库里的 MlKitInitProvider），而 ContentProvider
+          只在"它被分配到的进程"里创建：库自带声明没有 android:process，所以只有主进程会初始化。
+          ML Kit 中文模型的下载（OcrModelDownloadService）、识别（EngineOcrService）、翻译模型都跑在
+          :engine，那边 MlKitContext 恒为空，调用即抛 "MlKitContext has not been initialized"。
+          这里为 :engine 注册一个自己的初始化 Provider（类名/authority 都与库自带的不同，避免合并成一条）。
+        -->
+        <provider
+            android:name="com.slideindex.app.ocr.MlKitEngineProcessInitProvider"
+            android:authorities="${applicationId}.mlkitinitprovider.engine"
+            android:exported="false"
+            android:initOrder="99"
+            android:process=":engine" />
+    </application>
 </manifest>
