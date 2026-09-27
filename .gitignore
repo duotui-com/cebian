@@ -52,6 +52,9 @@ _lsposed_log/
 androguard.db
 androguard.db-*
 build_java_*.txt
+# 本地临时调试脚本（根目录 scratch，不入库）
+/check2_tmp.py
+/*_tmp.py
 
 # --- Lint 临时报告 ---
 .lint-report-extract/
