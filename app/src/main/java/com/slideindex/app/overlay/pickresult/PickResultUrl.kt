@@ -6,14 +6,38 @@ internal sealed class PickResultOpenLinkAction {
 }
 
 internal object PickResultUrl {
-    private val httpUrlRegex = Regex("""https?://[^\s<>"')\]}]+""", RegexOption.IGNORE_CASE)
-    private val wwwUrlRegex = Regex("""(?:^|[\s(\[{<"'])((?:www\.)[^\s<>"')\]}]+)""", RegexOption.IGNORE_CASE)
+    /**
+     * 不允许出现在网址内部的字符。
+     *
+     * 除 ASCII 空白与常见定界符外，还必须排除中文标点、全角符号和 CJK 文字：中文排版里
+     * 链接之间往往没有空格（「油管：https://t.co/a，微博：https://t.co/b」），只按空白切分
+     * 会把整段吞成一条超长网址，于是只看得到第一条链接。
+     */
+    private const val URL_STOP_CHARS =
+        "\\s<>\"')\\]},;" +
+            "\u2010-\u2027\u2030-\u205E" + // 通用标点：— – … “ ” 等
+            "\u3000-\u303F\u3040-\u30FF" + // CJK 标点与假名
+            "\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF" + // 汉字
+            "\uFE10-\uFE6F\uFF00-\uFFEF" + // 竖排标点与全角字符
+            "\uFFFD" // 替换字符，乱码文本里常见
+
+    /** 网址起始处的前一个字符不能是同类字符，避免从更长的 token 中间截出网址。 */
+    private const val URL_START_BOUNDARY = """(?<![\w.@/-])"""
+
+    private val anyUrlStopCharRegex = Regex("[$URL_STOP_CHARS]")
+    private val urlBody = "[^$URL_STOP_CHARS]"
+
+    private val httpUrlRegex = Regex("https?://$urlBody+", RegexOption.IGNORE_CASE)
+    private val wwwUrlRegex = Regex(
+        "$URL_START_BOUNDARY((?:www\\.)$urlBody+)",
+        RegexOption.IGNORE_CASE,
+    )
     private val schemeUrlRegex = Regex(
-        """(?:^|[\s(\[{<"'])((?:[a-z][a-z0-9+.-]*://)[^\s<>"')\]}]+)""",
+        "$URL_START_BOUNDARY((?:[a-z][a-z0-9+.-]*://)$urlBody+)",
         RegexOption.IGNORE_CASE,
     )
     private val systemUriRegex = Regex(
-        """(?:^|[\s(\[{<"'])((?:tel|mailto|sms|geo):[^\s<>"')\]}]+)""",
+        "$URL_START_BOUNDARY((?:tel|mailto|sms|geo):$urlBody+)",
         RegexOption.IGNORE_CASE,
     )
     private val bareHostRegex = Regex(
@@ -31,12 +55,9 @@ internal object PickResultUrl {
         activeText: String,
         hasSelection: Boolean,
     ): PickResultOpenLinkAction? {
-        if (hasSelection) {
-            return normalizeOpenableUrl(activeText)?.let { PickResultOpenLinkAction.Open(it) }
-        }
-        val trimmedFull = fullText.trim()
-        normalizeOpenableUrl(trimmedFull)?.let { return PickResultOpenLinkAction.Open(it) }
-        val urls = extractOpenableUrls(fullText)
+        val target = if (hasSelection) activeText else fullText
+        normalizeOpenableUrl(target.trim())?.let { return PickResultOpenLinkAction.Open(it) }
+        val urls = extractOpenableUrls(target)
         return when {
             urls.isEmpty() -> null
             urls.size == 1 -> PickResultOpenLinkAction.Open(urls.single())
@@ -89,12 +110,45 @@ internal object PickResultUrl {
         }
     }
 
+    /**
+     * 同域名多条链接（例如三条 t.co 短链）只显示 host 会看起来像同一条，
+     * 这里补上路径片段，例如 t.co/WfO3vZ0ygY。
+     */
+    fun linkCompactLabel(uri: String): String {
+        val normalized = normalizeOpenableUrl(uri) ?: uri.trim()
+        val host = linkDisplayLabel(normalized)
+        val segment = normalized
+            .substringAfter("://", missingDelimiterValue = "")
+            .substringAfter('/', missingDelimiterValue = "")
+            .substringBefore('/')
+            .substringBefore('?')
+            .substringBefore('#')
+        if (segment.isBlank()) return host
+        val short = if (segment.length > 12) segment.take(12) + "…" else segment
+        return "$host/$short"
+    }
+
+    /** 批量取显示标签，遇到重复 host 时才带上路径片段做区分。 */
+    fun linkDisplayLabels(uris: List<String>): List<String> {
+        val hosts = uris.map(::linkDisplayLabel)
+        val duplicatedHosts = hosts
+            .groupingBy { it.lowercase() }
+            .eachCount()
+            .filterValues { it > 1 }
+            .keys
+        return uris.mapIndexed { index, uri ->
+            if (hosts[index].lowercase() in duplicatedHosts) linkCompactLabel(uri) else hosts[index]
+        }
+    }
+
     fun isIntentUri(uri: String): Boolean =
         uri.startsWith("intent://", ignoreCase = true) || uri.startsWith("intent:", ignoreCase = true)
 
     fun normalizeOpenableUrl(raw: String): String? {
         val candidate = trimTrailingPunctuation(raw.trim())
         if (candidate.isBlank()) return null
+        // 含空白、中文标点或 CJK 文字的串不可能是一条网址，多半是整段文本
+        if (anyUrlStopCharRegex.containsMatchIn(candidate)) return null
         if (isBlockedScheme(candidate)) return null
         return when {
             isIntentUri(candidate) -> candidate

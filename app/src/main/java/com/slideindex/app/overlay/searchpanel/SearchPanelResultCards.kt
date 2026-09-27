@@ -181,8 +181,9 @@ fun SearchPanelLinkResultCards(
         scrollWhenExpanded = urls.size > 4,
         maxHeight = ExpandedCardMaxHeight,
     ) {
+        val hosts = remember(urls) { PickResultUrl.linkDisplayLabels(urls) }
         urls.forEachIndexed { index, url ->
-            val host = remember(url) { PickResultUrl.linkDisplayLabel(url) }
+            val host = hosts[index]
             SearchPanelResultCard(
                 title = stringResource(R.string.search_panel_open_link_host, host),
                 subtitle = url,

@@ -189,8 +189,9 @@ fun SearchPanelLinkCandidates(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        urls.forEach { url ->
-            val host = remember(url) { PickResultUrl.linkDisplayLabel(url) }
+        val hosts = remember(urls) { PickResultUrl.linkDisplayLabels(urls) }
+        urls.forEachIndexed { index, url ->
+            val host = hosts[index]
             val label = stringResource(R.string.search_panel_open_link_host, host)
             SearchPanelCandidateChip(
                 label = label,

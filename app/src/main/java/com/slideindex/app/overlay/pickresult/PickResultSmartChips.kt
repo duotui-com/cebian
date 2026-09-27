@@ -55,7 +55,7 @@ internal fun PickResultSmartChipsRow(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(entities, key = { it.label }) { entity ->
+            items(entities, key = { it.entityKey }) { entity ->
                 PickResultSmartChipItem(
                     entity = entity,
                     isDark = isDark,

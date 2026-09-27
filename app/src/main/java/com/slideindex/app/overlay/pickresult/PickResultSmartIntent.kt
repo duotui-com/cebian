@@ -15,6 +15,8 @@ import com.slideindex.app.R
 
 internal sealed class PickResultSmartEntity {
     abstract val label: String
+    /** 去重与 Compose key 用的稳定标识，默认与展示标签一致。 */
+    open val entityKey: String get() = label
     abstract val actionPrefixResId: Int
     abstract val icon: ImageVector
     abstract fun execute(context: Context, onCopyText: (String) -> Unit)
@@ -26,6 +28,7 @@ internal sealed class PickResultSmartEntity {
         override val icon: ImageVector get() = Icons.Outlined.Language
         override val actionPrefixResId: Int get() = R.string.float_ball_pick_smart_open_url
         override val label: String get() = host
+        override val entityKey: String get() = url
         override fun execute(context: Context, onCopyText: (String) -> Unit) {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
@@ -175,12 +178,14 @@ internal object PickResultSmartParser {
         }
 
         // 5. 网页 URL
-        val urls = PickResultUrl.extractOpenableUrls(text)
-        urls.take(2).forEach { url ->
-            val label = PickResultUrl.linkDisplayLabel(url)
-            entities.add(PickResultSmartEntity.UrlEntity(url = url, host = label))
+        val urls = PickResultUrl.extractOpenableUrls(text).take(MAX_URL_ENTITIES)
+        val labels = PickResultUrl.linkDisplayLabels(urls)
+        urls.forEachIndexed { index, url ->
+            entities.add(PickResultSmartEntity.UrlEntity(url = url, host = labels[index]))
         }
 
-        return entities.distinctBy { it.label }
+        return entities.distinctBy { it.entityKey }
     }
+
+    private const val MAX_URL_ENTITIES = 5
 }

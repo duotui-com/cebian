@@ -137,4 +137,114 @@ class PickResultUrlTest {
     fun linkDisplayLabel_tel() {
         assertEquals("10086", PickResultUrl.linkDisplayLabel("tel:10086"))
     }
+
+    @Test
+    fun extract_urlsSeparatedByChinesePunctuation() {
+        val text = "调查记者，主持人。油管频道地址：https://t.co/WfO3vZ0ygY?amp=1，" +
+            "Facebook地址：https://t.co/QO4mprdzUL，TikTok地址：https://t.co/chl5sh7Cfa"
+
+        assertEquals(
+            listOf(
+                "https://t.co/WfO3vZ0ygY?amp=1",
+                "https://t.co/QO4mprdzUL",
+                "https://t.co/chl5sh7Cfa",
+            ),
+            PickResultUrl.extractOpenableUrls(text),
+        )
+    }
+
+    @Test
+    fun extract_urlsSeparatedByAsciiComma() {
+        assertEquals(
+            listOf("https://a.com/x", "https://b.com/y"),
+            PickResultUrl.extractOpenableUrls("https://a.com/x,https://b.com/y"),
+        )
+    }
+
+    @Test
+    fun extract_urlStopsAtChineseText() {
+        assertEquals(
+            listOf("https://a.com/path"),
+            PickResultUrl.extractOpenableUrls("官网https://a.com/path然后是微博"),
+        )
+    }
+
+    @Test
+    fun extract_urlStopsAtTrailingChinesePunctuation() {
+        assertEquals(
+            listOf("https://a.com"),
+            PickResultUrl.extractOpenableUrls("链接：https://a.com。"),
+        )
+    }
+
+    @Test
+    fun extract_wwwHostAfterChinesePunctuation() {
+        assertEquals(
+            listOf("https://www.b.com/x"),
+            PickResultUrl.extractOpenableUrls("地址：www.b.com/x，还有别的"),
+        )
+    }
+
+    @Test
+    fun extract_keepsHostPort() {
+        assertEquals(
+            listOf("https://a.com:8080/x"),
+            PickResultUrl.extractOpenableUrls("服务：https://a.com:8080/x，谢谢"),
+        )
+    }
+
+    @Test
+    fun normalize_rejectsWholeParagraph() {
+        assertNull(
+            PickResultUrl.normalizeOpenableUrl(
+                "油管：https://t.co/WfO3vZ0ygY?amp=1，微博：https://t.co/QO4mprdzUL",
+            ),
+        )
+    }
+
+    @Test
+    fun resolve_fullTextChinesePunctuationSeparatedUrls_offersChooser() {
+        val text = "油管：https://t.co/aaa，微博：https://t.co/bbb，B站：https://t.co/ccc"
+
+        val action = PickResultUrl.resolveOpenLinkAction(
+            fullText = text,
+            activeText = text,
+            hasSelection = false,
+        )
+
+        assertTrue(action is PickResultOpenLinkAction.Choose)
+        assertEquals(3, (action as PickResultOpenLinkAction.Choose).urls.size)
+    }
+
+    @Test
+    fun resolve_selectionHoldingMultipleUrls_offersChooser() {
+        val text = "https://t.co/aaa，https://t.co/bbb"
+
+        val action = PickResultUrl.resolveOpenLinkAction(
+            fullText = text,
+            activeText = text,
+            hasSelection = true,
+        )
+
+        assertTrue(action is PickResultOpenLinkAction.Choose)
+        assertEquals(2, (action as PickResultOpenLinkAction.Choose).urls.size)
+    }
+
+    @Test
+    fun linkDisplayLabels_disambiguatesSameHost() {
+        assertEquals(
+            listOf("t.co/WfO3vZ0ygY", "t.co/QO4mprdzUL", "t.co/chl5sh7Cfa"),
+            PickResultUrl.linkDisplayLabels(
+                listOf(
+                    "https://t.co/WfO3vZ0ygY?amp=1",
+                    "https://t.co/QO4mprdzUL",
+                    "https://t.co/chl5sh7Cfa",
+                ),
+            ),
+        )
+        assertEquals(
+            listOf("a.com", "www.b.com"),
+            PickResultUrl.linkDisplayLabels(listOf("https://a.com", "https://www.b.com")),
+        )
+    }
 }
