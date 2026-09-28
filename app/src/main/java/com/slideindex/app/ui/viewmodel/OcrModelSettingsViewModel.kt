@@ -183,7 +183,10 @@ class OcrModelSettingsViewModel @Inject constructor(
 
     fun deleteOcrEngine() = viewModelScope.launch {
         nativeEnginePackCoordinator.deletePack(NativeEnginePackIds.OCR)
-        inferenceService.invalidateIfModelChanged(settings.value.floatBallOcrModelId.ifBlank { null })
+        // 引擎包已删：无条件作废内存里的旧会话。
+        // 原来传的是"当前选中的模型 id"，与已加载模型相等时不会释放
+        // （invalidateIfModelChanged 只在两者不同才释放），属于"包删了还在用旧引擎"的脏状态。
+        inferenceService.invalidateEngine()
     }
 
     fun deleteModel(modelId: String) = viewModelScope.launch {

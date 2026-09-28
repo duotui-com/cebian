@@ -159,9 +159,19 @@ class OcrInferenceService @Inject constructor(
     /** OCR 引擎包升级/删除后调用，避免继续复用旧的 PaddleOCR 会话。 */
     fun invalidateEngineBlocking() {
         kotlinx.coroutines.runBlocking(Dispatchers.Default) {
-            mutex.withLock {
-                releaseLoadedEngine()
-            }
+            invalidateEngine()
+        }
+    }
+
+    /**
+     * 挂起版的"无条件作废当前引擎会话"，供协程里调用（别在主线程 runBlocking）。
+     *
+     * 与 [invalidateIfModelChanged] 的区别：后者只在"已加载模型 ≠ 传入模型"时释放，
+     * 删除引擎包时传的恰好是当前选中的模型，于是永远不会释放，留下"包已删、旧会话还在"的脏状态。
+     */
+    suspend fun invalidateEngine() {
+        mutex.withLock {
+            releaseLoadedEngine()
         }
     }
 
