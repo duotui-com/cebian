@@ -2,6 +2,26 @@
 
 All notable changes to Cebian are documented in this file.
 
+## [1.25.5] - 2026-09-28
+
+### Changed
+- **架构**：交互面由 `:overlay` / `:clipboard` 多进程回退为单进程——无障碍服务、触钮/悬浮球/边角轮盘、全部浮层窗口（含小组件宿主与实时预览）、剪贴板监听、录屏截屏、模块桥、媒体监听全部合并回主进程，只保留 `:engine` 做 OCR/翻译的内存隔离；`AppProcess` 去掉 `isOverlay`/`isClipboardMonitor`/`isOther`，清理 8 处恒真恒假分支、Shizuku binder 死链路与 `OverlayStatePort` 空桩
+- **设置页浮层预览**：由 Intent + `startService` 改为同进程静态直连，删掉 11 个 `ACTION_PREVIEW_*` 与约 40 个 extra 常量及 `onStartCommand` 分发
+- **经典底栏**：毛玻璃着色改用容器色（`surfaceContainer` 50%）并加 0.08 细噪点抑制色带，默认模糊半径 24dp → 16dp（仅影响新装与恢复默认），修掉浅色主题下比页面背景还暗的灰蒙带
+- **添加搜索引擎**：sheet 改走 Miuix 列表规范（`settingsCardItems` + `SettingNavigationRow`），消除外层 Card 与行内 inset 叠加出来的双重水平内边距
+- **性能**：jieba 词典由「每节点一个 `unordered_map`」换成紧凑双数组 trie，并取消启动期预热、改首次分词时懒加载（实测 native 堆 301 → 202 MB）；交互浮层空闲时不再逐帧重绘（此前退到后台无人操作 40 秒仍渲染约 1200 帧、主线程与 RenderThread 各占 7.4%）；启动图标缓存改按字节限容（24 MB + 16 MB）并把图标栅格化到 ≤192px（BitmapDrawable 256 张/81 MB → 87 张/28 MB）；悬浮球 GIF 帧改按 (uri, 目标尺寸) 共享解码结果 + 引用计数（GIF 帧 1297 → 55 张，进程位图 263 → 138 MB）
+
+### Fixed
+- **引擎包**：尊重用户删除——`packsRoot` 下新增 `<packId>.user-removed` 标记，用户显式删包后不再被内置资产自动装回，取词自动回落到 ICU 分词；显式安装成功时清除标记
+- **OCR**：删除引擎包时真正作废已加载的会话（`deleteOcrEngine` 传入的是当前选中模型，被 `invalidateIfModelChanged` 判为「无需释放」，留下包已删、内存仍在用旧 PaddleOCR 会话的脏状态）；新增挂起版 `invalidateEngine()` 无条件释放，且不再在主线程 `runBlocking`
+- **设置页预览**：修复松手回弹与延迟回放——索引高度滑条改松手提交、提交值顶住到设置落盘再撤；悬浮球 Y 补合并守卫与待确认值
+- **浮层**：行程范围预览改双层描边提升对比度；小组件面板删除单项不再整页重建
+
+## [1.25.1] - 2026-09-28
+
+### Fixed
+- **OCR**：修 Android 17（`targetSdk 37`）上取词报「OCR 运行库未就绪」——引擎包解压后立刻把 native 库置为只读，否则 `System.load()` 会因「加载可写文件」（compat change `THROW_ERROR_FOR_WRITABLE_DCL` = 463348571）直接抛 `UnsatisfiedLinkError`；加载失败现在会把真实异常写进日志，不再只是一句「运行库未就绪」
+
 ## [1.25.0] - 2026-09-27
 
 ### Added
@@ -26,11 +46,6 @@ All notable changes to Cebian are documented in this file.
 - **验证码**：填充请求不再发空、卡住的「填充中」超时兜底、记录页强制读盘、注入改 ASYNC + 失败回退 Ctrl+V
 - **剪贴板**：用户服务断连退避重绑、残留子进程清理、通道解析修「勾 Root 却按 Shizuku 跑」、抢焦点读取失败重试；修后台状态显示未在监听、键盘剪贴板小窗开关下发、LSPosed 白名单返回连退两级
 - **权限/杂项**：TaskManagerUtil 每进程无条件初始化、Trampoline 结果改 token + 广播、文件锁按路径加进程内锁、跟随特权模式等 Shizuku 就绪再判
-
-## [1.25.1] - 2026-09-28
-
-### Fixed
-- **OCR**：修 Android 17（`targetSdk 37`）上取词报「OCR 运行库未就绪」——引擎包解压后立刻把 native 库置为只读，否则 `System.load()` 会因「加载可写文件」（compat change `THROW_ERROR_FOR_WRITABLE_DCL` = 463348571）直接抛 `UnsatisfiedLinkError`；加载失败现在会把真实异常写进日志，不再只是一句「运行库未就绪」
 
 ## [1.23.0] - 2026-09-24
 
