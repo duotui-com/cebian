@@ -171,7 +171,10 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             // 引擎包校验 + OCR 冒烟改到 :engine 进程执行（native 库与解压消耗不再压在本进程）
             com.slideindex.app.service.EngineBootService.start(this@SlideIndexApp)
-            JiebaWarmUp.start(this@SlideIndexApp)
+            // 分词不再在启动期预热：cppjieba 要把 5 MB 词典建成 native trie，
+            // 实测常驻上百 MB（首次 smaps 归因：主进程 Scudo 堆里最大的一块匿名内存）。
+            // CppJiebaTokenizer 本身是懒加载的（首次 segment() 才 nativeInit），
+            // 只服务"拾取结果的分词 chip"，等真正需要时再建即可。
             if (deps.settingsRepository.readSnapshot().onboardingCompleted) {
                 deps.applicationScope.launch(Dispatchers.IO) {
                     deps.appRepository.loadApps()
