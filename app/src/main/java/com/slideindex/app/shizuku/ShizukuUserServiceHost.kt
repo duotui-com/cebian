@@ -71,12 +71,8 @@ object ShizukuUserServiceHost {
     fun readApi(taskService: ITaskManagerService?): Int =
         taskService?.let { runCatching { it.apiVersion }.getOrDefault(0) } ?: 0
 
-    fun hasShizukuPermission(context: Context): Boolean =
-        runCatching {
-            // 非主进程惰性取 binder（启动期不抢，见 ShizukuBinderBridge）。
-            ShizukuBinderBridge.ensure(context)
-            Shizuku.pingBinder()
-        }.getOrDefault(false) &&
+    fun hasShizukuPermission(@Suppress("UNUSED_PARAMETER") context: Context): Boolean =
+        runCatching { Shizuku.pingBinder() }.getOrDefault(false) &&
             Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
 
     /**

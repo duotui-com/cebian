@@ -43,6 +43,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.zIndex
 import com.slideindex.app.data.AppInfo
 import com.slideindex.app.launcher.QuickLauncherGridLogic
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import com.slideindex.app.launcher.QuickLauncherGridLogic.moveIndex
 import com.slideindex.app.launcher.QuickLauncherItem
 import com.slideindex.app.settings.AppSettings
@@ -65,6 +70,9 @@ private const val PAGE_EDGE_AUTO_PAGE_CELL_FRACTION = 0.12f
 private const val PAGE_AUTO_TURN_COOLDOWN_MS = 400L
 private const val HOVER_DWELL_MS = 350L
 private const val HOVER_DEADZONE_DP = 14f
+
+/** 图标并发解析数：串行在 OEM 主题图标设备上要等一分钟，太多又会把 CPU 占满影响交互。 */
+private const val ICON_LOAD_CONCURRENCY = 4
 
 @Composable
 fun QuickLauncherGridEditor(
@@ -112,16 +120,24 @@ fun QuickLauncherGridEditor(
     var iconBitmapCache by remember { mutableStateOf<Map<Int, android.graphics.Bitmap?>>(emptyMap()) }
     LaunchedEffect(items, appsByPackage, actionIconTintArgb, settings.activityShortcuts, settings.shellCommands) {
         iconBitmapCache = withContext(Dispatchers.IO) {
-            items.mapIndexed { index, item ->
-                index to QuickLauncherIconResolver.iconBitmap(
-                    item = item,
-                    appsByPackage = appsByPackage,
-                    context = context,
-                    actionIconTintArgb = actionIconTintArgb,
-                    activityShortcuts = settings.activityShortcuts,
-                    shellCommands = settings.shellCommands,
-                )
-            }.toMap()
+            // 受限并发：串行解析在 OEM 主题图标设备上要等一分钟，全并发又会把 CPU 打满。
+            val permits = Semaphore(ICON_LOAD_CONCURRENCY)
+            coroutineScope {
+                items.mapIndexed { index, item ->
+                    async {
+                        permits.withPermit {
+                            index to QuickLauncherIconResolver.iconBitmap(
+                                item = item,
+                                appsByPackage = appsByPackage,
+                                context = context,
+                                actionIconTintArgb = actionIconTintArgb,
+                                activityShortcuts = settings.activityShortcuts,
+                                shellCommands = settings.shellCommands,
+                            )
+                        }
+                    }
+                }.awaitAll().toMap()
+            }
         }
     }
     val itemsState = rememberUpdatedState(items)

@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.LruCache
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,8 @@ class AppLaunchIconCache @Inject constructor(
     private val bitmapCache = object : LruCache<String, Bitmap>(
         (Runtime.getRuntime().maxMemory() / 1024 / 16).toInt().coerceIn(96, 512),
     ) {}
+
+    private val pendingRequests = ConcurrentHashMap.newKeySet<String>()
 
     fun clear() {
         drawableCache.evictAll()
@@ -102,6 +105,34 @@ class AppLaunchIconCache @Inject constructor(
         if (packageNames.isEmpty()) return
         scope.launch {
             warmBitmaps(packageNames, sizePx)
+        }
+    }
+
+    /**
+     * 后台加载单个图标，完成后回到主线程通知调用方重绘。
+     *
+     * 供浮层绘制路径使用：绘制时只 [peekBitmap]，未命中就提交这里 ——
+     * 主线程绝不能同步调 PackageManager（Flyme/MIUI 的主题图标重建会卡到 ANR）。
+     * 同一个 size 的重复请求会被合并。
+     */
+    fun requestBitmapAsync(packageName: String, sizePx: Int, onReady: () -> Unit) {
+        if (packageName.isBlank()) {
+            onReady()
+            return
+        }
+        val size = sizePx.coerceAtLeast(1)
+        val key = bitmapKey(packageName, size)
+        if (bitmapCache.get(key) != null) {
+            onReady()
+            return
+        }
+        if (!pendingRequests.add(key)) return
+        scope.launch {
+            withContext(Dispatchers.Default) {
+                runCatching { bitmapFor(packageName, size) }
+            }
+            pendingRequests.remove(key)
+            withContext(Dispatchers.Main) { onReady() }
         }
     }
 

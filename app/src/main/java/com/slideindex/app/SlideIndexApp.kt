@@ -1,6 +1,7 @@
 package com.slideindex.app
 
 import android.app.Application
+import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import com.slideindex.app.clipboard.DragFileMirror
@@ -47,6 +48,14 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
         const val STARTUP_HEAVY_TASK_DELAY_MS = 1_500L
 
         /**
+         * 非默认进程延后初始化 Shizuku 的等待时间。
+         *
+         * 取 binder 会把主进程拉起来并让本进程依赖它，所以要等主进程稳定后再做
+         * （覆盖安装后主进程启动慢、被 AMS 判成 attach 超时杀掉时，本进程会被连带杀掉）。
+         */
+        const val SHIZUKU_DEFERRED_START_DELAY_MS = 20_000L
+
+        /**
          * 给 WorkManager 声明的 JobScheduler id 范围（lint: SpecifyJobSchedulerIdRange）。
          *
          * 本应用除了 WorkManager，还自己直接用 JobScheduler（[com.slideindex.app.service.OverlayWatchdogJobService]
@@ -91,15 +100,13 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
         // 注意 enableMultiProcessSupport(flag) 的 flag 含义是"**当前进程**是不是 provider 进程"，
         // 传 true 会被 Shizuku 当成 provider 进程，紧接着的 requestBinderForNonProviderProcess 会直接 return。
         //
-        // 非主进程**不在启动期取 binder**：取 binder 会顺带把主进程拉起来，并让本进程依赖
-        // 主进程里的这个 provider —— 覆盖安装后主进程启动慢、被 AMS 判成 attach 超时杀掉时，
-        // 本进程（:overlay）会被系统连带杀掉，表现为"装完悬浮球半天不出来"。
-        // 具体策略见 ShizukuBinderBridge（启动期延后补取 + 真正用到时惰性取）。
+        // 历史上这里还给非主进程准备过"向主进程请求 binder"的通道：那会让本进程依赖主进程里的
+        // provider，覆盖安装后主进程启动慢、被 AMS 判成 attach 超时杀掉时，本进程会被连带杀掉
+        // （表现为"装完悬浮球半天不出来"）。`:overlay` 合并回默认进程后已经没有任何进程需要它，
+        // 所以那条通道整个删掉了，这里只保留默认进程的 provider 声明。
         runCatching {
             if (AppProcess.isMain) {
                 rikka.shizuku.ShizukuProvider.enableMultiProcessSupport(true)
-            } else {
-                com.slideindex.app.shizuku.ShizukuBinderBridge.scheduleDeferredAcquire(this)
             }
         }
         // 所有进程共有：崩溃记录 + Hidden API 放行 + 引擎运行时接入。
@@ -119,12 +126,6 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
                 com.slideindex.app.engine.EngineOcrTransport(this)
         }
 
-        // overlay 状态端口：overlay 进程负责接收命令，其它进程维护只读镜像。
-        if (AppProcess.isOverlay) {
-            com.slideindex.app.overlay.OverlayStatePort.startCommandReceiver(this)
-        } else {
-            com.slideindex.app.overlay.OverlayStatePort.startMirroring(this)
-        }
         // 剪贴板监听状态镜像：监听进程发布，其它进程（设置页）读。
         com.slideindex.app.clipboard.monitor.ClipboardMonitorStatusPort.start(this)
 
@@ -144,25 +145,15 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
             // :overlay 等进程：启动期只做廉价操作，把可能阻塞的初始化挪到后台，
             // 保证前台服务的 startForeground 窗口不被挤掉。
             AppLocaleApplier.primeFromStorage(this)
-            // 同上：shizukuInitializer.start() 会立刻去取 binder（= 拉起主进程并形成依赖），
-            // 非主进程要等主进程稳定后再做，否则会把浮层进程一起搭进去。
+            // shizukuInitializer.start() 会立刻去取 binder（= 拉起主进程并形成依赖），
+            // 非主进程要等主进程稳定后再做，否则会把本进程一起搭进去。
             deps.applicationScope.launch {
-                delay(com.slideindex.app.shizuku.ShizukuBinderBridge.DEFERRED_ACQUIRE_DELAY_MS)
-                if (com.slideindex.app.shizuku.ShizukuBinderBridge.isMainProcessAlive(this@SlideIndexApp)) {
+                delay(SHIZUKU_DEFERRED_START_DELAY_MS)
+                if (isMainProcessAlive(this@SlideIndexApp)) {
                     shizukuInitializer.start()
                 }
             }
             deps.applicationScope.launch { moduleHookConfigSync.start() }
-            if (AppProcess.isOverlay) {
-                // 键盘上方的剪贴板小窗由 :overlay 渲染，开关（clipboardFloatEnabled 等）
-                // 必须在本进程下发：此前只有主进程调 ClipboardFloatLifecycle.syncFromSettings，
-                // 导致 overlay 侧一直是 false → 弹出键盘看不到入口。
-                deps.applicationScope.launch {
-                    deps.settingsRepository.settings.collect { settings ->
-                        com.slideindex.app.clipboardfloat.ClipboardFloatImeCoordinator.applySettings(settings)
-                    }
-                }
-            }
         }
         otpAutoFillStatsInstaller.install()
         otpRecordLimitsInstaller.install()
@@ -233,6 +224,12 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
             com.slideindex.app.util.GestureActionIconBitmap.evictAll()
         }
     }
+
+    /** 主进程此刻是否活着（用 ActivityManager 查进程列表，不依赖任何跨进程通道）。 */
+    private fun isMainProcessAlive(context: Context): Boolean = runCatching {
+        val manager = context.getSystemService(ActivityManager::class.java) ?: return@runCatching false
+        manager.runningAppProcesses?.any { it.processName == context.packageName } ?: false
+    }.getOrDefault(false)
 
     fun schedulePersistWidgetPanelPages(pages: List<WidgetPanelPage>) {
         deps.widgetPanelPersistence.schedulePersist(pages)

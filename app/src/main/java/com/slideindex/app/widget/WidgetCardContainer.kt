@@ -188,7 +188,22 @@ class WidgetCardContainer(
       loadingPlaceholder.visibility = GONE
       hostEverBound = true
     } else {
-      loadingPlaceholder.visibility = VISIBLE
+      // 单进程后宿主视图与编辑器同进程：调用方没传视图时自己取一次，
+      // 否则编辑器永远停在占位卡（以前只有 :overlay 进程能创建宿主视图）。
+      val selfHostView = runCatching {
+        WidgetPopupHost.startListening(context)
+        WidgetPopupHost.obtainHostView(context, item.appWidgetId)
+      }.getOrNull()
+      if (selfHostView != null && item.itemType == ITEM_TYPE_WIDGET) {
+        scalableFrame.visibility = VISIBLE
+        scalableFrame.bindWidget(selfHostView, item.appWidgetId, item.spanX, item.spanY)
+        loadingPlaceholder.visibility = GONE
+        hostEverBound = true
+        updateScalableTargetFromContainer()
+        scalableFrame.commitHostLayout()
+      } else {
+        loadingPlaceholder.visibility = VISIBLE
+      }
     }
 
     addView(loadingPlaceholder, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))

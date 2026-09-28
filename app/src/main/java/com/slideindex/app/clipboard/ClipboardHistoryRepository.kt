@@ -212,8 +212,8 @@ class ClipboardHistoryRepository @Inject constructor(
         triggerContext: Context? = null,
         skipWhenListening: Boolean = true,
     ) {
-        // 监听进程（:overlay）与主进程都可能触发补读；只有引擎等旁支进程不参与。
-        if (com.slideindex.app.util.AppProcess.isEngine || com.slideindex.app.util.AppProcess.isOther) return
+        // 只有默认进程参与补读：引擎进程与 Shizuku 用户服务等旁支进程没有剪贴板宿主。
+        if (!com.slideindex.app.util.AppProcess.isMain) return
         if (skipWhenListening) {
             if (!settingsRepository.readSnapshot().clipboardBackgroundMonitoring) return
             if (clipboardMonitorController.isListening) return

@@ -11,10 +11,12 @@ import com.slideindex.app.settings.withUpdatedTriggerHandleEdgeWidth
 import com.slideindex.app.ui.trigger.TriggerSettingsLandscapeSession
 
 fun AppSettings.withOverlayLayoutPreview(): AppSettings {
+    val nowMs = android.os.SystemClock.elapsedRealtime()
     val landscapePreview = TriggerSettingsLandscapeSession.active
     var result = if (landscapePreview) forLandscapeEditing() else this
-    val preview = OverlayLayoutPreviewStore.triggerHandlePreview
+    val preview = OverlayLayoutPreviewStore.activeTriggerHandlePreview(nowMs)
     if (preview != null) {
+        val beforePreview = result
         val side = preview.side
         val handleId = preview.handleId
         if (preview.edgeWidthDp != null) {
@@ -40,12 +42,20 @@ fun AppSettings.withOverlayLayoutPreview(): AppSettings {
         if (preview.design != null) {
             result = result.withUpdatedTriggerHandleDesign(side, handleId, preview.design)
         }
+        // 设置已经落盘回流（预览值不再改变任何东西）→ 丢掉"待确认"，恢复正常渲染。
+        if (result == beforePreview) {
+            OverlayLayoutPreviewStore.dropCommittedTriggerHandle()
+        }
     }
     if (landscapePreview) {
         result = mergeLandscapeEdits(result)
     }
-    OverlayLayoutPreviewStore.indexHeightFraction?.let { fraction ->
+    OverlayLayoutPreviewStore.activeIndexHeightFraction(nowMs)?.let { fraction ->
+        val beforePreview = result
         result = result.copy(indexHeightFraction = fraction)
+        if (result == beforePreview) {
+            OverlayLayoutPreviewStore.dropCommittedIndexHeight()
+        }
     }
     return result
 }

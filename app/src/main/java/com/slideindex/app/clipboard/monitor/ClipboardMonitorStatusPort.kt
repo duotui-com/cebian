@@ -41,9 +41,8 @@ object ClipboardMonitorStatusPort {
     private var statusReceiver: BroadcastReceiver? = null
     private var requestReceiver: BroadcastReceiver? = null
 
-    /** 只有监听进程可以发布权威状态。 */
+    /** 单进程：监听服务与 UI 同进程，直接发布权威状态（不再有"必须有 :clipboard 进程发布"的限制）。 */
     fun publish(context: Context, listening: Boolean, mode: ClipboardMonitoringMode?) {
-        if (!AppProcess.isClipboardMonitor) return
         val previous = _status.value
         _status.value = ClipboardMonitorStatus(listening, mode)
         if (previous == null || previous.listening != listening || previous.mode != mode) {
@@ -58,20 +57,14 @@ object ClipboardMonitorStatusPort {
             .onFailure { Log.w(TAG, "publish failed", it) }
     }
 
-    /** 每个进程启动时调用：监听进程收"请重发"，其它进程收状态镜像。 */
+    /** 启动时注册状态接收器（单进程内自广播，保留是为了让 publish 的调用点不用改）。 */
     fun start(context: Context) {
-        if (AppProcess.isClipboardMonitor) {
-            startRequestReceiver(context)
-        } else {
-            startStatusReceiver(context)
-        }
+        startStatusReceiver(context)
     }
 
-    /** 非监听进程请求重发一次状态（打开设置页 / 切到前台时用）。 */
+    /** 请求重发一次状态（打开设置页 / 切到前台时用）：单进程直接问控制器。 */
     fun requestStatus(context: Context) {
-        if (AppProcess.isClipboardMonitor) return
-        val intent = Intent(ACTION_STATUS_REQUEST).apply { setPackage(context.packageName) }
-        runCatching { context.applicationContext.sendBroadcast(intent) }
+        runCatching { ClipboardMonitorController.peek()?.republishStatus() }
             .onFailure { Log.w(TAG, "requestStatus failed", it) }
     }
 

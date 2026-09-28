@@ -1,7 +1,6 @@
 package com.slideindex.app.overlay
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.RectF
 import android.view.MotionEvent
@@ -220,8 +219,10 @@ internal class QuickLauncherOverlayController(
     internal var quickLauncherEdgePageZone = 0
     internal var quickLauncherEdgeAutoPageSeeded = false
     internal var quickLauncherAppsByPackage: Map<String, AppInfo> = emptyMap()
-    internal val quickLauncherIconCache = mutableMapOf<String, Bitmap>()
-    internal val quickLauncherLabelCache = mutableMapOf<String, String>()
+    /** 应用列表换了要换图标 key（图标本身缓存在 [OverlayIconLoader]，跨会话保留）。 */
+    internal var quickLauncherAppsRevision: Int = 0
+        private set
+    internal val quickLauncherLabelCache = java.util.concurrent.ConcurrentHashMap<String, String>()
     internal var quickLauncherCachedPages: List<List<QuickLauncherItem>>? = null
     internal var quickLauncherCachedPagesKey: Int = 0
     internal var quickLauncherLayoutPanelWidth: Float = 0f
@@ -372,6 +373,7 @@ internal class QuickLauncherOverlayController(
 
     fun setApps(apps: List<AppInfo>) {
         rebuildQuickLauncherAppsByPackage(apps)
+        quickLauncherAppsRevision++
         invalidateQuickLauncherDerivedCaches()
     }
 
@@ -400,11 +402,30 @@ internal class QuickLauncherOverlayController(
         quickLauncherEdgePageZone = 0
         quickLauncherEdgeAutoPageSeeded = false
         quickLauncherPanelController.ensureDefaultsPersisted(host.settings())
-        renderer.warmCaches()
+        renderer.prewarm(quickLauncherPrewarmOrder())
         quickLauncherAnchorRawY = quickLauncherAnchorRawY
             ?.takeIf { it > 0f }
             ?: host.pathRecognizer().lastRawY().takeIf { it > 0f }
             ?: host.pathRecognizer().gestureStartRawY().takeIf { it > 0f }
+    }
+
+    /**
+     * 后台取图顺序：当前页 → 下一页 → 上一页 → 其余。
+     * 用户翻到第二页时那一页的图标已经是「正在解析/已就绪」，而不是刚开始排队。
+     */
+    private fun quickLauncherPrewarmOrder(): List<QuickLauncherItem> {
+        val pages = quickLauncherPages()
+        if (pages.size <= 1) return pages.flatten()
+        val current = quickLauncherPageIndex.coerceIn(0, pages.size - 1)
+        val ordered = buildList {
+            add(pages[current])
+            pages.getOrNull(current + 1)?.let { add(it) }
+            pages.getOrNull(current - 1)?.let { add(it) }
+            pages.forEachIndexed { index, page ->
+                if (index != current && index != current + 1 && index != current - 1) add(page)
+            }
+        }
+        return ordered.flatten()
     }
 
     fun onLayoutReady() {
@@ -556,7 +577,8 @@ internal class QuickLauncherOverlayController(
     }
 
     internal fun invalidateQuickLauncherDerivedCaches() {
-        quickLauncherIconCache.clear()
+        // 图标缓存在 OverlayIconLoader 里按 key 保留（key 含图标形状 / 尺寸 / 应用列表版本），
+        // 这里只清便宜的派生数据；否则每次开关面板都要重新打一遍 PackageManager。
         quickLauncherLabelCache.clear()
         quickLauncherCachedPages = null
         quickLauncherCachedPagesKey = 0

@@ -70,23 +70,6 @@ object OverlayServiceLifecycle {
     suspend fun recoverAccessibilityBinding(context: Context, settings: AppSettings): AccessibilityRecoverOutcome {
         val appContextForState = context.applicationContext
         if (!settings.serviceEnabled) return AccessibilityRecoverOutcome.NotNeeded
-        // 连接状态的权威值只存在于 :overlay（无障碍实例在那个进程）。
-        // 其它进程里 `SlideIndexAccessibilityService.isConnected()` 恒为 false，
-        // 直接用它会导致：主进程每次启动都误判「掉线」→ 白白抖断一次绑定（悬浮球/手势短暂消失）
-        // → 弹出「边缘手势未连接，请完全关闭后重新打开本应用」，而实际手势一直是好的。
-        if (!AppProcess.isOverlay) {
-            if (OverlayStatePort.isServiceConnected()) {
-                return AccessibilityRecoverOutcome.Connected
-            }
-            if (!OverlayStatePort.hasServiceState() && OverlayStatePort.isServiceStateFresh()) {
-                // 还没收到过 overlay 的状态广播：状态未知，别乱动（也不要吓用户）。
-                return AccessibilityRecoverOutcome.NotNeeded
-            }
-            // 真的掉线（或 overlay 进程已经不在了）：先把它拉起来，再让它在自己进程里恢复。
-            wakeOverlayService(appContextForState)
-            OverlayStatePort.sendCommand(appContextForState, OverlayStatePort.COMMAND_RECOVER_ACCESSIBILITY)
-            return AccessibilityRecoverOutcome.NotNeeded
-        }
         val appContext = context.applicationContext
 
         // 1. 覆盖安装 / 被系统杀过之后，AMS 通常会**自己**把无障碍服务绑回来（几秒级）——

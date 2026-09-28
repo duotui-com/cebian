@@ -1,6 +1,5 @@
 package com.slideindex.app.overlay
 
-import com.slideindex.app.di.AppDependencies
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -27,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.slideindex.app.R
 import com.slideindex.app.service.SlideIndexAccessibilityService
 import com.slideindex.app.settings.AppSettings
+import com.slideindex.app.settings.SettingsRepository
 import com.slideindex.app.ui.theme.OverlayAwareModuleTheme
 import com.slideindex.app.util.PermissionHelper
 import kotlinx.coroutines.CoroutineScope
@@ -56,9 +56,9 @@ object FloatingPointerAreaPreviewOverlay {
 
     val isShowing: Boolean get() = displayView != null
 
-    fun show(deps: AppDependencies) {
+    fun show(settingsRepository: SettingsRepository) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            mainHandler.post { show(deps) }
+            mainHandler.post { show(settingsRepository) }
             return
         }
         if (isShowing) return
@@ -72,7 +72,7 @@ object FloatingPointerAreaPreviewOverlay {
         val dm = hostContext.resources.displayMetrics
         val bounds = readOverlayScreenBounds(wm, dm)
 
-        val settingsHolder = mutableStateOf(deps.settingsRepository.readSnapshot())
+        val settingsHolder = mutableStateOf(settingsRepository.readSnapshot())
         val triggerHolder = mutableStateOf(
             Offset(0f, bounds.second * DEFAULT_TRIGGER_Y_NORM)
         )
@@ -128,7 +128,7 @@ object FloatingPointerAreaPreviewOverlay {
 
         settingsCollectJob?.cancel()
         settingsCollectJob = overlayScope.launch {
-            deps.settingsRepository.settings.collectLatest { latest ->
+            settingsRepository.settings.collectLatest { latest ->
                 settingsHolder.value = latest
             }
         }

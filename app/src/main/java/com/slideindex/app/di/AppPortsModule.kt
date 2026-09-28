@@ -40,7 +40,6 @@ import com.slideindex.app.shake.ShakeActionPort
 import com.slideindex.app.shake.ShakeFeedbackPort
 import com.slideindex.app.shake.ShakeRuntimePort
 import com.slideindex.app.util.FreeWindowLauncher
-import com.slideindex.app.util.AppProcess
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dagger.Binds
@@ -56,16 +55,10 @@ class MediaNotificationListenerPort @Inject constructor() : NotificationListener
     override fun listenerOrNull(): NotificationListenerService? = MediaNotificationListener.instance
 
     /**
-     * 监听服务在 `:overlay`，UI 在主进程：
-     * - overlay 进程直接问监听实例；
-     * - 其它进程读 overlay 广播过来的镜像（镜像还没到时返回 null，让调用方回退）。
+     * 监听服务与 UI 同进程：直接读本进程发布的快照（还没有快照时返回 null，让调用方回退）。
      */
     override fun activeNotificationSnapshotsOrNull(): List<ActiveNotificationSnapshot>? =
-        if (AppProcess.isOverlay) {
-            MediaNotificationListener.snapshotOf(MediaNotificationListener.instance)
-        } else {
-            OverlayStatePort.mirroredActiveNotificationSnapshots()
-        }
+        OverlayStatePort.mirroredActiveNotificationSnapshots()
 }
 
 @Singleton

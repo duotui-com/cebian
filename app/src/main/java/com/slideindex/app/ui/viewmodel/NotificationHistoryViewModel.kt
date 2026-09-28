@@ -62,8 +62,8 @@ class NotificationHistoryViewModel @Inject constructor(
     val refreshGeneration: StateFlow<Int> = _refreshGeneration.asStateFlow()
 
     init {
-        // 「实时」tab 的数据来自 :overlay 广播的镜像：镜像到达后重算一次，
-        // 否则首次进入页面时会停留在空列表（镜像比首帧慢）。
+        // 「实时」tab 的数据来自监听服务发布的快照流：快照到达后重算一次，
+        // 否则首次进入页面时会停留在空列表（快照比首帧慢）。
         viewModelScope.launch {
             com.slideindex.app.overlay.OverlayStatePort.activeNotificationSnapshots.collect { snapshots ->
                 if (snapshots != null) _refreshGeneration.value += 1
@@ -83,10 +83,8 @@ class NotificationHistoryViewModel @Inject constructor(
     }
 
     fun refreshActive() {
-        // 让 :overlay 重新广播一次通知栏快照（刚进页面 / 隐藏&恢复后）。主进程自己读不到监听实例。
-        if (!com.slideindex.app.util.AppProcess.isOverlay) {
-            com.slideindex.app.overlay.OverlayStatePort.requestActiveNotificationsPublish(appContext)
-        }
+        // 重新发布一次通知栏快照（刚进页面 / 隐藏&恢复后）。
+        com.slideindex.app.overlay.OverlayStatePort.requestActiveNotificationsPublish(appContext)
         _refreshGeneration.value += 1
     }
 

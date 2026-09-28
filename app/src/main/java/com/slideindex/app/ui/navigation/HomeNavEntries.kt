@@ -30,7 +30,6 @@ import com.slideindex.app.gesture.supportsAction
 import com.slideindex.app.launcher.QuickLauncherPanelDefaults
 import com.slideindex.app.overlay.LayoutPreviewContent
 import com.slideindex.app.overlay.PanelSide
-import com.slideindex.app.service.OverlayService
 import com.slideindex.app.settings.AppLaunchPolicy
 import com.slideindex.app.settings.FreeWindowMode
 import com.slideindex.app.settings.FreeWindowUiSettings
@@ -1212,7 +1211,8 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
                     longSwipeDistanceDp = value,
                 )
             },
-            onTriggerLayoutPreviewStop = { ctx.clearTriggerHandleLayoutPreview() },
+            // 松手只提交，不当场撤掉临时值：写入是异步的，立刻撤会先回到旧值再跳新值。
+            onTriggerLayoutPreviewStop = { ctx.commitTriggerHandleLayoutPreview() },
             onAlignHandlesChange = { enabled ->
                 viewModel.setTriggerAlignOppositeSide(key.handleId, side, enabled)
                 ctx.refreshFocusedTriggerPreview(side, key.handleId)
@@ -1277,7 +1277,7 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             onDesignPreview = { design ->
                 ctx.previewTriggerHandleDesign(side, key.handleId, design)
             },
-            onDesignPreviewStop = { ctx.clearTriggerHandleLayoutPreview() },
+            onDesignPreviewStop = { ctx.commitTriggerHandleLayoutPreview() },
         )
     }
 
@@ -1484,7 +1484,7 @@ fun NavEntryBuilder.layoutSettingsNavEntries(ctx: MainNavContext) {
             serviceEnabled = ctx.gestureActive(gestureSettings.serviceEnabled, permissions),
             onBack = {
                 ctx.clearOverlayLayoutPreview()
-                ctx.sendOverlayPreviewIntent(OverlayService.ACTION_PREVIEW_STOP)
+                ctx.stopLayoutPreview()
                 ctx.navigateBackTo(AppNavKey.ExtensionHub)
             },
             onIndexHeightChange = viewModel::setIndexHeightFraction,
@@ -1493,14 +1493,11 @@ fun NavEntryBuilder.layoutSettingsNavEntries(ctx: MainNavContext) {
             onHideEmptyIndexLettersChange = viewModel::setHideEmptyIndexLetters,
             onOpenHiddenAppsSettings = { ctx.navigate(AppNavKey.HomeHiddenApps) },
             onLayoutPreviewStart = {
-                ctx.sendOverlayPreviewIntent(
-                    OverlayService.ACTION_PREVIEW_START,
-                    LayoutPreviewContent.INDEX_ONLY,
-                )
+                ctx.startLayoutPreview(LayoutPreviewContent.INDEX_ONLY)
             },
             onLayoutPreviewStop = {
-                ctx.clearIndexHeightPreview()
-                ctx.sendOverlayPreviewIntent(OverlayService.ACTION_PREVIEW_STOP)
+                ctx.commitIndexHeightPreview()
+                ctx.stopLayoutPreview()
             },
             onIndexHeightPreviewChange = { fraction ->
                 ctx.previewIndexHeightFraction(fraction)

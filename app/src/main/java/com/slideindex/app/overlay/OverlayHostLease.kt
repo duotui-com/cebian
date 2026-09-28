@@ -24,8 +24,7 @@ import android.util.Log
 object OverlayHostLease {
     private const val TAG = "OverlayHostLease"
 
-    /** 租约超时：连续这么久没有续租就认为宿主服务已经不在。 */
-    private const val LEASE_TIMEOUT_MS = 6_000L
+    /** 巡检间隔：单进程下只用来兜底"服务没了但窗口还在"这一种情况。 */
     private const val CHECK_INTERVAL_MS = 2_000L
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -37,26 +36,21 @@ object OverlayHostLease {
 
     private val registrations = LinkedHashMap<String, Registration>()
 
-    @Volatile
-    private var lastRenewMs = 0L
-
     private var watchdogScheduled = false
 
     private val watchdog = Runnable {
         watchdogScheduled = false
         if (registrations.isEmpty()) return@Runnable
-        val idleMs = SystemClock.uptimeMillis() - lastRenewMs
-        val leaseExpired = lastRenewMs > 0L && idleMs > LEASE_TIMEOUT_MS
+        // 单进程：无障碍实例和窗口在同一个进程里，直接看实例存活即可，不再需要跨进程租约过期判定。
         val ownerAlive = registrations.values.any { registration ->
             runCatching { registration.isOwnerAlive() }.getOrDefault(true)
         }
-        if (!ownerAlive || leaseExpired) {
+        if (!ownerAlive) {
             val pending = registrations.values.map { it.teardown }
             registrations.clear()
             Log.w(
                 TAG,
-                "浮层宿主失联（无障碍服务 enabled=$ownerAlive，心跳 ${idleMs}ms），" +
-                    "强制拆卸 ${pending.size} 个宿主"
+                "浮层宿主失联（无障碍服务已不在本进程），强制拆卸 ${pending.size} 个宿主"
             )
             pending.forEach { teardown ->
                 runCatching { teardown() }
@@ -67,10 +61,9 @@ object OverlayHostLease {
         scheduleWatchdog()
     }
 
-    /** 无障碍服务存活期间调用（主线程，每 2s 一次），刷新租约。 */
-    fun renew() {
-        lastRenewMs = SystemClock.uptimeMillis()
-    }
+    /** 兼容旧调用点：单进程不需要续租。 */
+    @Suppress("UNUSED_PARAMETER")
+    fun renew() = Unit
 
     /**
      * 登记一个浮层宿主。同一 [key] 重复登记会覆盖旧的。
@@ -103,7 +96,6 @@ object OverlayHostLease {
         mainHandler.removeCallbacks(watchdog)
         registrations.clear()
         watchdogScheduled = false
-        lastRenewMs = 0L
     }
 
     /** 仅测试使用：手动触发一次守护检查。 */

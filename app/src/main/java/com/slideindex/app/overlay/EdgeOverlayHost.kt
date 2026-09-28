@@ -383,6 +383,15 @@ class EdgeOverlayHost(
         applyOverlayLayoutPreviewSettings()
     }
 
+    /**
+     * 松手提交索引高度预览：把临时值转成"待确认"，等设置落盘回流追上再撤，
+     * 避免松手瞬间先按旧值重画一次。
+     */
+    fun commitIndexHeightPreview() {
+        OverlayLayoutPreviewStore.commitIndexHeightPreview()
+        applyOverlayLayoutPreviewSettings()
+    }
+
     fun mergeTriggerHandleLayoutPreview(
         side: PanelSide,
         handleId: String,
@@ -408,6 +417,12 @@ class EdgeOverlayHost(
 
     fun clearTriggerHandleLayoutPreview() {
         OverlayLayoutPreviewStore.clearTriggerHandlePreview()
+        applyOverlayLayoutPreviewSettings()
+    }
+
+    /** 松手提交触钮预览：同 [commitIndexHeightPreview]。 */
+    fun commitTriggerHandleLayoutPreview() {
+        OverlayLayoutPreviewStore.commitTriggerHandlePreview()
         applyOverlayLayoutPreviewSettings()
     }
 

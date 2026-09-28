@@ -261,15 +261,15 @@ fun MainNavHost(
             permissions.accessibilityGranted &&
             floatingPointerAreaPreviewEnabled
         ) {
-            // 浮层窗口必须由 :overlay 创建：跟手位置来自那边的边缘触摸事件。
-            activity.setFloatingPointerAreaPreview(true)
+            // 预览窗口由无障碍服务所在的进程创建：跟手位置来自边缘触摸事件。
+            activity.overlayServiceController.setFloatingPointerAreaPreview(true)
         } else {
-            activity.setFloatingPointerAreaPreview(false)
+            activity.overlayServiceController.setFloatingPointerAreaPreview(false)
         }
     }
 
     DisposableEffect(Unit) {
-        onDispose { activity.setFloatingPointerAreaPreview(false) }
+        onDispose { activity.overlayServiceController.setFloatingPointerAreaPreview(false) }
     }
 
     val coroutineScope = rememberCoroutineScope()

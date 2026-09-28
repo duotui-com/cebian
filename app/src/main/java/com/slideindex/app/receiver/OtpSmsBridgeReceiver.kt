@@ -15,7 +15,6 @@ import com.slideindex.app.di.AppGraphEntryPoint
 import com.slideindex.app.di.AppDependencies
 import com.slideindex.app.otp.OtpAutoFillController
 import com.slideindex.app.otp.OtpAutoFillDispatch
-import com.slideindex.app.otp.OtpAutoInputOrchestrator
 import com.slideindex.app.otp.OtpCaptureDeduplicator
 import com.slideindex.app.otp.OtpClipboardHelper
 import com.slideindex.app.otp.OtpExtractionConfig
@@ -95,19 +94,14 @@ class OtpSmsBridgeReceiver : BroadcastReceiver() {
             null
         }
         if (settings.otpAutoInputEnabled) {
-            // 注入依赖无障碍实例（在 :overlay 进程）；主进程只能转发请求。
-            if (com.slideindex.app.util.AppProcess.isOverlay) {
-                OtpAutoInputOrchestrator.requestAutoFill(context.applicationContext, code, settings, recordId)
-            } else {
-                // 跨进程这条路要防"广播发给空气"（:overlay 没起来时动态接收者不存在），
-                // 见 OtpAutoFillDispatch：先看浮层在不在、不在就顺手拉起并短重试。
-                OtpAutoFillDispatch.request(
-                    context = context,
-                    code = code,
-                    recordId = recordId,
-                    settings = settings,
-                )
-            }
+            // 注入依赖无障碍实例。本进程未必已经连上无障碍（可能刚被系统拉起），
+            // 所以走 OtpAutoFillDispatch：它会在必要时把常驻服务拉起来并短重试。
+            OtpAutoFillDispatch.request(
+                context = context,
+                code = code,
+                recordId = recordId,
+                settings = settings,
+            )
         }
         if (settings.otpCopyToClipboard) {
             runCatching { OtpClipboardHelper.copyCode(context.applicationContext, code) }

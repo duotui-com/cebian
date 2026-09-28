@@ -18,7 +18,6 @@ import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.settings.ClipboardMonitoringMode
 import com.slideindex.app.settings.PrivilegeMode
 import com.slideindex.app.util.PermissionHelper
-import com.slideindex.app.util.AppProcess
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -103,9 +102,7 @@ fun rememberClipboardMonitoringUiState(settings: AppSettings): ClipboardMonitori
 
     // 首帧也主动要一次状态，避免刚进页面时状态还是空的。
     DisposableEffect(Unit) {
-        if (!AppProcess.isClipboardMonitor) {
-            ClipboardMonitorStatusPort.requestStatus(context)
-        }
+        ClipboardMonitorStatusPort.requestStatus(context)
         onDispose { }
     }
 

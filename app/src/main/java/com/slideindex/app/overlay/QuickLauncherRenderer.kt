@@ -1,5 +1,6 @@
 package com.slideindex.app.overlay
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -8,6 +9,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import androidx.core.graphics.withClip
 import com.slideindex.app.R
+import com.slideindex.app.activity.ActivityShortcut
 import com.slideindex.app.data.AppInfo
 import com.slideindex.app.launcher.QuickLauncherGridLogic
 import com.slideindex.app.launcher.QuickLauncherItem
@@ -19,6 +21,7 @@ import com.slideindex.app.launcher.showsShortcutBadge
 import com.slideindex.app.overlay.layout.visualColumn
 import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.settings.QuickLauncherDisplaySettings
+import com.slideindex.app.shell.ShellCommand
 import com.slideindex.app.util.AppShortcutLoader
 import com.slideindex.app.util.AppLocaleApplier
 import com.slideindex.app.util.GestureActionIconBitmap
@@ -76,12 +79,17 @@ internal class QuickLauncherRenderer(
         appLabelPaint.textSize = host.sp(11f)
     }
 
-    fun warmCaches() {
-        Thread {
-            warmQuickLauncherIconCache()
-            warmQuickLauncherShortcutCache()
-            warmQuickLauncherActionIconCache()
-        }.start()
+    /**
+     * 面板打开时预取图标。
+     *
+     * [items] 由调用方按「当前页 → 相邻页 → 其余页」排序传入，先提交的先抢到后台线程。
+     * 这里只提交任务，绝不解析：解析耗时（PackageManager + OEM 主题图标）必须留在后台，
+     * 否则魅族/小米等机型会直接把主线程卡到 ANR。
+     */
+    fun prewarm(items: List<QuickLauncherItem>) {
+        prewarmIcons(items)
+        prewarmShortcuts(items)
+        prewarmActionIcons(items)
     }
 
     fun draw(canvas: Canvas, drawToolbar: Boolean = true) {
@@ -142,22 +150,48 @@ internal class QuickLauncherRenderer(
         }
     }
 
-    private fun warmQuickLauncherIconCache() {
-        ctrl.rebuildQuickLauncherAppsByPackage()
+    private fun prewarmIcons(items: List<QuickLauncherItem>) {
+        if (items.isEmpty()) return
         val size = quickLauncherGridIconSize.toInt().coerceAtLeast(1)
-        ctrl.quickLauncherRootItems().forEach { item ->
-            resolveQuickLauncherItemIcon(item, size)
+        if (ctrl.quickLauncherAppsByPackage.isEmpty()) {
+            ctrl.rebuildQuickLauncherAppsByPackage()
+        }
+        items.forEach { item -> requestQuickLauncherItemIcon(item, size, urgent = false) }
+    }
+
+    private fun prewarmShortcuts(items: List<QuickLauncherItem>) {
+        val shortcuts = items.filter { it.type == QuickLauncherItemType.SHORTCUT }
+        if (shortcuts.isEmpty()) return
+        val appContext = host.context.applicationContext
+        OverlayIconLoader.submit {
+            AppShortcutLoader.warmQuickLauncherShortcuts(appContext, shortcuts)
         }
     }
 
-    private fun resolveQuickLauncherItemIcon(item: QuickLauncherItem, size: Int): Bitmap? {
-        val catalogStamp = host.settings().activityShortcuts
-            .joinToString(";") { "${it.identityKey()}:${it.iconPath.orEmpty()}" }
-        val shellStamp = host.settings().shellCommands
-            .joinToString(";") { "${it.id}:${it.iconType}:${it.iconPath.orEmpty()}:${it.textIcon.orEmpty()}" }
-        val key = "${ctrl.quickLauncherItemCacheKey(item)}\u0000$size\u0000${quickLauncherIconShape}\u0000v34\u0000$catalogStamp\u0000$shellStamp"
-        ctrl.quickLauncherIconCache[key]?.let { return it }
-        val shellCommands = host.settings().shellCommands
+    private fun prewarmActionIcons(items: List<QuickLauncherItem>) {
+        val sizePx = quickLauncherGridIconSize.toInt().coerceAtLeast(1)
+        val actions = items.filter { it.type == QuickLauncherItemType.ACTION }
+            .mapNotNull { QuickLauncherItemCodec.parseActionPayload(it.payload) }
+        if (actions.isEmpty()) return
+        OverlayIconLoader.submit {
+            actions.forEach { action ->
+                GestureActionIconBitmap.preload(action, sizePx, outlined = true)
+            }
+        }
+    }
+
+    /**
+     * 后台解析单个图标。只在 [OverlayIconLoader] 的工作线程里执行，
+     * 参数在提交前就从主线程快照好，避免后台线程回头读 View 状态。
+     */
+    private fun resolveQuickLauncherIcon(
+        item: QuickLauncherItem,
+        size: Int,
+        context: Context,
+        appsByPackage: Map<String, AppInfo>,
+        activityShortcuts: List<ActivityShortcut>,
+        shellCommands: List<ShellCommand>
+    ): Bitmap? {
         if (item.type == QuickLauncherItemType.ACTION &&
             QuickLauncherIconResolver.shouldUseGestureVectorIcon(item, shellCommands)
         ) {
@@ -168,34 +202,16 @@ internal class QuickLauncherRenderer(
                 tintArgb = Color.WHITE,
                 outlined = true,
                 withPlate = true
-            ).also { ctrl.quickLauncherIconCache[key] = it }
+            )
         }
         return QuickLauncherIconResolver.iconBitmap(
             item = item,
-            appsByPackage = ctrl.quickLauncherAppsByPackage,
+            appsByPackage = appsByPackage,
             size = size,
-            context = host.context,
-            activityShortcuts = host.settings().activityShortcuts,
+            context = context,
+            activityShortcuts = activityShortcuts,
             shellCommands = shellCommands
-        )?.also { ctrl.quickLauncherIconCache[key] = it }
-    }
-
-    private fun warmQuickLauncherShortcutCache() {
-        val items = ctrl.quickLauncherRootItems()
-        if (items.none { it.type == QuickLauncherItemType.SHORTCUT }) return
-        Thread {
-            AppShortcutLoader.warmQuickLauncherShortcuts(host.context, items)
-        }.start()
-    }
-
-    private fun warmQuickLauncherActionIconCache() {
-        val sizePx = quickLauncherGridIconSize.toInt().coerceAtLeast(1)
-        ctrl.quickLauncherRootItems().forEach { item ->
-            if (item.type != QuickLauncherItemType.ACTION) return@forEach
-            QuickLauncherItemCodec.parseActionPayload(item.payload)?.let { action ->
-                GestureActionIconBitmap.preload(action, sizePx, outlined = true)
-            }
-        }
+        )
     }
 
     private fun quickLauncherItemLabel(item: QuickLauncherItem): String {
@@ -216,12 +232,78 @@ internal class QuickLauncherRenderer(
         return label
     }
 
+    /**
+     * 绘制路径取图标：命中就画，未命中提交后台解析并返回 null（调用方画占位）。
+     * 任何情况下都不会在这里触发 PackageManager / 磁盘 IO。
+     */
     private fun quickLauncherItemIcon(item: QuickLauncherItem): Bitmap? {
         val size = quickLauncherGridIconSize.toInt().coerceAtLeast(1)
         if (ctrl.quickLauncherAppsByPackage.isEmpty()) {
             ctrl.rebuildQuickLauncherAppsByPackage()
         }
-        return resolveQuickLauncherItemIcon(item, size)
+        val key = quickLauncherIconKey(item, size)
+        OverlayIconLoader.peek(key)?.let { return it }
+        requestQuickLauncherItemIcon(item, size, urgent = true)
+        return null
+    }
+
+    private fun requestQuickLauncherItemIcon(
+        item: QuickLauncherItem,
+        size: Int,
+        urgent: Boolean
+    ) {
+        val key = quickLauncherIconKey(item, size)
+        val appContext = host.context.applicationContext
+        val appsByPackage = ctrl.quickLauncherAppsByPackage
+        val activityShortcuts = host.settings().activityShortcuts
+        val shellCommands = host.settings().shellCommands
+        OverlayIconLoader.request(
+            key = key,
+            urgent = urgent,
+            load = {
+                resolveQuickLauncherIcon(
+                    item = item,
+                    size = size,
+                    context = appContext,
+                    appsByPackage = appsByPackage,
+                    activityShortcuts = activityShortcuts,
+                    shellCommands = shellCommands
+                )
+            },
+            onReady = { ctrl.invalidateQuickLauncherPanel() }
+        )
+    }
+
+    private fun quickLauncherIconKey(item: QuickLauncherItem, size: Int): String =
+        "${ctrl.quickLauncherItemCacheKey(item)}\u0000$size\u0000$quickLauncherIconShape" +
+            "\u0000v35\u0000${quickLauncherIconCatalogStamp()}\u0000${ctrl.quickLauncherAppsRevision}"
+
+    private var cachedShortcutCatalog: List<ActivityShortcut>? = null
+    private var cachedShellCatalog: List<ShellCommand>? = null
+    private var cachedCatalogStamp: String = ""
+
+    /**
+     * 快捷方式目录 / 快捷命令目录的指纹，用于让这些条目在目录变化后重新取图。
+     * 目录本身按引用比对，避免每格每帧都拼一次字符串。
+     */
+    private fun quickLauncherIconCatalogStamp(): String {
+        val shortcuts = host.settings().activityShortcuts
+        val shells = host.settings().shellCommands
+        if (shortcuts !== cachedShortcutCatalog || shells !== cachedShellCatalog) {
+            cachedShortcutCatalog = shortcuts
+            cachedShellCatalog = shells
+            cachedCatalogStamp = buildString {
+                shortcuts.forEach { shortcut ->
+                    append(shortcut.identityKey()).append(':').append(shortcut.iconPath.orEmpty()).append(';')
+                }
+                append('\u0000')
+                shells.forEach { shell ->
+                    append(shell.id).append(':').append(shell.iconType).append(':')
+                        .append(shell.iconPath.orEmpty()).append(':').append(shell.textIcon.orEmpty()).append(';')
+                }
+            }
+        }
+        return cachedCatalogStamp
     }
 
     private val frostedGlassDrawable = LocalFrostedGlassDrawable { host.overlayView() }

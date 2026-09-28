@@ -8,13 +8,10 @@ import android.content.Context
 
 internal object ClipboardMonitorProcess {
     /**
-     * 剪贴板监听前台服务由独立进程 `:clipboard-monitor` 独占（此前跟着 `:overlay`）。
+     * 单进程后剪贴板监听与 UI/无障碍在同一个进程，**本进程就是监听进程**。
      *
-     * 为什么要独立：这条服务最容易踩前台服务启动超时被杀，跟浮层同进程时一崩就带走
-     * 悬浮球与手势。拆开后它自己崩只影响剪贴板记录。
-     *
-     * 其它进程要启停监听时，直接按组件名启停 [ClipboardMonitorForegroundService]，
-     * 由它在自己进程里解析监听模式。
+     * 这条判定不能留 false：`ClipboardMonitorController.start/restart` 在"非监听进程"时
+     * 会直接 `return false`，判定恒 false 等于监听永远起不来（合并后必须为 true）。
      */
-    fun isMonitorProcess(): Boolean = com.slideindex.app.util.AppProcess.isClipboardMonitor
+    fun isMonitorProcess(): Boolean = true
 }

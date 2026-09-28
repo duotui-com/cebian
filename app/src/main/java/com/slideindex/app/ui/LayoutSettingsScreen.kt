@@ -85,6 +85,10 @@ fun LayoutSettingsScreen(
                         enabled = serviceEnabled,
                         label = "",
                         formatLabel = { "${(it * 100).roundToInt()}%" },
+                        // 拖动期只走预览通道，松手才写一次设置：
+                        // 之前每个 tick 都写一次 DataStore，落盘队列会在松手之后继续回流，
+                        // 把刚才的拖动"回放"一遍（滑条数值与索引面板都会跟着抖）。
+                        commitOnFinish = true,
                         triggersLayoutPreview = true,
                         onLayoutPreviewStart = onLayoutPreviewStart,
                         onLayoutPreviewStop = onLayoutPreviewStop,

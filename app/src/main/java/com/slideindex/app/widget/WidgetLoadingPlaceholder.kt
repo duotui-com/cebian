@@ -37,15 +37,8 @@ class WidgetLoadingPlaceholder(context: Context) : FrameLayout(context) {
     setWillNotDraw(false)
     setBackgroundColor("#F5F5F5".toColorInt())
     val label = TextView(context).apply {
-      // 浮层进程里是真在加载（宿主就在那儿）；设置编辑器进程永远拿不到宿主视图，
-      // 再写"加载中…"就是骗人 —— 那里改成中性说明，预览走页面上的「在面板中预览」入口。
-      text = context.getString(
-        if (com.slideindex.app.util.AppProcess.isOverlay) {
-          com.slideindex.app.R.string.widget_loading
-        } else {
-          com.slideindex.app.R.string.widget_preview_hint
-        }
-      )
+      // 单进程后宿主视图与编辑器在同一个进程里，占位只是"真在加载"的短暂状态。
+      text = context.getString(com.slideindex.app.R.string.widget_loading)
       setTextColor("#9E9E9E".toColorInt())
       textSize = 13f
     }

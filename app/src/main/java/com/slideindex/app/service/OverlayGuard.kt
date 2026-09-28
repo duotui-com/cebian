@@ -5,26 +5,24 @@ import android.os.SystemClock
 import android.util.Log
 import com.slideindex.app.overlay.OverlayStatePort
 import com.slideindex.app.settings.AppSettings
-import com.slideindex.app.util.AppProcess
 import com.slideindex.app.util.PermissionHelper
 import com.slideindex.app.util.SecureSettingsHelper
 import kotlinx.coroutines.delay
 
 /**
- * 常驻交互（`:overlay`）看门狗。
+ * 常驻交互看门狗。
  *
- * 多进程之后主进程不再是常驻进程，"App 不开的时候边缘手势没人管"这件事必须由别的机制兜住。
- * 这里做的是**互拉**：由主进程里的 [OverlayWatchdogJobService] 定期巡检，发现 overlay 掉线
- * 或进程疑似已死时：
+ * "App 不开的时候边缘手势没人管"这件事必须由别的机制兜住，这里做的是**互拉**：
+ * [OverlayWatchdogJobService] 定期巡检，发现无障碍掉线或进程疑似已死时：
  *
- * 1. 先 `startForegroundService(OverlayService)` 把 `:overlay` 拉起来；它 onCreate 会自己
+ * 1. 先 `startForegroundService(OverlayService)` 把常驻服务拉起来；它 onCreate 会自己
  *    走一遍无障碍恢复并立刻回一帧状态；
- * 2. 唤醒无效（进程起不来 / 系统拒绝重绑）时，改写系统无障碍条目强制系统重绑 ——
- *    这一步同时会把承载无障碍服务的 `:overlay` 进程重新拉起来；
+ * 2. 唤醒无效（进程起不来 / 系统拒绝重绑）时，改写系统无障碍条目强制系统重绑；
  * 3. 仍然不行才发通知提示用户手动处理（可点进系统无障碍设置）。
  *
- * 判定"是不是掉线"一律用 [OverlayStatePort] 的跨进程镜像 + 心跳新鲜度，
- * 绝不用进程内静态（那是本项目踩过的坑：主进程里 `isConnected()` 恒 false，会误报并抖断正常绑定）。
+ * 判定"是不是掉线"一律经 [OverlayStatePort]（回单进程后它就是本进程的权威状态，
+ * 不再有镜像延迟），不要另起一份进程内静态——历史上主进程读自己的 `isConnected()`
+ * 恒 false，误报抖断过正常绑定。
  */
 object OverlayGuard {
     enum class GuardResult {
@@ -49,7 +47,6 @@ object OverlayGuard {
 
     suspend fun run(context: Context, settings: AppSettings): GuardResult {
         val appContext = context.applicationContext
-        if (AppProcess.isOverlay) return GuardResult.NotEnabled
         if (!settings.serviceEnabled) return GuardResult.Disabled
         if (!PermissionHelper.isAccessibilityServiceEnabled(appContext)) return GuardResult.NotEnabled
 

@@ -217,6 +217,11 @@ class AppRepository @Inject constructor(
         launchIconCache.warmBitmapsAsync(packageNames, sizePx)
     }
 
+    /** 后台补一个图标，完成后回主线程通知重绘（浮层绘制路径专用，替代同步 [launchIconBitmap]）。 */
+    fun requestLaunchIconBitmapAsync(packageName: String, sizePx: Int, onReady: () -> Unit) {
+        launchIconCache.requestBitmapAsync(packageName, sizePx, onReady)
+    }
+
     private fun publishApps(apps: List<AppInfo>) {
         appsByPackage = apps.associateBy { it.packageName }
         launchIconCache.retainPackages(apps.map { it.packageName })

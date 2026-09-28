@@ -30,8 +30,6 @@ import com.slideindex.app.freezer.FreezerLaunchState
 import com.slideindex.app.freezer.FreezerTab
 import com.slideindex.app.notification.NotificationHistoryLaunchState
 import com.slideindex.app.overlay.FloatBallPickResultPanel
-import com.slideindex.app.overlay.LayoutPreviewContent
-import com.slideindex.app.overlay.LayoutPreviewFocus
 import com.slideindex.app.overlay.WidgetPickerOverlayWindow
 import com.slideindex.app.overlay.WidgetPopupOverlayWindow
 import com.slideindex.app.service.OverlayService
@@ -85,7 +83,8 @@ class MainActivity : ComponentActivity() {
     private val currentIntentAction = mutableStateOf<String?>(null)
     private val pendingNavRoute = mutableStateOf<String?>(null)
     private val pendingShowUpdate = mutableStateOf(false)
-    private lateinit var overlayServiceController: OverlayServiceController
+    /** 设置页浮层预览与常驻服务控制的入口（同进程直连）。 */
+    internal lateinit var overlayServiceController: OverlayServiceController
     private val permissionRefreshHandler = Handler(Looper.getMainLooper())
     private var accessibilitySettingsObserver: ContentObserver? = null
 
@@ -362,27 +361,6 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
-    }
-
-    internal fun sendOverlayPreviewIntent(
-        action: String,
-        content: LayoutPreviewContent = LayoutPreviewContent.TRIGGER_ONLY,
-        focus: LayoutPreviewFocus? = null
-    ) {
-        overlayServiceController.sendPreviewIntent(action, content, focus)
-    }
-
-    /** 滑条拖动期的实时预览：由 [com.slideindex.app.service.OverlayServiceController] 送到 :overlay。 */
-    internal fun sendOverlayPreviewExtras(action: String, configure: (Intent) -> Unit) {
-        overlayServiceController.sendPreviewExtras(action, configure)
-    }
-
-    internal fun setFloatingPointerAreaPreview(active: Boolean, sensitivity: Float? = null) {
-        overlayServiceController.setFloatingPointerAreaPreview(active, sensitivity)
-    }
-
-    internal fun showWidgetPanelPreview() {
-        overlayServiceController.showWidgetPanelPreview()
     }
 
     internal fun refreshPermissionState() {

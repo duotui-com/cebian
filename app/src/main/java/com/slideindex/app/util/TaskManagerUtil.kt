@@ -176,15 +176,8 @@ object TaskManagerUtil {
         forceRestartUserService(appContext())
     }
 
-    fun isShizukuRunning(): Boolean {
-        // 非主进程（:overlay / :clipboard）真正要用 Shizuku 之前先确保 binder 已取到。
-        // 之前是在进程启动期无条件抢着取，会把主进程一并拉起来并让本进程依赖它
-        // （覆盖安装后主进程启动慢被杀时，:overlay 会被连带杀掉）。详见 ShizukuBinderBridge。
-        applicationContext?.let { ctx ->
-            runCatching { com.slideindex.app.shizuku.ShizukuBinderBridge.ensure(ctx) }
-        }
-        return runCatching { Shizuku.pingBinder() }.getOrDefault(false)
-    }
+    fun isShizukuRunning(): Boolean =
+        runCatching { Shizuku.pingBinder() }.getOrDefault(false)
 
     fun hasShizukuPermission(): Boolean =
         isShizukuRunning() &&

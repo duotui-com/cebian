@@ -85,6 +85,11 @@ object FloatBallOverlay {
     private const val FLOAT_BALL_PASSTHROUGH_FRAMES_BEFORE_INJECT = 6
     private const val FLOAT_BALL_PASSTHROUGH_RESTORE_DELAY_MS = 140L
 
+    /** "提交后的 Y 预览值"顶住多久；设置落盘正常都在几十毫秒内，超时就放手避免卡住旧值。 */
+    private const val PENDING_POSITION_Y_TIMEOUT_MS = 1_500L
+    /** 浮点比较容差：设置落盘经过序列化，不能要求按位相等。 */
+    private const val POSITION_Y_EPSILON = 0.0005f
+
     private var passivePickPreviewAlpha = 1f
     private var passivePickPreviewAnchor: Offset? = null
 
@@ -109,6 +114,17 @@ object FloatBallOverlay {
     private val screenOffDismissReceiver = ScreenOffDismissReceiver { hideCursor() }
     private var appContext: Context? = null
     private var positionYPreviewRestore: Float? = null
+
+    /**
+     * 已提交、但还没被设置回流确认的 Y 预览值。
+     *
+     * 滑条松手时"写设置"是异步落盘的：如果这时立刻丢掉预览值，球会先回到已保存的旧位置，
+     * 等新值落盘回流后再跳过去（用户看到的就是"先回原位、再跳到正确位置"）。
+     * 这里把提交值顶住，直到 incoming 的设置值追上（或超时兜底），与 [committedActiveSideUntilPersist] 同一套做法。
+     */
+    private var pendingPositionYFraction: Float? = null
+
+    private val clearPendingPositionYRunnable = Runnable { pendingPositionYFraction = null }
     private var appearancePreviewRestore: FloatBallAppearancePreviewSnapshot? = null
 
     private data class FloatBallAppearancePreviewSnapshot(
@@ -472,6 +488,8 @@ object FloatBallOverlay {
             return
         }
         val state = settingsState ?: return
+        // 新的拖动接管，之前那次"待确认"的值作废。
+        cancelPendingPositionY()
         if (positionYPreviewRestore == null) {
             positionYPreviewRestore = state.value.floatBallPositionYFraction
         }
@@ -488,8 +506,15 @@ object FloatBallOverlay {
         }
         val baseline = positionYPreviewRestore
         positionYPreviewRestore = null
-        if (!restoreIfNeeded || baseline == null) return
         val state = settingsState ?: return
+        if (!restoreIfNeeded || baseline == null) {
+            // 提交：保留当前预览值，等设置回流到同一个值再放手。
+            pendingPositionYFraction = state.value.floatBallPositionYFraction
+            mainHandler.removeCallbacks(clearPendingPositionYRunnable)
+            mainHandler.postDelayed(clearPendingPositionYRunnable, PENDING_POSITION_Y_TIMEOUT_MS)
+            return
+        }
+        cancelPendingPositionY()
         val restored = state.value.let { it.copy(floatBall = it.floatBall.copy(floatBallPositionYFraction = baseline)) }
         state.value = restored
         applyAllLayouts(restored)
@@ -497,6 +522,12 @@ object FloatBallOverlay {
 
     fun clearPositionYPreviewRestore() {
         positionYPreviewRestore = null
+        cancelPendingPositionY()
+    }
+
+    private fun cancelPendingPositionY() {
+        pendingPositionYFraction = null
+        mainHandler.removeCallbacks(clearPendingPositionYRunnable)
     }
 
     fun previewAppearance(
@@ -680,6 +711,26 @@ object FloatBallOverlay {
                         floatBallLineOpacity = current.floatBallLineOpacity
                     )
                 )
+                // 拖动期：任何回流（别的设置写入、本次提交前后的中间态）都不许把 Y 拉回旧值。
+                positionYPreviewRestore != null && current != null -> incoming.copy(
+                    floatBall = incoming.floatBall.copy(
+                        floatBallPositionYFraction = current.floatBallPositionYFraction
+                    )
+                )
+                // 提交后、落盘回流前：继续顶住预览值，等 incoming 追上同一个值就放手。
+                pendingPositionYFraction != null && current != null -> {
+                    val pending = pendingPositionYFraction!!
+                    if (kotlin.math.abs(incoming.floatBallPositionYFraction - pending) <= POSITION_Y_EPSILON) {
+                        cancelPendingPositionY()
+                        incoming
+                    } else {
+                        incoming.copy(
+                            floatBall = incoming.floatBall.copy(
+                                floatBallPositionYFraction = current.floatBallPositionYFraction
+                            )
+                        )
+                    }
+                }
                 isDragging &&
                     current != null &&
                     incoming.floatBallActiveSide != current.floatBallActiveSide -> incoming.copy(
@@ -737,6 +788,7 @@ object FloatBallOverlay {
         windowManager = null
         sceneState = null
         dragActiveSideOverrideState = null
+        cancelPendingPositionY()
         onPositionPersisted = null
         onActiveSidePersisted = null
         screenOffDismissReceiver.unregister()

@@ -18,8 +18,6 @@ import com.slideindex.app.di.AppDependencies
 import com.slideindex.app.overlay.LayoutPreviewContent
 import com.slideindex.app.overlay.LayoutPreviewFocus
 import com.slideindex.app.overlay.PanelSide
-import com.slideindex.app.service.OverlayService
-import com.slideindex.app.service.SlideIndexAccessibilityService
 import com.slideindex.app.gesture.GestureAngles
 import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.util.HapticHelper
@@ -91,12 +89,16 @@ class MainNavContext(
         activity.lifecycleScope.launch { block() }
     }
 
-    fun sendOverlayPreviewIntent(
-        action: String,
+    /** 布局预览总开关（触钮 / 索引高度 / 手势角度）。 */
+    fun startLayoutPreview(
         content: LayoutPreviewContent = LayoutPreviewContent.TRIGGER_ONLY,
         focus: LayoutPreviewFocus? = null,
     ) {
-        activity.sendOverlayPreviewIntent(action, content, focus)
+        activity.overlayServiceController.startLayoutPreview(content, focus)
+    }
+
+    fun stopLayoutPreview() {
+        activity.overlayServiceController.stopLayoutPreview()
     }
 
     fun startFocusedTriggerPreview(
@@ -145,8 +147,7 @@ class MainNavContext(
         handleId: String,
         showPairedGroup: Boolean = false,
     ) {
-        sendOverlayPreviewIntent(
-            action = OverlayService.ACTION_PREVIEW_START,
+        activity.overlayServiceController.startLayoutPreview(
             content = LayoutPreviewContent.TRIGGER_ONLY,
             focus = triggerPreviewFocus(
                 side = side,
@@ -162,8 +163,7 @@ class MainNavContext(
         handleId: String,
         showPairedGroup: Boolean = false,
     ) {
-        sendOverlayPreviewIntent(
-            action = OverlayService.ACTION_PREVIEW_START,
+        activity.overlayServiceController.startLayoutPreview(
             content = LayoutPreviewContent.TRIGGER_ONLY,
             focus = triggerPreviewFocus(
                 side = side,
@@ -193,59 +193,49 @@ class MainNavContext(
         previewGestureAngles(angles)
     }
 
-    // 悬浮指针"行程范围预览"：窗口与跟手位置都在 :overlay，拖动期只推实时灵敏度。
+    // 悬浮指针"行程范围预览"：窗口与跟手位置都在本进程，拖动期只推实时灵敏度。
     fun previewFloatingPointerAreaSensitivityStart() {
-        activity.setFloatingPointerAreaPreview(true)
+        activity.overlayServiceController.setFloatingPointerAreaPreview(true)
     }
 
     fun previewFloatingPointerAreaSensitivity(fraction: Float) {
-        activity.setFloatingPointerAreaPreview(true, fraction)
+        activity.overlayServiceController.setFloatingPointerAreaPreview(true, fraction)
     }
 
     /** 松手：清掉临时灵敏度，预览继续跟随已保存设置。 */
     fun previewFloatingPointerAreaSensitivityEnd() {
-        activity.setFloatingPointerAreaPreview(true, Float.NaN)
+        activity.overlayServiceController.setFloatingPointerAreaPreview(true, Float.NaN)
     }
 
-    /** 小组件编辑器点"预览"：由 :overlay 弹出小组件面板显示真身。 */
+    /** 小组件编辑器点"预览"：弹出小组件面板显示真身。 */
     fun showWidgetPanelPreview() {
-        activity.showWidgetPanelPreview()
+        activity.overlayServiceController.showWidgetPanelPreview()
     }
 
     fun stopTriggerPreview() {
         cancelPendingTriggerPreviewStop()
         focusedTriggerPreviewRetainCount = 0
-        sendOverlayPreviewIntent(OverlayService.ACTION_PREVIEW_STOP)
+        activity.overlayServiceController.stopLayoutPreview()
     }
 
     fun startFloatBallStripZonePreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_STRIP_ZONE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, true)
-        }
+        activity.overlayServiceController.setFloatBallStripZonePreview(true)
     }
 
     fun stopFloatBallStripZonePreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_STRIP_ZONE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, false)
-        }
+        activity.overlayServiceController.setFloatBallStripZonePreview(false)
     }
 
     fun previewFloatBallPositionY(fraction: Float) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_POSITION_Y) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_POSITION_Y_FRACTION, fraction)
-        }
+        activity.overlayServiceController.previewFloatBallPositionYFraction(fraction)
     }
 
     fun endFloatBallPositionYPreview(restoreIfNeeded: Boolean) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_POSITION_Y) { intent ->
-            if (restoreIfNeeded) intent.putExtra(OverlayService.EXTRA_PREVIEW_RESTORE, true)
-        }
+        activity.overlayServiceController.endFloatBallPositionYPreview(restoreIfNeeded)
     }
 
     fun clearFloatBallPositionYPreviewRestore() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_POSITION_Y) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CLEAR_RESTORE, true)
-        }
+        activity.overlayServiceController.clearFloatBallPositionYPreviewRestore()
     }
 
     fun previewFloatBallAppearance(
@@ -256,49 +246,30 @@ class MainNavContext(
         lineWidthFraction: Float? = null,
         lineOpacity: Float? = null,
     ) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_APPEARANCE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, true)
-            if (sizeDp != null) intent.putExtra(OverlayService.EXTRA_PREVIEW_SIZE_DP, sizeDp)
-            if (opacity != null) intent.putExtra(OverlayService.EXTRA_PREVIEW_OPACITY, opacity)
-            if (visibleFraction != null) {
-                intent.putExtra(OverlayService.EXTRA_PREVIEW_VISIBLE_FRACTION, visibleFraction)
-            }
-            if (lineHeightFraction != null) {
-                intent.putExtra(OverlayService.EXTRA_PREVIEW_LINE_HEIGHT_FRACTION, lineHeightFraction)
-            }
-            if (lineWidthFraction != null) {
-                intent.putExtra(OverlayService.EXTRA_PREVIEW_LINE_WIDTH_FRACTION, lineWidthFraction)
-            }
-            if (lineOpacity != null) intent.putExtra(OverlayService.EXTRA_PREVIEW_LINE_OPACITY, lineOpacity)
-        }
+        activity.overlayServiceController.previewFloatBallAppearance(
+            sizeDp = sizeDp,
+            opacity = opacity,
+            visibleFraction = visibleFraction,
+            lineHeightFraction = lineHeightFraction,
+            lineWidthFraction = lineWidthFraction,
+            lineOpacity = lineOpacity,
+        )
     }
 
     fun endFloatBallAppearancePreview(restoreIfNeeded: Boolean) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_APPEARANCE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_ACTIVE, false)
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_RESTORE, restoreIfNeeded)
-        }
+        activity.overlayServiceController.endFloatBallAppearancePreview(restoreIfNeeded)
     }
 
     fun clearFloatBallAppearancePreviewRestore() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_FLOAT_BALL_APPEARANCE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CLEAR_RESTORE, true)
-        }
+        activity.overlayServiceController.clearFloatBallAppearancePreviewRestore()
     }
 
-    // 浮层预览必须跨进程送达 :overlay —— 设置界面在独立进程，
-    // 直连 SlideIndexAccessibilityService.instance 只会命中 null 静默失效。
-
     fun startCornerZonePreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CORNER_ZONE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_ACTIVE, true)
-        }
+        activity.overlayServiceController.setCornerZonePreviewActive(true)
     }
 
     fun stopCornerZonePreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CORNER_ZONE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_ACTIVE, false)
-        }
+        activity.overlayServiceController.setCornerZonePreviewActive(false)
     }
 
     fun updateCornerZonePreview(
@@ -307,29 +278,33 @@ class MainNavContext(
         horizontalEdgeWidthDp: Float,
         horizontalEdgeHeightDp: Float,
     ) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CORNER_ZONE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_ACTIVE, true)
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_V_WIDTH, verticalEdgeWidthDp)
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_V_HEIGHT, verticalEdgeHeightDp)
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_H_WIDTH, horizontalEdgeWidthDp)
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_CORNER_H_HEIGHT, horizontalEdgeHeightDp)
-        }
+        activity.overlayServiceController.applyCornerZonePreviewDimensions(
+            verticalEdgeWidthDp = verticalEdgeWidthDp,
+            verticalEdgeHeightDp = verticalEdgeHeightDp,
+            horizontalEdgeWidthDp = horizontalEdgeWidthDp,
+            horizontalEdgeHeightDp = horizontalEdgeHeightDp,
+        )
     }
 
     fun previewIndexHeightFraction(fraction: Float) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_INDEX_HEIGHT) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_INDEX_FRACTION, fraction)
-        }
+        activity.overlayServiceController.previewIndexHeightFraction(fraction)
     }
 
     fun clearIndexHeightPreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_INDEX_HEIGHT) { }
+        activity.overlayServiceController.clearIndexHeightPreview()
+    }
+
+    /** 松手提交索引高度预览（等设置落盘再撤，避免跳回旧值）。 */
+    fun commitIndexHeightPreview() {
+        activity.overlayServiceController.commitIndexHeightPreview()
     }
 
     fun previewTriggerHandleEdgeWidth(side: PanelSide, handleId: String, edgeWidthDp: Float) {
-        previewTriggerHandle(side, handleId) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_EDGE_WIDTH_DP, edgeWidthDp)
-        }
+        activity.overlayServiceController.previewTriggerHandle(
+            side = side,
+            handleId = handleId,
+            edgeWidthDp = edgeWidthDp,
+        )
     }
 
     fun previewTriggerHandleVerticalRange(
@@ -338,10 +313,12 @@ class MainNavContext(
         topFraction: Float,
         bottomFraction: Float,
     ) {
-        previewTriggerHandle(side, handleId) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_TOP_FRACTION, topFraction)
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_BOTTOM_FRACTION, bottomFraction)
-        }
+        activity.overlayServiceController.previewTriggerHandle(
+            side = side,
+            handleId = handleId,
+            topFraction = topFraction,
+            bottomFraction = bottomFraction,
+        )
     }
 
     fun previewTriggerHandleSwipeDistances(
@@ -350,14 +327,12 @@ class MainNavContext(
         shortSwipeDistanceDp: Float? = null,
         longSwipeDistanceDp: Float? = null,
     ) {
-        previewTriggerHandle(side, handleId) { intent ->
-            if (shortSwipeDistanceDp != null) {
-                intent.putExtra(OverlayService.EXTRA_PREVIEW_SHORT_SWIPE_DP, shortSwipeDistanceDp)
-            }
-            if (longSwipeDistanceDp != null) {
-                intent.putExtra(OverlayService.EXTRA_PREVIEW_LONG_SWIPE_DP, longSwipeDistanceDp)
-            }
-        }
+        activity.overlayServiceController.previewTriggerHandle(
+            side = side,
+            handleId = handleId,
+            shortSwipeDistanceDp = shortSwipeDistanceDp,
+            longSwipeDistanceDp = longSwipeDistanceDp,
+        )
     }
 
     fun previewTriggerHandleDesign(
@@ -365,43 +340,33 @@ class MainNavContext(
         handleId: String,
         design: com.slideindex.app.gesture.TriggerHandleDesign,
     ) {
-        previewTriggerHandle(side, handleId) { intent ->
-            intent.putExtra(
-                OverlayService.EXTRA_PREVIEW_DESIGN,
-                com.slideindex.app.gesture.TriggerHandleDesignCodec.encode(design),
-            )
-        }
+        activity.overlayServiceController.previewTriggerHandle(
+            side = side,
+            handleId = handleId,
+            design = design,
+        )
     }
 
-    /** 手势角度预览：同样必须跨进程。 */
+    /** 手势角度预览。 */
     fun previewGestureAngles(angles: com.slideindex.app.gesture.GestureAngles) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_GESTURE_ANGLES) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_GESTURE_ANGLES, angles.toFloatArray())
-        }
+        activity.overlayServiceController.setGestureAnglesPreview(angles)
     }
 
     fun clearGestureAnglesPreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_GESTURE_ANGLES) { }
+        activity.overlayServiceController.setGestureAnglesPreview(null)
     }
 
     fun clearTriggerHandleLayoutPreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CLEAR) { }
+        activity.overlayServiceController.clearOverlayLayoutPreview()
+    }
+
+    /** 松手提交触钮预览（等设置落盘再撤，避免跳回旧值）。 */
+    fun commitTriggerHandleLayoutPreview() {
+        activity.overlayServiceController.commitTriggerHandleLayoutPreview()
     }
 
     fun clearOverlayLayoutPreview() {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_CLEAR) { }
-    }
-
-    private fun previewTriggerHandle(
-        side: PanelSide,
-        handleId: String,
-        configure: (android.content.Intent) -> Unit,
-    ) {
-        activity.sendOverlayPreviewExtras(OverlayService.ACTION_PREVIEW_TRIGGER_HANDLE) { intent ->
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_SIDE, side.name)
-            intent.putExtra(OverlayService.EXTRA_PREVIEW_HANDLE_ID, handleId)
-            configure(intent)
-        }
+        activity.overlayServiceController.clearOverlayLayoutPreview()
     }
 
     private fun triggerPreviewFocus(
@@ -419,8 +384,7 @@ class MainNavContext(
     private fun retainFocusedTriggerPreview(focus: LayoutPreviewFocus) {
         cancelPendingTriggerPreviewStop()
         focusedTriggerPreviewRetainCount++
-        sendOverlayPreviewIntent(
-            action = OverlayService.ACTION_PREVIEW_START,
+        activity.overlayServiceController.startLayoutPreview(
             content = LayoutPreviewContent.TRIGGER_ONLY,
             focus = focus,
         )
@@ -430,7 +394,7 @@ class MainNavContext(
         cancelPendingTriggerPreviewStop()
         pendingTriggerPreviewStop = Runnable {
             if (focusedTriggerPreviewRetainCount == 0) {
-                sendOverlayPreviewIntent(OverlayService.ACTION_PREVIEW_STOP)
+                activity.overlayServiceController.stopLayoutPreview()
             }
         }
         triggerPreviewHandler.postDelayed(pendingTriggerPreviewStop!!, TRIGGER_PREVIEW_HANDOFF_MS)

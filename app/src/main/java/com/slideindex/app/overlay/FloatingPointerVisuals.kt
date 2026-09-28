@@ -53,53 +53,74 @@ internal fun DrawScope.drawFloatingPointerAreaPreview(
     screenWidth: Float,
     screenHeight: Float
 ) {
+    // 全部描边都用"深色底描边 + 亮色面描边"两层：
+    // 单层半透明白线在浅色页面上几乎看不见（旧实现在白底上就是一层淡白雾）。
     drawRoundRect(
-        color = Color.White.copy(alpha = 0.04f),
+        color = Color.White.copy(alpha = 0.06f),
         topLeft = Offset.Zero,
         size = Size(screenWidth, screenHeight),
         cornerRadius = CornerRadius(0f, 0f)
     )
     drawRoundRect(
-        color = Color.White.copy(alpha = 0.22f),
+        color = Color.Black.copy(alpha = 0.35f),
         topLeft = Offset.Zero,
         size = Size(screenWidth, screenHeight),
         cornerRadius = CornerRadius(0f, 0f),
-        style = Stroke(width = 2f)
+        style = Stroke(width = 4f)
+    )
+    drawRoundRect(
+        color = Color.White.copy(alpha = 0.35f),
+        topLeft = Offset.Zero,
+        size = Size(screenWidth, screenHeight),
+        cornerRadius = CornerRadius(0f, 0f),
+        style = Stroke(width = 1.5f)
     )
 
     val area = layout.travelRect
     if (area.width > 0f && area.height > 0f) {
+        val dash = PathEffect.dashPathEffect(floatArrayOf(14f, 10f))
         drawRoundRect(
-            color = Color(0x22FFFFFF),
+            color = Color.White.copy(alpha = 0.20f),
             topLeft = area.topLeft,
             size = area.size,
             cornerRadius = CornerRadius(8f, 8f)
         )
         drawRoundRect(
-            color = Color.White.copy(alpha = 0.38f),
+            color = Color.Black.copy(alpha = 0.45f),
             topLeft = area.topLeft,
             size = area.size,
             cornerRadius = CornerRadius(8f, 8f),
-            style = Stroke(
-                width = 1.5f,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 10f))
-            )
+            style = Stroke(width = 4f, pathEffect = dash)
+        )
+        drawRoundRect(
+            color = Color.White.copy(alpha = 0.92f),
+            topLeft = area.topLeft,
+            size = area.size,
+            cornerRadius = CornerRadius(8f, 8f),
+            style = Stroke(width = 1.8f, pathEffect = dash)
         )
     }
     val onScreen = layout.travelRectOnScreen
     if (onScreen.width > 0f && onScreen.height > 0f) {
         drawRoundRect(
-            color = Color(0x55FFFFFF),
+            color = Color.White.copy(alpha = 0.38f),
             topLeft = onScreen.topLeft,
             size = onScreen.size,
             cornerRadius = CornerRadius(8f, 8f)
         )
         drawRoundRect(
-            color = Color.White.copy(alpha = 0.78f),
+            color = Color.Black.copy(alpha = 0.40f),
             topLeft = onScreen.topLeft,
             size = onScreen.size,
             cornerRadius = CornerRadius(8f, 8f),
-            style = Stroke(width = 2f)
+            style = Stroke(width = 4.5f)
+        )
+        drawRoundRect(
+            color = Color.White.copy(alpha = 1f),
+            topLeft = onScreen.topLeft,
+            size = onScreen.size,
+            cornerRadius = CornerRadius(8f, 8f),
+            style = Stroke(width = 2.2f)
         )
     }
 

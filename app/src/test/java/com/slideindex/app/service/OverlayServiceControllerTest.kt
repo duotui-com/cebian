@@ -6,7 +6,7 @@ import com.slideindex.app.settings.testSettingsRepository
 import com.slideindex.app.ui.navigation.NavPermissionStates
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,27 +20,26 @@ import org.robolectric.annotation.Config
 class OverlayServiceControllerTest {
 
     @Test
-    fun sendPreviewIntent_noOpWhenAccessibilityDisabled() {
+    fun layoutPreview_doesNotStartServiceWhenAccessibilityDisabled() {
         val app = RuntimeEnvironment.getApplication()
         val controller = controller(app, accessibilityGranted = false)
 
-        controller.sendPreviewIntent(OverlayService.ACTION_PREVIEW_START)
+        controller.startLayoutPreview()
 
         val started = Shadows.shadowOf(app).nextStartedService
-        assertFalse(started?.action == OverlayService.ACTION_PREVIEW_START)
+        assertNull("预览不再经由 Intent 启动服务", started)
     }
 
     @Test
-    fun sendPreviewIntent_startsServiceWhenAccessibilityGranted() {
+    fun layoutPreview_staysInProcessWhenAccessibilityGranted() {
         val app = RuntimeEnvironment.getApplication()
         val controller = controller(app, accessibilityGranted = true)
 
-        controller.sendPreviewIntent(
-            OverlayService.ACTION_PREVIEW_START,
-        )
+        controller.startLayoutPreview()
+        controller.stopLayoutPreview()
 
         val started = Shadows.shadowOf(app).nextStartedService
-        assertTrue(started?.action == OverlayService.ACTION_PREVIEW_START)
+        assertNull("预览通道不再启动任何服务", started)
     }
 
     @Test

@@ -209,7 +209,9 @@ fun FloatBallAppearanceSettingsScreen(
                             keyPoints = SETTINGS_SLIDER_PERCENT_KEY_POINTS_01,
                             triggersLayoutPreview = true,
                             onLayoutPreviewStart = onPositionYPreviewStart,
-                            onLayoutPreviewStop = { onPositionYPreviewStop(true) },
+                            // 松手只是"提交"：写入是异步的，这里再还原成拖动前的值会看到
+                            // "先回原位、再跳到新位置"。还原留给离开页面/取消预览的路径。
+                            onLayoutPreviewStop = { onPositionYPreviewStop(false) },
                             onLayoutPreviewValueChange = onPositionYPreviewChange,
                             onValueChange = { fraction ->
                                 onPositionYPreviewStop(false)

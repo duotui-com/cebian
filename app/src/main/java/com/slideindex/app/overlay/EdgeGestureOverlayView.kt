@@ -592,8 +592,26 @@ class EdgeGestureOverlayView(
         return rawX - loc[0] to rawY - loc[1]
     }
 
-    private fun iconFor(app: AppInfo): Bitmap =
-        appRepository.launchIconBitmap(app.packageName, iconSizePx.toInt().coerceAtLeast(1))
+    /**
+     * 索引面板 / 任务切换器绘制路径取图标：只读缓存，未命中返回透明占位并提交后台加载。
+     *
+     * 这里原来直接调 `launchIconBitmap`（缓存未命中会同步打 PackageManager）——
+     * 在魅族上那一条会走主题图标逐像素重建，主线程直接卡到 ANR。
+     */
+    private fun iconFor(app: AppInfo): Bitmap {
+        val size = iconSizePx.toInt().coerceAtLeast(1)
+        appRepository.peekLaunchIconBitmap(app.packageName, size)?.let { return it }
+        appRepository.requestLaunchIconBitmapAsync(app.packageName, size) {
+            if (panelMode() != OverlayPanelMode.NONE) invalidate()
+        }
+        return transparentIcon(size)
+    }
+
+    private val transparentIcons = mutableMapOf<Int, Bitmap>()
+
+    /** 图标还没解析出来时的占位：透明（与 AppLaunchIconCache 的 ColorDrawable(0) 观感一致）。 */
+    private fun transparentIcon(size: Int): Bitmap =
+        transparentIcons.getOrPut(size) { Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888) }
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density
 

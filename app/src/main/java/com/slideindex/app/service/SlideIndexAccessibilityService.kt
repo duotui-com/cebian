@@ -481,6 +481,10 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             overlayHostOrNull("clearIndexHeightPreview")?.clearIndexHeightPreview()
         }
 
+        fun commitIndexHeightPreview() {
+            overlayHostOrNull("commitIndexHeightPreview")?.commitIndexHeightPreview()
+        }
+
         fun mergeTriggerHandleLayoutPreview(
             side: com.slideindex.app.overlay.PanelSide,
             handleId: String,
@@ -505,6 +509,11 @@ class SlideIndexAccessibilityService : AccessibilityService() {
 
         fun clearTriggerHandleLayoutPreview() {
             overlayHostOrNull("clearTriggerHandleLayoutPreview")?.clearTriggerHandleLayoutPreview()
+        }
+
+        fun commitTriggerHandleLayoutPreview() {
+            overlayHostOrNull("commitTriggerHandleLayoutPreview")
+                ?.commitTriggerHandleLayoutPreview()
         }
 
         fun clearOverlayLayoutPreview() {

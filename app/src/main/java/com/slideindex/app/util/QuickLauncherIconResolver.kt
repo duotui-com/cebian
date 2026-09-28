@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.util.LruCache
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withClip
 import com.slideindex.app.activity.ActivityShortcut
@@ -25,6 +26,18 @@ import com.slideindex.app.shell.ShellCommand
 import com.slideindex.app.shell.ShellCommandIconResolver
 
 object QuickLauncherIconResolver {
+
+    /**
+     * 进程内图标缓存。
+     *
+     * 必须缓存的原因：魅族/小米等 OEM 的 [PackageManager.getApplicationIcon] 会做主题图标重建
+     * （Flyme: `FlymeThemeHelper.cropTransparentSpace` 逐像素 `Bitmap.getPixel`），单个图标可达秒级
+     * —— 编辑器一次要画几十个图标，不缓存就是"等一分钟"（真机实测）。
+     */
+    private val bitmapCache = object : LruCache<String, Bitmap>(
+        (Runtime.getRuntime().maxMemory() / 1024 / 24).toInt().coerceIn(48, 256)
+    ) {}
+
     fun iconBitmap(
         item: QuickLauncherItem,
         appsByPackage: Map<String, AppInfo>,
@@ -33,6 +46,35 @@ object QuickLauncherIconResolver {
         actionIconTintArgb: Int = Color.WHITE,
         activityShortcuts: List<ActivityShortcut> = emptyList(),
         shellCommands: List<ShellCommand> = emptyList(),
+    ): Bitmap? {
+        val cacheKey = buildString {
+            append(item.type.id).append('\u0000').append(item.payload).append('\u0000').append(item.label)
+            append('\u0000').append(size).append('\u0000').append(actionIconTintArgb)
+            append('\u0000').append(activityShortcuts.size).append(':').append(activityShortcuts.hashCode())
+            append('\u0000').append(shellCommands.size).append(':').append(shellCommands.hashCode())
+        }
+        bitmapCache.get(cacheKey)?.let { return it }
+        val bitmap = resolveIconBitmap(
+            item = item,
+            appsByPackage = appsByPackage,
+            size = size,
+            context = context,
+            activityShortcuts = activityShortcuts,
+            shellCommands = shellCommands,
+        )
+        if (bitmap != null) {
+            bitmapCache.put(cacheKey, bitmap)
+        }
+        return bitmap
+    }
+
+    private fun resolveIconBitmap(
+        item: QuickLauncherItem,
+        appsByPackage: Map<String, AppInfo>,
+        size: Int,
+        context: Context?,
+        activityShortcuts: List<ActivityShortcut>,
+        shellCommands: List<ShellCommand>,
     ): Bitmap? {
         if (item.type == QuickLauncherItemType.FOLDER) {
             return renderFolderBitmap(

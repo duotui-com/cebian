@@ -385,6 +385,8 @@ private fun WidgetPanelGridEditor(
     )
   }
 
+  val previewSectionTitle = stringResource(R.string.floating_pointer_preview_section)
+
   Column(
     modifier = Modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(0.dp),
@@ -395,6 +397,122 @@ private fun WidgetPanelGridEditor(
     ) {
       SettingsCardSegmentContent {
         pageSettingsCard.RenderRows()
+      }
+    }
+
+    SmallTitle(
+      text = previewSectionTitle,
+      modifier = Modifier
+        .fillMaxWidth()
+        ,
+    )
+
+    CardSegment(
+      isFirst = true,
+      isLast = true,
+      outerBottomPadding = 12.dp,
+    ) {
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(vertical = 12.dp),
+        contentAlignment = Alignment.TopCenter,
+      ) {
+      val screenWidthPx = LocalWindowInfo.current.containerSize.width
+      val layoutMetrics = WidgetPanelLayoutMetrics.compute(
+        screenWidthPx = screenWidthPx,
+        page = page,
+        density = density.density,
+        panelPaddingDp = 12f,
+        panelInnerPaddingDp = 4f,
+        horizontalInsetDp = 16f,
+      )
+      val panelWidthDp = with(density) { layoutMetrics.panelWidthPx.toDp() }
+      val viewportHeight = with(density) {
+        layoutMetrics.viewportHeightPx.toDp().coerceAtLeast(200.dp)
+      }
+      val gridScrollState = rememberScrollState()
+
+      Box(
+        modifier = Modifier
+          .width(panelWidthDp)
+          .height(viewportHeight)
+          .clip(RoundedCornerShape(20.dp))
+          .background(
+            WidgetPanelUi.panelSurfaceColor(
+              overlayAlpha = page.overlayAlpha,
+              editMode = true,
+              blurEnabled = widgetPanelBlurEnabled,
+            ),
+          ),
+      ) {
+        Column(
+          modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(gridScrollState, enabled = gridScrollEnabled),
+        ) {
+          androidx.compose.ui.viewinterop.AndroidView(
+            modifier = Modifier
+              .fillMaxWidth()
+              .wrapContentHeight()
+              .nestedScroll(rememberNestedScrollInteropConnection()),
+            factory = { ctx ->
+              com.slideindex.app.widget.WidgetCanvasLayout(ctx).apply {
+                val dm = ctx.resources.displayMetrics
+                val pad = (4f * dm.density).roundToInt()
+                setPadding(pad, pad, pad, pad)
+                onPageCommitted = { committedPage ->
+                  onPagesChange(WidgetPanelMutator.replacePage(latestPages, pageIndex, committedPage))
+                }
+                onItemRemoved = { widgetId ->
+                  onPagesChange(
+                    WidgetPanelMutator.removeWidgetFromPage(ctx, latestPages, pageIndex, widgetId),
+                  )
+                }
+                onConfigureWidget = { widgetId ->
+                  val intent = com.slideindex.app.service.WidgetConfigureTrampolineActivity.createIntent(ctx, widgetId)
+                  runCatching { ctx.startActivity(intent) }
+                }
+                onAddWidgetRequested = { launchWidgetPicker() }
+                onInteractionActiveChange = onGridInteractionActiveChange
+                bindIfNeeded(page, ctx)
+                editMode = true
+              }
+            },
+            update = { view ->
+              view.onPageCommitted = { committedPage ->
+                onPagesChange(WidgetPanelMutator.replacePage(latestPages, pageIndex, committedPage))
+              }
+              view.onItemRemoved = { widgetId ->
+                onPagesChange(
+                  WidgetPanelMutator.removeWidgetFromPage(view.context, latestPages, pageIndex, widgetId),
+                )
+              }
+              view.onConfigureWidget = { widgetId ->
+                val intent = com.slideindex.app.service.WidgetConfigureTrampolineActivity.createIntent(view.context, widgetId)
+                runCatching { view.context.startActivity(intent) }
+              }
+              view.onAddWidgetRequested = { launchWidgetPicker() }
+              view.onInteractionActiveChange = onGridInteractionActiveChange
+              view.bindIfNeeded(page, view.context)
+              view.editMode = true
+            },
+          )
+        }
+
+        Box(
+          modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(16.dp)
+            .size(56.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable { launchWidgetPicker() },
+          contentAlignment = Alignment.Center,
+        ) {
+          Icon(Icons.Default.Add, contentDescription = stringResource(R.string.widget_panel_add_widget))
+        }
+      }
       }
     }
   }

@@ -410,7 +410,10 @@ class WidgetPopupCardLayout(
     }
 
     private fun persist(updated: List<WidgetPanelPage>) {
-        pages = updated.toMutableList()
+        // 与 updatePages 用同一套归一化：设置回流时 updatePages 才能判定"内容没变"而跳过整页重建。
+        pages = WidgetPanelDefaults.effectivePages(updated)
+            .map { WidgetPanelGridLogic.fitPageToGrid(it) }
+            .toMutableList()
         onSavePages(updated)
         updateDots()
         updateHeader()
@@ -522,8 +525,10 @@ class WidgetPopupCardLayout(
                 persist(WidgetPanelMutator.replacePage(pages, position, committedPage))
             }
             canvas.onItemRemoved = { widgetId ->
+                // 画布自己已经把被删的那张卡摘掉了，这里只需要持久化；
+                // 再 notifyItemChanged 会让整页重新 bind（removeAllViews + 重建所有卡），
+                // 表现为"其他小组件先消失再浮现"。
                 persist(WidgetPanelMutator.removeWidgetFromPage(hostContext, pages, position, widgetId))
-                notifyItemChanged(position)
             }
             canvas.onConfigureWidget = { widgetId ->
                 val intent = WidgetConfigureTrampolineActivity.createIntent(hostContext, widgetId)

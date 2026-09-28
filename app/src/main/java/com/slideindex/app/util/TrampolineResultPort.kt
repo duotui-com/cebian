@@ -1,12 +1,8 @@
 package com.slideindex.app.util
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
-import androidx.core.content.ContextCompat
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -28,11 +24,7 @@ object TrampolineResultPort {
 
     private val pending = ConcurrentHashMap<String, (Bundle) -> Unit>()
 
-    @Volatile
-    private var receiverRegistered = false
-
     fun register(context: Context, token: String, onResult: (Bundle) -> Unit) {
-        ensureReceiver(context)
         pending[token] = onResult
     }
 
@@ -40,39 +32,14 @@ object TrampolineResultPort {
         pending.remove(token)
     }
 
-    /** Activity 侧调用：把结果送回发起进程。 */
+    /** Activity 侧调用：单进程直接回调发起方（token 仅用于传递与校验）。 */
     fun deliver(context: Context, token: String, payload: Bundle) {
-        val appContext = context.applicationContext
-        val intent = Intent(ACTION_RESULT).apply {
-            setPackage(appContext.packageName)
-            putExtra(EXTRA_TOKEN, token)
-            putExtras(payload)
+        val callback = pending.remove(token)
+        if (callback == null) {
+            Log.w(TAG, "deliver($token): 没有等待中的回调")
+            return
         }
-        runCatching { appContext.sendBroadcast(intent) }
-            .onFailure { Log.w(TAG, "deliver($token) failed", it) }
-    }
-
-    private fun ensureReceiver(context: Context) {
-        if (receiverRegistered) return
-        val appContext = context.applicationContext
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(receiverContext: Context?, intent: Intent?) {
-                if (intent?.action != ACTION_RESULT) return
-                val token = intent.getStringExtra(EXTRA_TOKEN) ?: return
-                val callback = pending.remove(token) ?: return
-                val extras = intent.extras ?: Bundle()
-                runCatching { callback(extras) }
-                    .onFailure { Log.w(TAG, "onResult($token) failed", it) }
-            }
-        }
-        runCatching {
-            ContextCompat.registerReceiver(
-                appContext,
-                receiver,
-                IntentFilter(ACTION_RESULT),
-                ContextCompat.RECEIVER_NOT_EXPORTED,
-            )
-            receiverRegistered = true
-        }.onFailure { Log.w(TAG, "registerReceiver failed", it) }
+        runCatching { callback(payload) }
+            .onFailure { Log.w(TAG, "onResult($token) failed", it) }
     }
 }
