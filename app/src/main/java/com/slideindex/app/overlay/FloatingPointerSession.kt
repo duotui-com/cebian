@@ -290,6 +290,18 @@ internal class FloatingPointerSession(
         gestureRecorderTrailRevision.intValue++
     }
 
+    /**
+     * 手势收尾（回填指针位置 + 清理轨迹）是否还没做完。
+     *
+     * 这些字段不是 Compose 状态，只能靠逐帧回调兜底；[FloatingPointerDisplay] 的
+     * 逐帧循环用它决定是否继续吃 vsync。
+     */
+    internal val hasPendingGestureAftermath: Boolean
+        get() = gesturePointerRestoreX != null ||
+            gesturePointerRestoreY != null ||
+            gestureRecorderTrailPoints.isNotEmpty() ||
+            trailLifespanOverrideMs != null
+
     /** QC `o21.m`: clear trail, restore pointer after replay + retreat end. */
     fun completeGestureAftermathIfReady(settings: AppSettings): Boolean {
         if (gestureReplayActive.value) return false

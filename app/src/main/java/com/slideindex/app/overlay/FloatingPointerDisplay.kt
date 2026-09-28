@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -42,7 +43,9 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableLongStateOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 
 @Composable
@@ -243,37 +246,34 @@ internal fun FloatingPointerDisplay(
 
         LaunchedEffect(Unit) {
             while (true) {
-                withFrameNanos { frameTime ->
-                    val now = System.currentTimeMillis()
-                    val recordingActive = session.gestureRecordingActive.value
-                    val replayActive = session.gestureReplayActive.value
-                    val retreatActive = session.gestureTrailRetreatActive.value
-                    session.clearRippleIfExpired(now, settings.floatingPointerRippleDurationMs.toLong())
-                    session.pruneExpiredTrailPoints(now)
-                    session.clearInjectedSwipePreviewIfExpired(now)
-                    session.finishGestureTrailRetreatIfConsumed(settings)
-                    if (!replayActive && !recordingActive && !retreatActive) {
-                        session.completeGestureAftermathIfReady(settings)
-                    }
-                    if (session.trailPoints.size >= 2 ||
-                        session.hasActiveTrail(now) ||
-                        session.hasActiveGestureRecorderTrail(now) ||
-                        session.hasActiveInjectedSwipePreview(now) ||
-                        recordingActive ||
-                        retreatActive ||
-                        replayActive ||
-                        rippleProgress.isRunning ||
-                        rippleProgress.value > 0.001f ||
-                        pointerSizeScale.isRunning ||
-                        pointerDrawAlpha.isRunning ||
-                        pointerClickAnim.isRunning ||
-                        pointerClickAnim.value > 0.001f ||
-                        gestureRecorderProgress.isRunning ||
-                        gestureRecorderProgress.value > 0.001f ||
-                        presence < 0.999f ||
-                        radialMenuProgress < 0.999f
-                    ) {
-                        animationTick = frameTime
+                // 空闲时挂起等状态变化；最多 IDLE_RECHECK_MS 兜底重查一次，
+                // 免得"只有时间衰减、没有状态写入"的收尾（轨迹过期、指针回填）被漏掉。
+                withTimeoutOrNull(IDLE_RECHECK_MS) {
+                    snapshotFlow { session.needsFrameTicker() }.first { it }
+                }
+                var keepTicking = true
+                while (keepTicking) {
+                    withFrameNanos { frameTime ->
+                        val now = System.currentTimeMillis()
+                        val recordingActive = session.gestureRecordingActive.value
+                        val replayActive = session.gestureReplayActive.value
+                        val retreatActive = session.gestureTrailRetreatActive.value
+                        session.clearRippleIfExpired(now, settings.floatingPointerRippleDurationMs.toLong())
+                        session.pruneExpiredTrailPoints(now)
+                        session.clearInjectedSwipePreviewIfExpired(now)
+                        session.finishGestureTrailRetreatIfConsumed(settings)
+                        if (!replayActive && !recordingActive && !retreatActive) {
+                            session.completeGestureAftermathIfReady(settings)
+                        }
+                        keepTicking = session.needsFrameTicker(now) ||
+                            rippleProgress.isRunning ||
+                            pointerSizeScale.isRunning ||
+                            pointerDrawAlpha.isRunning ||
+                            pointerClickAnim.isRunning ||
+                            gestureRecorderProgress.isRunning
+                        if (keepTicking) {
+                            animationTick = frameTime
+                        }
                     }
                 }
             }
@@ -475,3 +475,30 @@ internal fun FloatingPointerDisplay(
         }
     }
 }
+
+/**
+ * 逐帧回调是否还有活要干：只覆盖"没有状态事件驱动、靠时间衰减"的内容（轨迹 / 涟漪 / 手势收尾）。
+ * 这些数据必须由帧回调清理并重绘，否则会一直留在屏幕上。
+ *
+ * Compose 动画（[androidx.compose.animation.core.Animatable]、`animateFloatAsState` 等）
+ * 由自身状态失效驱动重绘，不在这里判断。原判据把 `presence < 0.999f`、
+ * `radialMenuProgress < 0.999f` 当作"动画中"，但静止时这两个值恰好是 0，条件恒真，
+ * 于是空闲的 overlay 也每帧写 `animationTick` → 永久重绘（真机实测：应用退到后台、
+ * 无人操作时 40s 仍渲染 1200 帧，约 30fps，主线程 + RenderThread + SurfaceFlinger 全程忙）。
+ */
+private fun FloatingPointerSession.needsFrameTicker(
+    nowMs: Long = System.currentTimeMillis()
+): Boolean =
+    trailPoints.isNotEmpty() ||
+        hasActiveTrail(nowMs) ||
+        hasActiveGestureRecorderTrail(nowMs) ||
+        hasActiveInjectedSwipePreview(nowMs) ||
+        hasPendingGestureAftermath ||
+        rippleActive.value ||
+        gestureRecordingActive.value ||
+        realtimeGestureActive.value ||
+        gestureReplayActive.value ||
+        gestureTrailRetreatActive.value
+
+/** 空闲时兜底重查周期：只做一次"有没有活要干"的判断，不写状态、不重绘。 */
+private const val IDLE_RECHECK_MS = 500L
