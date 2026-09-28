@@ -32,6 +32,7 @@ import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 
 
 
@@ -270,7 +271,11 @@ object RegionalScreenshotOcr {
 
         PickPerf.mark("a11y_screenshot_start")
 
-        val bitmap = suspendCancellableCoroutine { continuation ->
+        // takeScreenshot 的回调不保证一定回来（服务断开、请求被丢弃时静默消失）。
+        // 没超时的话这个协程会永远挂着，并把一整张全屏截图（1080p 约 10 MB）一起钉在堆里
+        // ——堆快照里就抓到过一份 9.6 MB 的 `captureRectBitmap` 挂起残留。
+        val bitmap = withTimeoutOrNull(SCREENSHOT_TIMEOUT_MS) {
+            suspendCancellableCoroutine { continuation ->
 
             service.takeScreenshot(
 
@@ -331,7 +336,7 @@ object RegionalScreenshotOcr {
                 }
 
             )
-
+            }
         }
 
         PickPerf.markStepDuration("a11y_screenshot_end", start, "bitmap=${bitmap != null}")
@@ -341,6 +346,9 @@ object RegionalScreenshotOcr {
     }
 
 
+
+    /** takeScreenshot 回调丢失时的兜底：避免协程永远挂着并钉住一整张全屏截图。 */
+    private const val SCREENSHOT_TIMEOUT_MS = 5_000L
 
     private fun closeHardwareBuffer(buffer: HardwareBuffer?) {
         runCatching { buffer?.close() }

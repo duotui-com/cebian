@@ -5,7 +5,9 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.drawable.ColorDrawable
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.LruCache
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -29,13 +31,21 @@ class AppLaunchIconCache @Inject constructor(
     private val pm get() = context.packageManager
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    private val drawableCache = object : LruCache<String, Drawable>(
-        (Runtime.getRuntime().maxMemory() / 1024 / 32).toInt().coerceIn(64, 384),
-    ) {}
+    /**
+     * 缓存按**字节**算，不再按条目数算。
+     *
+     * 原实现是 `LruCache<String, Drawable>(最多 384 条)`，而 Flyme/MIUI 的主题图标是
+     * 每个约 288×288 的位图（≈330 KB），384 条上限意味着常驻上百 MB——堆快照实测
+     * `BitmapDrawable$BitmapState` 一项就有 256 张 / 81 MB。现在统一栅格化成
+     * [ICON_CACHE_PX] 的位图并按字节淘汰，两档合计 40 MB 封顶。
+     */
+    private val drawableCache = object : LruCache<String, Bitmap>(DRAWABLE_CACHE_BYTES) {
+        override fun sizeOf(key: String, value: Bitmap): Int = value.allocationByteCount
+    }
 
-    private val bitmapCache = object : LruCache<String, Bitmap>(
-        (Runtime.getRuntime().maxMemory() / 1024 / 16).toInt().coerceIn(96, 512),
-    ) {}
+    private val bitmapCache = object : LruCache<String, Bitmap>(BITMAP_CACHE_BYTES) {
+        override fun sizeOf(key: String, value: Bitmap): Int = value.allocationByteCount
+    }
 
     private val pendingRequests = ConcurrentHashMap.newKeySet<String>()
 
@@ -55,8 +65,7 @@ class AppLaunchIconCache @Inject constructor(
         if (drawableCache.get(pkg) != null) return
         runCatching {
             val raw = pm.getApplicationIcon(applicationInfo)
-            val drawable = raw.constantState?.newDrawable()?.mutate() ?: raw.mutate()
-            drawableCache.put(pkg, drawable)
+            drawableCache.put(pkg, rasterize(raw, ICON_CACHE_PX))
         }
     }
 
@@ -71,7 +80,7 @@ class AppLaunchIconCache @Inject constructor(
     /** Returns a cached launcher icon without touching PackageManager. */
     fun peekDrawable(packageName: String): Drawable? {
         val cached = drawableCache.get(packageName) ?: return null
-        return cached.constantState?.newDrawable()?.mutate() ?: cached.mutate()
+        return BitmapDrawable(context.resources, cached)
     }
 
     /** Loads from PackageManager when missing, then returns a fresh drawable instance. */
@@ -95,8 +104,8 @@ class AppLaunchIconCache @Inject constructor(
         if (drawableCache.get(packageName) == null) {
             loadDrawable(packageName)
         }
-        val drawable = drawableCache.get(packageName) ?: ColorDrawable(0)
-        val bitmap = rasterize(drawable, size)
+        val source = drawableCache.get(packageName)
+        val bitmap = if (source != null) rasterizeBitmap(source, size) else createTransparent(size)
         bitmapCache.put(key, bitmap)
         return bitmap
     }
@@ -154,5 +163,31 @@ class AppLaunchIconCache @Inject constructor(
         return bitmap
     }
 
+    private fun rasterizeBitmap(source: Bitmap, size: Int): Bitmap {
+        if (source.width == size && source.height == size) {
+            return source.copy(Bitmap.Config.ARGB_8888, false) ?: createTransparent(size)
+        }
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).drawBitmap(
+            source,
+            null,
+            RectF(0f, 0f, size.toFloat(), size.toFloat()),
+            Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
+        )
+        return bitmap
+    }
+
+    private fun createTransparent(size: Int): Bitmap =
+        Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+
     private fun bitmapKey(packageName: String, sizePx: Int): String = "$packageName\u0000$sizePx"
+
+    private companion object {
+        /** 缓存图标边长上限：所有绘制点都在 200px 以内，超过就没必要留原图。 */
+        const val ICON_CACHE_PX = 192
+
+        /** 两档缓存都以字节计，合计 40 MB 封顶（原先按条目数算，实测可到上百 MB）。 */
+        const val DRAWABLE_CACHE_BYTES = 24 * 1024 * 1024
+        const val BITMAP_CACHE_BYTES = 16 * 1024 * 1024
+    }
 }
