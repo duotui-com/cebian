@@ -164,7 +164,16 @@ fun ClassicFloatingSideNavRailOverlay(
     }
 }
 
-private const val MainBottomNavGlassTintAlpha = 0.08f
+/**
+ * 经典毛玻璃的着色不透明度。
+ *
+ * 着色取容器色（`MiuixTheme.colorScheme.surfaceContainer`）而非正文色：
+ * 正文色在浅色主题下接近黑色，8% 的暗纱会把模糊层压成一片灰（实测 #E4E4E4），
+ * 比页面背景 #F7F7F7 还暗，看起来就是"脏"。
+ */
+private const val MainBottomNavGlassTintAlpha = 0.5f
+/** 极细噪点，避免大半径模糊出现色带/斑块。 */
+private const val MainBottomNavGlassNoiseFactor = 0.08f
 private val MainBottomNavIndicatorInset = 4.dp
 private const val MainBottomNavPressOverlayAlpha = 0.08f
 private val MainBottomNavIconSize = 24.dp
@@ -185,9 +194,11 @@ private val MainBottomNavItemColorTween = tween<Color>(
 @Composable
 private fun rememberBottomNavGlassStyle(blurRadius: Dp) = HazeDefaults.style(
     backgroundColor = MiuixTheme.colorScheme.background,
-    tint = HazeTint(MiuixTheme.colorScheme.onBackground.copy(alpha = MainBottomNavGlassTintAlpha)),
+    tint = HazeTint(
+        MiuixTheme.colorScheme.surfaceContainer.copy(alpha = MainBottomNavGlassTintAlpha),
+    ),
     blurRadius = blurRadius,
-    noiseFactor = 0f,
+    noiseFactor = MainBottomNavGlassNoiseFactor,
 )
 
 private fun DrawScope.drawNavItemCapsule(

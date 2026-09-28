@@ -421,7 +421,8 @@ data class OverlaySettings(
 }
 
 object BottomNavBlurDefaults {
-    const val DEFAULT_RADIUS_DP = 24f
+    /** 经典底栏默认模糊半径；24dp 在 72dp 高的胶囊上过糊，透出的内容会失去结构。 */
+    const val DEFAULT_RADIUS_DP = 16f
     const val LIQUID_GLASS_DEFAULT_RADIUS_DP = 4f
     const val FLOATING_NAV_DEFAULT_RADIUS_DP = 7f
     const val MIN_RADIUS_DP = 0f
