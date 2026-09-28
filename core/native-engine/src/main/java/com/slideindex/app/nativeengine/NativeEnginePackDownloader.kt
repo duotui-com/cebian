@@ -180,6 +180,8 @@ class NativeEnginePackDownloader @Inject constructor(
         if (packId == NativeEnginePackIds.OCR) {
             migrationNoticeStore.clearMigrationState(packId)
         }
+        // 用户显式安装成功 -> 清掉"已删除"标记，之后允许自动 provision。
+        repository.clearUserRemoved(packId)
 
         return DownloadRunResult.Success(
             NativeEnginePackDownloadState(

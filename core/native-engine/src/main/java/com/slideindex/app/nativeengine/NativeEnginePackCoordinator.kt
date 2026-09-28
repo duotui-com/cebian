@@ -73,8 +73,13 @@ class NativeEnginePackCoordinator @Inject constructor(
     }
 
     suspend fun deletePack(packId: String) = withContext(Dispatchers.IO) {
+        // 用户显式删除：留标记，之后不再从内置资产自动装回来（尊重删除）。
+        repository.markUserRemoved(packId)
         repository.deletePack(packId)
     }
+
+    /** 用户是否主动删过这个包；为 true 时自动 provision 会跳过。 */
+    fun isUserRemoved(packId: String): Boolean = repository.isUserRemoved(packId)
 
     fun installedPackRevision(packId: String): Int? =
         repository.readManifest(packId)?.packRevision
@@ -136,6 +141,8 @@ class NativeEnginePackCoordinator @Inject constructor(
         }
 
     private suspend fun ensurePackProvisioned(packId: String) {
+        // 用户删过的包不再自动从 APK 内置资产解压装回；要装由用户在设置里显式安装。
+        if (repository.isUserRemoved(packId)) return
         val entry = catalogProvider.findPack(packId) ?: return
         val catalogVersion = catalogProvider.catalog.version
         provisionMutex.withLock {

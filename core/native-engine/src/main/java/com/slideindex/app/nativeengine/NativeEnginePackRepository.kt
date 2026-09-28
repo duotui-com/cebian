@@ -38,6 +38,26 @@ class NativeEnginePackRepository @Inject constructor(
 
     fun downloadZipFile(packId: String): File = File(packsRoot(), "$packId.download.zip")
 
+    /**
+     * 「用户主动删除过这个引擎包」标记。
+     *
+     * 用户删包 = 明确要省掉它，所以 bundled 资产（full 包内置）**不能**下次用到功能时又
+     * 自动解压装回来。标记放在 packsRoot 下（不在 packRoot 里），删包不会连带删掉它；
+     * 只有用户在设置里显式安装（走下载器）才会清除。跨进程也一致（纯文件判断）。
+     */
+    fun userRemovedMarkerFile(packId: String): File = File(packsRoot(), "$packId.user-removed")
+
+    fun isUserRemoved(packId: String): Boolean = userRemovedMarkerFile(packId).isFile
+
+    fun markUserRemoved(packId: String) {
+        packsRoot().mkdirs()
+        runCatching { userRemovedMarkerFile(packId).writeText("1") }
+    }
+
+    fun clearUserRemoved(packId: String) {
+        runCatching { userRemovedMarkerFile(packId).delete() }
+    }
+
     fun isInstalled(packId: String): Boolean {
         val manifest = readManifest(packId) ?: return false
         val libDir = nativeLibDir(packId)
