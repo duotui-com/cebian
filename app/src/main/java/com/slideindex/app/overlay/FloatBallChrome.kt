@@ -438,15 +438,18 @@ private fun FloatBallGifVisual(
     val player = remember { FloatBallGifPlayer() }
     var sequence by remember(uri) { mutableStateOf<FloatBallGifFrameDecoder.Sequence?>(null) }
     var decodeFailed by remember(uri) { mutableStateOf(false) }
+    val gifHandle = remember(uri) { mutableStateOf<FloatBallGifSequenceCache.Handle?>(null) }
 
     LaunchedEffect(uri) {
         decodeFailed = false
-        val decoded = withContext(Dispatchers.IO) {
-            FloatBallGifFrameDecoder.decode(context, uri, decodePx)
+        // 和球窗口、拖拽快照共享同一份解码结果，避免每个预览都预解码整只 GIF。
+        val handle = withContext(Dispatchers.IO) {
+            FloatBallGifSequenceCache.acquire(context, uri, decodePx)
         }
-        sequence = decoded
-        if (decoded != null) {
-            FloatBallGifDragSnapshot.update(uri, decodePx, decoded)
+        gifHandle.value = handle
+        sequence = handle?.sequence
+        if (handle != null) {
+            FloatBallGifDragSnapshot.update(uri, decodePx, handle.sequence)
         } else {
             decodeFailed = true
         }
@@ -468,6 +471,8 @@ private fun FloatBallGifVisual(
         onDispose {
             FloatBallGifDragSnapshot.clear()
             player.release()
+            gifHandle.value?.close()
+            gifHandle.value = null
         }
     }
 

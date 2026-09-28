@@ -10,6 +10,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
+import android.os.PowerManager
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.graphics.createBitmap
@@ -92,6 +93,13 @@ internal class FloatBallGifView @JvmOverloads constructor(
         if (layerType != layer) {
             setLayerType(layer, null)
         }
+    }
+
+    /** 球不可见（窗口隐藏 / 从窗口树摘掉）或熄屏时，逐帧重绘没有意义。 */
+    fun canAnimateFrame(): Boolean {
+        if (!isShown || windowVisibility != VISIBLE) return false
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        return powerManager?.isInteractive != false
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

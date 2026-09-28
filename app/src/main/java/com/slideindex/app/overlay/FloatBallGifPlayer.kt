@@ -21,7 +21,15 @@ internal class FloatBallGifPlayer(
         override fun run() {
             if (paused) return
             val view = gifView ?: return
-            when (val seq = sequence) {
+            val seq = sequence ?: return
+            if (!view.canAnimateFrame()) {
+                // 球不可见 / 熄屏：没必要逐帧重绘，1 秒探一次即可。
+                view.setAnimating(false)
+                handler.postDelayed(this, HIDDEN_RECHECK_MS)
+                return
+            }
+            view.setAnimating(true)
+            when (seq) {
                 is FloatBallGifFrameDecoder.Sequence.Cached -> {
                     if (seq.frames.isEmpty()) return
                     val frame = seq.frames[frameIndex]
@@ -41,7 +49,6 @@ internal class FloatBallGifPlayer(
                     )
                     handler.postDelayed(this, STREAMING_TICK_MS.toLong())
                 }
-                null -> Unit
             }
         }
     }
@@ -52,7 +59,7 @@ internal class FloatBallGifPlayer(
 
     fun setSequence(seq: FloatBallGifFrameDecoder.Sequence?) {
         stop()
-        sequence?.recycle()
+        // 位图归 FloatBallGifSequenceCache 所有，可能被别处共享，这里只能松手不能 recycle。
         sequence = seq
         frameIndex = 0
         streamingStartUptimeMs = SystemClock.uptimeMillis()
@@ -85,7 +92,6 @@ internal class FloatBallGifPlayer(
 
     fun release() {
         stop()
-        sequence?.recycle()
         sequence = null
         gifView?.clearFrame()
         gifView = null
@@ -111,5 +117,8 @@ internal class FloatBallGifPlayer(
 
     companion object {
         internal const val STREAMING_TICK_MS = 66
+
+        /** 球不可见时的探测周期；恢复可见后由下一次探测自动继续播放。 */
+        private const val HIDDEN_RECHECK_MS = 1_000L
     }
 }

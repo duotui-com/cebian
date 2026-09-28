@@ -55,6 +55,7 @@ internal class FloatBallIconView(context: Context) : FrameLayout(context) {
     private var slideshowUris: List<String> = emptyList()
     private var slideshowIndex = 0
     private var gifDecodeToken = 0
+    private var gifSequenceHandle: FloatBallGifSequenceCache.Handle? = null
 
     private val slideshowRunnable = object : Runnable {
         override fun run() {
@@ -148,6 +149,7 @@ internal class FloatBallIconView(context: Context) : FrameLayout(context) {
         stopSlideshow()
         gifDecodeToken++
         gifPlayer.release()
+        releaseGifSequence()
         builtinAnimView.releaseAnimation()
         releaseOwnedBitmap()
         staticImage.setImageDrawable(null)
@@ -193,6 +195,7 @@ internal class FloatBallIconView(context: Context) : FrameLayout(context) {
     private fun showBuiltin(styleType: FloatBallStyleType, opacity: Float) {
         stopSlideshow()
         gifPlayer.release()
+        releaseGifSequence()
         releaseOwnedBitmap()
         showContentMode(ContentMode.BUILTIN)
         builtinAnimView.alpha = opacity
@@ -215,15 +218,17 @@ internal class FloatBallIconView(context: Context) : FrameLayout(context) {
 
         val token = ++gifDecodeToken
         Thread {
-            val decoded = FloatBallGifFrameDecoder.decode(context, uri, decodePx)
+            // 共享缓存：同一 (uri, 尺寸) 只解码一份，不再每次进 GIF 样式都解一整只。
+            val handle = FloatBallGifSequenceCache.acquire(context, uri, decodePx)
             mainHandler.post {
                 if (token != gifDecodeToken) {
-                    decoded?.recycle()
+                    handle?.close()
                     return@post
                 }
-                if (decoded != null) {
-                    FloatBallGifDragSnapshot.update(uri, decodePx, decoded)
-                    gifPlayer.setSequence(decoded)
+                if (handle != null) {
+                    retainGifSequence(handle)
+                    FloatBallGifDragSnapshot.update(uri, decodePx, handle.sequence)
+                    gifPlayer.setSequence(handle.sequence)
                     gifPlayer.setPaused(false)
                     gifPlayer.start()
                 } else {
@@ -255,6 +260,7 @@ internal class FloatBallIconView(context: Context) : FrameLayout(context) {
 
     private fun showStaticBitmap(bitmap: Bitmap, owns: Boolean) {
         gifPlayer.release()
+        releaseGifSequence()
         builtinAnimView.releaseAnimation()
         releaseOwnedBitmap()
         ownedBitmap = if (owns) bitmap else null
@@ -266,6 +272,18 @@ internal class FloatBallIconView(context: Context) : FrameLayout(context) {
     private fun releaseOwnedBitmap() {
         ownedBitmap?.recycle()
         ownedBitmap = null
+    }
+
+    /** 记下当前持有的共享序列；换样式时把旧的还回缓存——这才是真正释放的时机。 */
+    private fun retainGifSequence(handle: FloatBallGifSequenceCache.Handle) {
+        if (gifSequenceHandle === handle) return
+        gifSequenceHandle?.close()
+        gifSequenceHandle = handle
+    }
+
+    private fun releaseGifSequence() {
+        gifSequenceHandle?.close()
+        gifSequenceHandle = null
     }
 
     private fun stopSlideshow() {
