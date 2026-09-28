@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Widgets
-import com.slideindex.app.ui.SettingIconContainer
 import com.slideindex.app.ui.miuix.MiuixConfirmDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -52,17 +51,13 @@ import com.slideindex.app.settings.SearchEngineConfig
 import com.slideindex.app.settings.SearchEngineStore
 import com.slideindex.app.settings.SearchEngineType
 import com.slideindex.app.ui.viewmodel.SearchEngineImportPreviewState
-import com.slideindex.app.ui.miuix.CardItem
-import com.slideindex.app.ui.miuix.groupedCardItems
 import com.slideindex.app.ui.settings.components.SettingNavigationRow
-import com.slideindex.app.ui.settings.components.settingsCardScopeItem
+import com.slideindex.app.ui.settings.components.settingsCardItems
 import com.slideindex.app.ui.settings.components.settingsLazyHint
 import com.slideindex.app.ui.settings.components.settingsLazySmallTitle
 import com.slideindex.app.ui.settings.components.settingsLazyTipCard
 
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
-import top.yukonga.miuix.kmp.preference.ArrowPreference
+import com.slideindex.app.ui.miuix.MiuixBottomSheet
 import com.slideindex.app.ui.miuix.MiuixSettingsFab
 import com.slideindex.app.ui.searchengine.AggregatedSearchEngineManager
 
@@ -137,47 +132,43 @@ fun SearchEngineSettingsScreen(
         }
     }
 
-    OverlayBottomSheet(
+    MiuixBottomSheet(
         show = showAddSheet,
         title = stringResource(R.string.search_engine_add_title),
         onDismissRequest = { showAddSheet = false },
     ) {
-        MiuixCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-        ) {
-            ArrowPreference(
-                title = stringResource(R.string.search_engine_settings_preset_catalog),
-                summary = stringResource(R.string.search_engine_settings_preset_catalog_subtitle),
-                startAction = {
-                    SettingIconContainer {
-                        Icon(
-                            imageVector = Icons.Default.Widgets,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp),
-                        )
-                    }
+        // 规范做法（ui/miuix/README「类型 1：列表」）：非懒加载容器用 settingsCardItems + RenderRows，
+        // 行用 SettingNavigationRow —— 它自带图标容器、右箭头、分组卡片背景与行内 inset。
+        // 原来手写 Card 包 ArrowPreference，会让 Card 的 insideMargin 与行自带 inset 叠加成
+        // 水平双 padding（12 外层 + 16 + 16），视觉上就是"内容缩在中间、显得挤"。
+        val addSheetRows = settingsCardItems("search-engine-add-sheet") {
+            SettingNavigationRow(
+                icon = { label ->
+                    Icon(
+                        imageVector = Icons.Default.Widgets,
+                        contentDescription = label,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
                 },
+                title = stringResource(R.string.search_engine_settings_preset_catalog),
+                subtitle = stringResource(R.string.search_engine_settings_preset_catalog_subtitle),
                 onClick = {
                     showAddSheet = false
                     onOpenPresetPicker()
                 },
             )
-            ArrowPreference(
-                title = stringResource(R.string.search_engine_settings_import),
-                summary = stringResource(R.string.search_engine_settings_import_subtitle),
-                startAction = {
-                    SettingIconContainer {
-                        Icon(
-                            imageVector = Icons.Default.Backup,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp),
-                        )
-                    }
+            SettingNavigationRow(
+                icon = { label ->
+                    Icon(
+                        imageVector = Icons.Default.Backup,
+                        contentDescription = label,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
                 },
+                title = stringResource(R.string.search_engine_settings_import),
+                subtitle = stringResource(R.string.search_engine_settings_import_subtitle),
                 onClick = {
                     showAddSheet = false
                     importLauncher.launch(
@@ -190,24 +181,29 @@ fun SearchEngineSettingsScreen(
                     )
                 },
             )
-            ArrowPreference(
-                title = stringResource(R.string.search_engine_add_title),
-                summary = stringResource(R.string.search_engine_add_subtitle),
-                startAction = {
-                    SettingIconContainer {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp),
-                        )
-                    }
+            SettingNavigationRow(
+                icon = { label ->
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = label,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
                 },
+                title = stringResource(R.string.search_engine_add_title),
+                subtitle = stringResource(R.string.search_engine_add_subtitle),
                 onClick = {
                     showAddSheet = false
                     onOpenEditor(null)
                 },
             )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+        ) {
+            addSheetRows.RenderRows()
         }
     }
 
