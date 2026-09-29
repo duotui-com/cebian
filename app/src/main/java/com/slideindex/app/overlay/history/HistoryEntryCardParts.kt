@@ -335,6 +335,8 @@ internal data class HistoryCardMenuAction(
 internal fun HistoryCardOverflowMenu(
     contentDescription: String,
     actions: List<HistoryCardMenuAction>,
+    /** 和溢出菜单锚在同一个位置的附加内容，比如二级选择菜单。 */
+    anchoredContent: @Composable () -> Unit = {},
 ) {
     if (actions.isEmpty()) return
     val scheme = MiuixTheme.colorScheme
@@ -372,6 +374,7 @@ internal fun HistoryCardOverflowMenu(
                 )
             }
         }
+        anchoredContent()
     }
 }
 

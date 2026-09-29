@@ -131,6 +131,21 @@ object StashCoordinator {
         }
     }
 
+    /** 在微信聊天界面里一键发送该条目；点发送后按偏好收起面板，发送流程不随面板销毁而取消。 */
+    fun sendStashEntry(context: Context, entry: StashEntry) {
+        val collapse = StashAccess.sendPreferences?.collapsePanelAfterSend?.value != false
+        // 内容为空 / 已有发送在进行时只提示，不动面板，所以放进 onStart。
+        StashSendHelper.send(context, entry) {
+            if (collapse) {
+                FloatBallStashPanel.dismiss()
+            } else {
+                // 面板保持展开时，刚在搜索框里输过字的话面板窗口还拿着焦点；微信没有窗口焦点就读不到剪贴板，
+                // 粘贴会失败，所以先让面板交出输入焦点。
+                FloatBallStashPanel.updateWindowInputActiveForClipboard(false)
+            }
+        }
+    }
+
     fun openStashPanel(context: Context) {
         FloatBallStashPanel.show(context)
     }

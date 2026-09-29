@@ -15,7 +15,9 @@ import com.slideindex.app.otp.OtpRecordsRepository
 import com.slideindex.app.service.ShareImageOcrHistoryRepository
 import com.slideindex.app.search.SearchHistoryRepository
 import com.slideindex.app.shell.ShellOutputHistoryRepository
+import com.slideindex.app.stash.StashCategoryRepository
 import com.slideindex.app.stash.StashRepository
+import com.slideindex.app.stash.StashSendPreferences
 import com.slideindex.app.settings.SettingsRepository
 import com.slideindex.app.settings.WidgetPanelPersistence
 import com.slideindex.app.ui.feedback.UserMessageBus
@@ -43,6 +45,8 @@ class AppDependencies @Inject constructor(
     val shellOutputHistoryRepository: ShellOutputHistoryRepository,
     val searchHistoryRepository: SearchHistoryRepository,
     val stashRepository: StashRepository,
+    val stashCategoryRepository: StashCategoryRepository,
+    val stashSendPreferences: StashSendPreferences,
     val clipboardHistoryRepository: ClipboardHistoryRepository,
     override val widgetPanelPersistence: WidgetPanelPersistence
 ) : OverlayDependencies

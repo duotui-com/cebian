@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ストッシュのカテゴリと WeChat へのワンタップ送信（定型文）。キーは stash_category_ / stash_send_ で始まります。 -->
+<resources>
+    <!-- 設定の入口 -->
+    <string name="stash_category_manage_title">カテゴリと定型文の管理</string>
+    <string name="stash_category_manage_subtitle">ストッシュの内容を分類して、WeChat でワンタップ送信</string>
+
+    <!-- 管理ページ：ワンタップ送信の設定 -->
+    <string name="stash_category_settings_title">カテゴリと定型文の管理</string>
+    <string name="stash_category_settings_subtitle">カテゴリ付きの内容は長期保存され、WeChat のチャットへワンタップで送れます</string>
+    <string name="stash_category_send_section">ワンタップ送信</string>
+    <string name="stash_category_accessibility_title">ユーザー補助サービス</string>
+    <string name="stash_category_accessibility_on">有効です。WeChat のチャット画面でワンタップ送信できます</string>
+    <string name="stash_category_accessibility_off">無効です。タップして設定を開きます</string>
+    <string name="stash_category_collapse_title">送信後にパネルを閉じる</string>
+    <string name="stash_category_collapse_desc">「送信」をタップすると、先にコレクションパネルを閉じてから WeChat に入力します</string>
+    <string name="stash_category_wechat_env_hint">「送信」は WeChat のチャット画面でのみ動作します。ユーザー補助サービスを有効にし、送信したいチャットを WeChat で開いたままにしてください。入力欄にある下書きは上書きされます。機種や WeChat のバージョンによってはユーザー補助で WeChat の画面を読み取れない（ノードツリーが空）ことがあり、その場合はメッセージを表示してクリップボードにコピーします。システムのユーザー補助設定で「選択して読み上げ」を有効にすると、WeChat が画面ツリーを再構築するため、再試行すると改善する場合があります。</string>
+
+    <!-- 管理ページ：カテゴリ一覧 -->
+    <string name="stash_category_section">カテゴリ</string>
+    <string name="stash_category_add">カテゴリを追加</string>
+    <string name="stash_category_add_desc">カテゴリ内の項目は長期保存され、200 件の上限に含まれず、「ストッシュを消去」でも消えません</string>
+    <string name="stash_category_empty">カテゴリはまだありません。作成して、内容を入れましょう。</string>
+    <string name="stash_category_add_title">カテゴリを追加</string>
+    <string name="stash_category_rename_title">カテゴリ名を変更</string>
+    <string name="stash_category_name_hint">カテゴリ名</string>
+    <string name="stash_category_name_rejected">カテゴリ名は空にできず、既存のカテゴリと重複できません</string>
+    <string name="stash_category_entry_count">%d 件</string>
+    <string name="stash_category_rename">名前を変更</string>
+    <string name="stash_category_delete">カテゴリを削除</string>
+    <string name="stash_category_delete_title">カテゴリを削除しますか？</string>
+    <string name="stash_category_delete_message">カテゴリ「%1$s」内の %2$d 件は削除されず、通常のストッシュ項目に戻ります（先頭に並びます。ストッシュが 200 件を超えた場合は、古い通常項目から削除されます）。</string>
+
+    <!-- 管理ページ：カテゴリ内の項目 -->
+    <string name="stash_category_entries_add">定型文を追加</string>
+    <string name="stash_category_entries_add_desc">テキスト、画像、またはその両方</string>
+    <string name="stash_category_entries_empty">このカテゴリにはまだ項目がありません</string>
+    <string name="stash_category_entries_reorder_hint">長押しでドラッグして並べ替え、タップで編集</string>
+    <string name="stash_category_entry_type_text">テキスト</string>
+    <string name="stash_category_entry_type_image">画像</string>
+    <string name="stash_category_entry_type_rich">テキスト＋画像</string>
+    <string name="stash_category_entry_image_only">[画像]</string>
+    <string name="stash_category_move">別のカテゴリへ移動</string>
+    <string name="stash_category_move_title">カテゴリへ移動</string>
+    <string name="stash_category_move_uncategorized">カテゴリから外す（通常のストッシュに戻す）</string>
+    <string name="stash_category_entry_delete_title">この項目を削除しますか？</string>
+    <string name="stash_category_entry_delete_message">元に戻せません。</string>
+    <string name="stash_category_clear">このカテゴリを空にする</string>
+    <string name="stash_category_clear_desc">このカテゴリ内の項目をすべて削除します（画像を含む）。カテゴリ自体は残ります</string>
+    <string name="stash_category_clear_confirm_title">このカテゴリを空にしますか？</string>
+    <string name="stash_category_clear_confirm_message">「%1$s」内の %2$d 件（画像を含む）を削除します。元に戻せません。</string>
+
+    <!-- 管理ページ：項目の追加・編集 -->
+    <string name="stash_category_editor_add_title">定型文を追加</string>
+    <string name="stash_category_editor_edit_title">定型文を編集</string>
+    <string name="stash_category_editor_save">保存</string>
+    <string name="stash_category_editor_text_section">テキスト</string>
+    <string name="stash_category_editor_text_label">テキスト（画像だけ送る場合は空でも可）</string>
+    <string name="stash_category_editor_image_section">画像</string>
+    <string name="stash_category_editor_pick_image">画像を選択</string>
+    <string name="stash_category_editor_change_image">画像を変更</string>
+    <string name="stash_category_editor_remove_image">画像を削除</string>
+    <string name="stash_category_editor_order_hint">テキストと画像の両方を入力した場合は、テキスト、画像の順に送信します。</string>
+    <string name="stash_category_editor_complex">この項目には複数のテキストまたは画像が含まれるため、ここでは編集できません。戻って移動または削除してください。</string>
+    <string name="stash_category_image_load_failed">画像を読み込めませんでした</string>
+    <string name="stash_category_save_failed">保存できませんでした</string>
+
+    <!-- コレクションパネル：絞り込みバーとカード -->
+    <string name="stash_category_all">すべて</string>
+    <string name="stash_category_uncategorized">未分類</string>
+    <string name="stash_category_manage">管理</string>
+    <string name="stash_category_empty_hint">このカテゴリは空です。管理ページで追加するか、ストッシュ項目の「カテゴリへ移動」を使ってください</string>
+    <string name="stash_category_uncategorized_empty_hint">未分類の項目はありません</string>
+    <string name="stash_category_move_to">カテゴリへ移動</string>
+    <string name="stash_category_move_out">カテゴリから外す</string>
+    <string name="stash_category_move_manage">カテゴリを管理…</string>
+    <string name="stash_category_moved">移動しました</string>
+    <string name="stash_category_clear_all_confirm_message">カテゴリに入っていないストッシュ項目（画像を含む）を削除します。元に戻せません。カテゴリ内の項目は消去されません。</string>
+
+    <!-- ワンタップ送信 -->
+    <string name="stash_send_action">WeChat へ送信</string>
+    <string name="stash_send_empty">この項目には送信できるテキストや画像がありません</string>
+    <string name="stash_send_busy">送信中です。しばらくお待ちください</string>
+    <string name="stash_send_copied_suffix">。クリップボードにコピーしました</string>
+    <string name="stash_send_fail_accessibility">ユーザー補助サービスが無効のため、自動送信できません</string>
+    <string name="stash_send_fail_not_in_wechat">先に WeChat のチャット画面を開いてください</string>
+    <string name="stash_send_fail_tree_empty">WeChat の画面を読み取れません（ユーザー補助ツリーが空）。ユーザー補助設定で「選択して読み上げ」を有効にして再試行してください</string>
+    <string name="stash_send_fail_input_not_found">WeChat の入力欄が見つかりません。先にチャットを開いてください</string>
+    <string name="stash_send_fail_send_button">「送信」ボタンが見つかりません。手動で送信してください</string>
+    <string name="stash_send_fail_image">画像ファイルがない、またはクリップボードに置けません</string>
+    <string name="stash_send_fail_unexpected">送信中にエラーが発生しました。もう一度お試しください</string>
+    <string name="stash_send_fail_partial">前半の内容は送信できましたが、後半の送信に失敗しました</string>
+</resources>

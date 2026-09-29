@@ -23,7 +23,11 @@ data class StashEntry(
     val starred: Boolean = false,
     /** 钉图在屏幕上的显示宽高（逻辑像素），用于从暂存夹恢复时保持原尺寸。 */
     val pinDisplayWidthPx: Int? = null,
-    val pinDisplayHeightPx: Int? = null
+    val pinDisplayHeightPx: Int? = null,
+    /** 所属分类；非空即“话术”：长期保留，不占暂存夹 200 条名额，也不被自动清理。 */
+    val categoryId: String? = null,
+    /** 分类内的手动排序，越小越靠前；仅 [categoryId] 非空时使用。 */
+    val sortOrder: Int = 0
 )
 
 sealed class StashRichPart {

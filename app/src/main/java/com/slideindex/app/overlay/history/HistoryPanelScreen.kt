@@ -113,6 +113,8 @@ internal fun HistoryPanelScreen(
     val stashEntries by viewModel.stashEntries.collectAsStateWithLifecycle()
     val filteredStashEntries by viewModel.filteredStashEntries.collectAsStateWithLifecycle()
     val stashSearchQuery by viewModel.stashSearchQuery.collectAsStateWithLifecycle()
+    val stashCategories by viewModel.stashCategories.collectAsStateWithLifecycle()
+    val stashCategoryFilter by viewModel.stashCategoryFilter.collectAsStateWithLifecycle()
     val clipboardEntryCount by viewModel.clipboardEntryCount.collectAsStateWithLifecycle()
     val filteredClipboardEntries by viewModel.filteredClipboardEntries.collectAsStateWithLifecycle()
     val clipboardSearchQuery by viewModel.clipboardSearchQuery.collectAsStateWithLifecycle()
@@ -172,7 +174,11 @@ internal fun HistoryPanelScreen(
         }
         viewModel.setSelectedTab(tab)
         when (tab) {
-            HistoryPanelTab.Stash -> viewModel.setStashSearchQuery(pending.query)
+            HistoryPanelTab.Stash -> {
+                // 上次选中的分类会跨次保留；深链带来的搜索要在整个暂存夹里找，别被它静默缩小范围。
+                viewModel.setStashCategoryFilter(com.slideindex.app.stash.StashCategoryFilter.All)
+                viewModel.setStashSearchQuery(pending.query)
+            }
             HistoryPanelTab.Clipboard -> viewModel.setClipboardSearchQuery(pending.query)
         }
         searchExpanded = true
@@ -266,21 +272,36 @@ internal fun HistoryPanelScreen(
                     beyondViewportPageCount = 0,
                 ) { page ->
                     when (HistoryPanelTab.entries[page]) {
-                        HistoryPanelTab.Stash -> HistoryStashTabBody(
-                            allEntries = stashEntries,
-                            filteredEntries = filteredStashEntries,
-                            searchQuery = stashSearchQuery,
-                            isActive = selectedTab == HistoryPanelTab.Stash,
-                            panelBlurActive = panelBlurActive,
-                            listTopPadding = listTopPadding,
-                            listBackdrop = barBackdrop,
-                            repo = stashRepo,
-                            expandedEntryIds = expandedEntryIds,
-                            selectedImageIndices = selectedImageIndices,
-                            onToggleExpanded = viewModel::toggleExpanded,
-                            onSelectedImageIndexChange = viewModel::setSelectedImageIndex,
-                            onShowMessage = showPanelMessage,
-                        )
+                        HistoryPanelTab.Stash -> Box(modifier = Modifier.fillMaxSize()) {
+                            HistoryStashTabBody(
+                                allEntries = stashEntries,
+                                filteredEntries = filteredStashEntries,
+                                searchQuery = stashSearchQuery,
+                                categories = stashCategories,
+                                categoryFilter = stashCategoryFilter,
+                                isActive = selectedTab == HistoryPanelTab.Stash,
+                                panelBlurActive = panelBlurActive,
+                                listTopPadding = listTopPadding + StashCategoryBarHeight,
+                                listBackdrop = barBackdrop,
+                                repo = stashRepo,
+                                expandedEntryIds = expandedEntryIds,
+                                selectedImageIndices = selectedImageIndices,
+                                onToggleExpanded = viewModel::toggleExpanded,
+                                onSelectedImageIndexChange = viewModel::setSelectedImageIndex,
+                                onShowMessage = showPanelMessage,
+                            )
+                            StashCategoryChipBar(
+                                categories = stashCategories,
+                                selected = stashCategoryFilter,
+                                panelBlurActive = panelBlurActive,
+                                backdrop = barBackdrop,
+                                onSelect = viewModel::setStashCategoryFilter,
+                                onManage = { openStashCategoryManagement(context) },
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(top = listTopPadding),
+                            )
+                        }
                         HistoryPanelTab.Clipboard -> HistoryClipboardTabBody(
                             entryCount = clipboardEntryCount,
                             filteredEntries = filteredClipboardEntries,
@@ -383,6 +404,8 @@ private fun HistoryStashTabBody(
     allEntries: List<com.slideindex.app.stash.StashEntry>,
     filteredEntries: List<com.slideindex.app.stash.StashEntry>,
     searchQuery: String,
+    categories: List<com.slideindex.app.stash.StashCategory>,
+    categoryFilter: com.slideindex.app.stash.StashCategoryFilter,
     isActive: Boolean,
     panelBlurActive: Boolean,
     listTopPadding: Dp,
@@ -398,6 +421,9 @@ private fun HistoryStashTabBody(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val topEntryId = allEntries.firstOrNull()?.id
+    val categoryNames = remember(categories) { categories.associate { it.id to it.name } }
+    // 换了分类，列表内容整个变了，回到顶部。
+    LaunchedEffect(categoryFilter) { listState.scrollToItem(0) }
     var previousTopId by remember { mutableStateOf<String?>(null) }
     var previousIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     LaunchedEffect(isActive, topEntryId, searchQuery) {
@@ -425,7 +451,15 @@ private fun HistoryStashTabBody(
             ) {
                 Text(
                     text = stringResource(
-                        if (allEntries.isEmpty()) R.string.stash_empty else R.string.stash_search_empty,
+                        when {
+                            searchQuery.isNotBlank() && allEntries.isNotEmpty() -> R.string.stash_search_empty
+                            // 先建分类、再放内容是常见流程：整个暂存夹还是空的时候，新建的空分类也要给分类的提示。
+                            categoryFilter is com.slideindex.app.stash.StashCategoryFilter.Category ->
+                                R.string.stash_category_empty_hint
+                            categoryFilter == com.slideindex.app.stash.StashCategoryFilter.Uncategorized &&
+                                allEntries.isNotEmpty() -> R.string.stash_category_uncategorized_empty_hint
+                            else -> R.string.stash_empty
+                        },
                     ),
                     style = MiuixTheme.textStyles.body2,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
@@ -494,8 +528,22 @@ private fun HistoryStashTabBody(
                                 }
                             }
                         },
+                        onSend = { StashCoordinator.sendStashEntry(context, entry) },
                         onToggleStar = { scope.launch { repo?.toggleStar(entry.id) } },
                         onDelete = { scope.launch { repo?.delete(entry.id) } },
+                        categoryUi = StashCardCategoryUi(
+                            categoryName = entry.categoryId?.let { categoryNames[it] },
+                            currentCategoryId = entry.categoryId,
+                            categories = categories,
+                            onMove = { targetCategoryId ->
+                                scope.launch {
+                                    if (repo?.moveToCategory(entry.id, targetCategoryId) == true) {
+                                        onShowMessage(R.string.stash_category_moved)
+                                    }
+                                }
+                            },
+                            onManage = { openStashCategoryManagement(context) },
+                        ),
                     )
                 }
                 item(key = "stash_list_footer") {

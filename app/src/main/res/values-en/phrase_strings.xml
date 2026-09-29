@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stash categories and one-tap send to WeChat (canned replies). Keys are prefixed stash_category_ / stash_send_. -->
+<resources>
+    <!-- Settings entry -->
+    <string name="stash_category_manage_title">Categories &amp; canned replies</string>
+    <string name="stash_category_manage_subtitle">Sort stash items into categories and send them in WeChat with one tap</string>
+
+    <!-- Manage page: one-tap send settings -->
+    <string name="stash_category_settings_title">Categories &amp; canned replies</string>
+    <string name="stash_category_settings_subtitle">Categorized items are kept long-term and can be sent to a WeChat chat with one tap</string>
+    <string name="stash_category_send_section">One-tap send</string>
+    <string name="stash_category_accessibility_title">Accessibility service</string>
+    <string name="stash_category_accessibility_on">Enabled — one-tap send works in WeChat chats</string>
+    <string name="stash_category_accessibility_off">Not enabled. Tap to open settings</string>
+    <string name="stash_category_collapse_title">Close the panel after sending</string>
+    <string name="stash_category_collapse_desc">Tapping Send closes the collection panel first, then fills in WeChat</string>
+    <string name="stash_category_wechat_env_hint">Send only works in a WeChat chat: turn on the accessibility service and keep WeChat open on the chat you want to send to. Sending overwrites any draft in the input box. On some devices or WeChat versions accessibility cannot read the WeChat screen (an empty node tree); you will get a message and the content is copied to the clipboard instead. Try turning on “Select to Speak” in the system accessibility settings so WeChat rebuilds its view tree, then retry.</string>
+
+    <!-- Manage page: category list -->
+    <string name="stash_category_section">Categories</string>
+    <string name="stash_category_add">Add category</string>
+    <string name="stash_category_add_desc">Items in a category are kept long-term: they do not count toward the 200-item limit and are not removed by “Clear stash”</string>
+    <string name="stash_category_empty">No categories yet. Create one, then put items into it.</string>
+    <string name="stash_category_add_title">Add category</string>
+    <string name="stash_category_rename_title">Rename category</string>
+    <string name="stash_category_name_hint">Category name</string>
+    <string name="stash_category_name_rejected">The name must not be empty or duplicate an existing category</string>
+    <string name="stash_category_entry_count">Entries: %d</string>
+    <string name="stash_category_rename">Rename</string>
+    <string name="stash_category_delete">Delete category</string>
+    <string name="stash_category_delete_title">Delete category?</string>
+    <string name="stash_category_delete_message">The %2$d item(s) in “%1$s” are kept and become regular stash items again (placed first; once the stash exceeds 200 items the oldest regular items are still dropped).</string>
+
+    <!-- Manage page: items in a category -->
+    <string name="stash_category_entries_add">Add item</string>
+    <string name="stash_category_entries_add_desc">Text, an image, or both</string>
+    <string name="stash_category_entries_empty">This category is empty</string>
+    <string name="stash_category_entries_reorder_hint">Long-press to drag and reorder, tap to edit</string>
+    <string name="stash_category_entry_type_text">Text</string>
+    <string name="stash_category_entry_type_image">Image</string>
+    <string name="stash_category_entry_type_rich">Text + image</string>
+    <string name="stash_category_entry_image_only">[Image]</string>
+    <string name="stash_category_move">Move to another category</string>
+    <string name="stash_category_move_title">Move to category</string>
+    <string name="stash_category_move_uncategorized">Remove from category (back to regular stash)</string>
+    <string name="stash_category_entry_delete_title">Delete this item?</string>
+    <string name="stash_category_entry_delete_message">This cannot be undone.</string>
+    <string name="stash_category_clear">Clear this category</string>
+    <string name="stash_category_clear_desc">Delete every item in this category (including images); the category itself stays</string>
+    <string name="stash_category_clear_confirm_title">Clear this category?</string>
+    <string name="stash_category_clear_confirm_message">This will delete the %2$d item(s) in “%1$s” (including images). This cannot be undone.</string>
+
+    <!-- Manage page: add / edit an item -->
+    <string name="stash_category_editor_add_title">Add item</string>
+    <string name="stash_category_editor_edit_title">Edit item</string>
+    <string name="stash_category_editor_save">Save</string>
+    <string name="stash_category_editor_text_section">Text</string>
+    <string name="stash_category_editor_text_label">Text (optional if you only send an image)</string>
+    <string name="stash_category_editor_image_section">Image</string>
+    <string name="stash_category_editor_pick_image">Choose image</string>
+    <string name="stash_category_editor_change_image">Change image</string>
+    <string name="stash_category_editor_remove_image">Remove image</string>
+    <string name="stash_category_editor_order_hint">If both are filled in, the text is sent first, then the image.</string>
+    <string name="stash_category_editor_complex">This item has several text blocks or images and cannot be edited here. Go back to move or delete it.</string>
+    <string name="stash_category_image_load_failed">Failed to read the image</string>
+    <string name="stash_category_save_failed">Failed to save</string>
+
+    <!-- Collection panel: filter bar and cards -->
+    <string name="stash_category_all">All</string>
+    <string name="stash_category_uncategorized">Uncategorized</string>
+    <string name="stash_category_manage">Manage</string>
+    <string name="stash_category_empty_hint">This category is empty. Add items in the manage page, or use “Move to category” on a stash item</string>
+    <string name="stash_category_uncategorized_empty_hint">No uncategorized items</string>
+    <string name="stash_category_move_to">Move to category</string>
+    <string name="stash_category_move_out">Remove from category</string>
+    <string name="stash_category_move_manage">Manage categories…</string>
+    <string name="stash_category_moved">Moved</string>
+    <string name="stash_category_clear_all_confirm_message">Stash items that are not in a category (including images) will be deleted. This cannot be undone. Items in categories are not cleared.</string>
+
+    <!-- One-tap send -->
+    <string name="stash_send_action">Send to WeChat</string>
+    <string name="stash_send_empty">There is no text or image to send in this item</string>
+    <string name="stash_send_busy">Sending — please wait</string>
+    <string name="stash_send_copied_suffix">, copied to the clipboard</string>
+    <string name="stash_send_fail_accessibility">Accessibility service is off, so auto-send is unavailable</string>
+    <string name="stash_send_fail_not_in_wechat">Switch to a WeChat chat first</string>
+    <string name="stash_send_fail_tree_empty">Cannot read the WeChat screen (empty accessibility tree); try turning on “Select to Speak” in the accessibility settings and retry</string>
+    <string name="stash_send_fail_input_not_found">WeChat input box not found — open a chat first</string>
+    <string name="stash_send_fail_send_button">The Send button was not found — tap Send manually</string>
+    <string name="stash_send_fail_image">The image file is missing or cannot be put on the clipboard</string>
+    <string name="stash_send_fail_unexpected">Something went wrong while sending — try again</string>
+    <string name="stash_send_fail_partial">Earlier content was sent, but a later part failed</string>
+</resources>

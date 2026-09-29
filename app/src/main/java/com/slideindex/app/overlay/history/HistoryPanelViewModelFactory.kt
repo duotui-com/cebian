@@ -7,6 +7,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.slideindex.app.clipboard.ClipboardAccess
 import com.slideindex.app.clipboard.ClipboardHistoryRepository
 import com.slideindex.app.stash.StashAccess
+import com.slideindex.app.stash.StashCategoryRepository
 import com.slideindex.app.stash.StashRepository
 
 /**
@@ -18,6 +19,7 @@ class HistoryPanelViewModelFactory(
     owner: SavedStateRegistryOwner,
     private val stashRepository: StashRepository? = StashAccess.repository,
     private val clipboardRepository: ClipboardHistoryRepository? = ClipboardAccess.repository,
+    private val stashCategoryRepository: StashCategoryRepository? = StashAccess.categoryRepository,
 ) : AbstractSavedStateViewModelFactory(owner, null) {
 
     @Suppress("UNCHECKED_CAST")
@@ -30,6 +32,7 @@ class HistoryPanelViewModelFactory(
             savedStateHandle = handle,
             stashRepository = stashRepository,
             clipboardRepository = clipboardRepository,
+            stashCategoryRepository = stashCategoryRepository,
         ) as T
     }
 }

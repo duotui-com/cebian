@@ -13,6 +13,7 @@ fun NavEntryBuilder.extensionNavEntries(ctx: MainNavContext) {
     shellCommandNavEntries(ctx)
     widgetPanelNavEntries(ctx)
     stashClipboardNavEntries(ctx)
+    stashCategoryNavEntries(ctx)
     searchPanelNavEntries(ctx)
     floatBallNavEntries(ctx)
     floatingPointerNavEntries(ctx)
