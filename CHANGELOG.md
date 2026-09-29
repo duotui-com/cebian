@@ -1,6 +1,17 @@
 # Changelog
 
-All notable changes to Cebian are documented in this file.
+All notable changes to XGesture are documented in this file.
+
+## [1.26.0] - 2026-09-29
+
+### ⚠️ Breaking
+- **外部协议改名**：调起协议由 `cebian://` 换成 `xgesture://`，旧 scheme 不再注册、不再解析。用 Tasker / MacroDroid 等按 deeplink 唤起面板的自动化，需要把链接前缀改成 `xgesture://`；host、路径与 `?q=` 参数完全不变。走 Intent Action（`com.slideindex.app.action.*`）的自动化不受影响
+- **应用与仓库改名**：`边栏 / Cebian` → `X手势 / XGesture`；仓库迁移到 `github.com/qpst4/xgesture`（旧地址仍重定向），Release 资产名由 `cebian-<版本>-*.apk` 改为 `xgesture-<版本>-*.apk`。应用包名 `com.slideindex.app` 保持不变，可直接覆盖安装、配置与数据保留
+
+### Changed
+- **对外协议收敛为单一真源**：新增 `AppLinks`（scheme / host / 路径 / 查询参数），原先散落在 4 个 Kotlin 常量、4 处 Manifest 与多语言 UI 文案里的字面量收敛为单点；解析入口统一走 `AppLinks.isAppLink()`，避免「改了一侧、漏改另一侧」这类不崩溃也不报错的静默故障
+- **快捷方式随新协议迁移**：`LauncherShortcutsApplier` 在 `setDynamicShortcuts` 之后补调一次 `updateShortcuts`，让用户已固定到桌面的快捷方式一并迁移，避免旧的「剪贴板」快捷方式落到收纳夹
+- **全量品牌词替换**：中文 `边栏` → `X手势`、英文/日文 `Cebian` → `XGesture`、阿拉伯语改用拉丁品牌 `XGesture`；无障碍服务名保留 `#…👈` 的排序前缀。通用词「侧边栏」与已持久化的 `cebianshell:` 协议前缀保持不变
 
 ## [1.25.5] - 2026-09-28
 
@@ -567,7 +578,7 @@ All notable changes to Cebian are documented in this file.
 ### Added
 - 搜索历史、前缀别名与历史深链搜索；候选搜索分类型设置与系统设置 Manifest 索引
 - Shell 命令自定义图标与启动器角标；Activity 快捷方式应用内直达目录与自定义图标
-- 剪贴历史贴边浮窗与分页加载；暂存夹/剪贴板 `cebian://` 外部快捷入口
+- 剪贴历史贴边浮窗与分页加载；暂存夹/剪贴板 `xgesture://` 外部快捷入口
 - 边角轮盘壁纸模糊与手势动作分组选择
 - 悬浮指针持续手势悬停框选、松手点击关闭与触摸层优化
 - 悬浮球加号指针独立纵向速度；扣桌/命中提示音频反馈
@@ -636,7 +647,7 @@ All notable changes to Cebian are documented in this file.
 - OverlayCompositor 悬浮层合成器与统一 Z 轴层级协调
 - 边缘持续交接启动器（区域取词/悬浮指针）
 - 取词/搜索面板 warmUp 预挂载
-- Release APK 输出命名为 `cebian-{版本}.apk`
+- Release APK 输出命名为 `xgesture-{版本}.apk`
 - CI 发版前自动校验 APK 内版本号
 
 ### Changed
@@ -772,7 +783,7 @@ All notable changes to Cebian are documented in this file.
 - **其他：** OCR 模型前台下载、Shell 模板变量、许可证 Markdown 页、引导页分步权限说明
 
 ### Changed
-- 品牌统一为 **Cebian**（边栏）；许可证升级为 **AGPLv3**
+- 品牌统一为 **XGesture**（X手势）；许可证升级为 **AGPLv3**
 - `minSdk` 提升至 31（Android 12）
 - 悬浮球/Overlay 架构拆分（SceneState、Chrome、TouchHost、面板 Host、history 子模块）
 - 设置页统一区块组件与乐观更新；Hub 设置改 LazyColumn 脚手架
