@@ -90,6 +90,12 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // 抢在首帧之前把常驻服务前台化：覆盖安装后 AMS 会立刻重启 OverlayService 并要求
+        // 5 秒内 startForeground()，而这段时间主线程正被首帧/图标装载占着，排在后面就会撞超时。
+        // 详见 OverlayServiceLifecycle.warmStartEarly。
+        if (AppProcess.isMain) {
+            com.slideindex.app.service.OverlayServiceLifecycle.warmStartEarly(this)
+        }
         // TaskManagerUtil 只是"存一下 app context"，不做任何跨进程动作，必须在每个进程一开始就喂上。
         // 它此前只被 ShizukuInitializer 顺带初始化，而 :overlay 侧的 Shizuku 初始化现在是"延后且
         // 主进程活着才做"——只要没走到那一步，:overlay 里所有特权调用都会抛
