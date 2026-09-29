@@ -1,5 +1,21 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.slideindex.app.overlay.history
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -48,7 +64,6 @@ import com.slideindex.app.stash.StashEntryType
 import com.slideindex.app.stash.allImageFileNames
 import com.slideindex.app.stash.combinedText
 import com.slideindex.app.stash.resolvedContentBlocks
-import com.slideindex.app.stash.shouldOfferExpand
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
@@ -271,13 +286,17 @@ internal fun HistoryClipboardEntryCard(
     )
 }
 
+/** 暂存夹卡片的操作按钮边长；四个竖排，卡片高度就由它们决定。 */
+private val StashCardButtonSize = 28.dp
+
+/**
+ * 暂存夹卡片：操作按钮（复制 / 分享 / 发送 / 菜单）竖排在 [actionsOnStart] 指定的一侧，
+ * 内容区文案固定最多两行、超出截断，同屏能放下更多条。不再展开，想看全文去管理页。
+ */
 @Composable
 internal fun HistoryStashEntryCard(
     entry: StashEntry,
-    expanded: Boolean,
-    onExpandedChange: () -> Unit,
-    selectedImageIndex: Int,
-    onSelectedImageIndexChange: (Int) -> Unit,
+    actionsOnStart: Boolean,
     onShowMessage: (Int) -> Unit,
     onPin: () -> Unit,
     onCopy: () -> Unit,
@@ -291,13 +310,12 @@ internal fun HistoryStashEntryCard(
     val view = LocalView.current
     val repo = StashAccess.repository
     var showCategoryMenu by remember { mutableStateOf(false) }
-    val previewWidthPx = historyPreviewWidthPx()
-    val previewHeightPx = historyStashPreviewHeightPx()
-    val richPreviewHeightPx = historyClipboardCardPreviewHeightPx()
+    val density = LocalDensity.current
+    val thumbWidthPx = remember(density) { with(density) { 160.dp.roundToPx() } }
+    val thumbHeightPx = remember(density) { with(density) { StashCardThumbHeight.roundToPx() } }
     val richBlocks = remember(entry.id, entry.contentBlocks, entry.type, entry.text, entry.imageFileName) {
         entry.resolvedContentBlocks()
     }
-    val canExpand = remember(entry.id, entry.type, richBlocks) { entry.shouldOfferExpand() }
     val summaryText = remember(entry.id, entry.type, entry.text, richBlocks) {
         when (entry.type) {
             StashEntryType.TEXT -> entry.text.orEmpty()
@@ -310,22 +328,26 @@ internal fun HistoryStashEntryCard(
     }
     val singleThumb = rememberLoadedSingleThumb(
         entryId = entry.id,
-        loadKey = listOf(previewWidthPx, previewHeightPx, entry.type),
+        loadKey = listOf(thumbWidthPx, thumbHeightPx, entry.type),
         enabled = entry.type == StashEntryType.IMAGE,
-        loader = { repo?.loadImageThumbnailForCard(entry, previewWidthPx, previewHeightPx) },
+        loader = { repo?.loadImageThumbnailForCard(entry, thumbWidthPx, thumbHeightPx) },
     )
-    val (richThumbnails, richImageLoadFailed) = rememberLoadedThumbnails(
+    val (richThumbnails, _) = rememberLoadedThumbnails(
         entryId = entry.id,
-        loadKey = listOf(richImageFileNames, previewWidthPx, richPreviewHeightPx, entry.type),
+        loadKey = listOf(richImageFileNames, thumbWidthPx, thumbHeightPx, entry.type),
         enabled = entry.type == StashEntryType.RICH && richImageFileNames.isNotEmpty(),
         loader = {
-            repo?.loadEntryThumbnailsForCard(entry, previewWidthPx, richPreviewHeightPx).orEmpty()
+            repo?.loadEntryThumbnailsForCard(entry, thumbWidthPx, thumbHeightPx).orEmpty()
         },
     )
-    val richHasImages = richThumbnails.isNotEmpty()
-    val richSelectedBitmap = richThumbnails.getOrNull(selectedImageIndex)
+    // 分享 / 保存图片针对卡片上看得到的那张图：图片条目是它自己，图文条目是第一张。
+    val shownBitmap = when (entry.type) {
+        StashEntryType.IMAGE -> singleThumb
+        StashEntryType.RICH -> richThumbnails.firstOrNull()
+        else -> null
+    }
     val pinLabel = stringResource(R.string.stash_action_pin)
-    val shareLabel = stringResource(R.string.float_ball_action_share)
+    val pickLabel = stringResource(R.string.stash_action_open_pick)
     val saveImageLabel = stringResource(R.string.clipboard_action_save_image)
     val deleteLabel = stringResource(R.string.stash_action_delete)
     val moveToCategoryLabel = stringResource(R.string.stash_category_move_to)
@@ -357,150 +379,39 @@ internal fun HistoryStashEntryCard(
         }
     }
 
-    HistoryEntryCardShell(
-        entryId = entry.id,
-        createdAtEpochMs = entry.createdAtEpochMs,
+    HistoryStashCardShell(
         starred = entry.starred,
-        headerTrailing = {
-            IconButton(
-                onClick = {
-                    val imageIndex = when (entry.type) {
-                        StashEntryType.RICH -> selectedImageIndex
-                        else -> 0
-                    }
-                    PickResultFromHistoryCoordinator.openFromStash(context, entry, imageIndex)
-                },
-                modifier = Modifier.size(32.dp),
-            ) {
-                MiuixIcon(
-                    imageVector = Icons.Outlined.TextFields,
-                    contentDescription = stringResource(R.string.stash_action_open_pick),
-                    modifier = Modifier.size(18.dp),
-                    tint = MiuixTheme.colorScheme.onBackground,
-                )
-            }
-            IconButton(onClick = onToggleStar, modifier = Modifier.size(32.dp)) {
-                MiuixIcon(
-                    imageVector = if (entry.starred) Icons.Default.Star else Icons.Outlined.StarOutline,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = if (entry.starred) {
-                        MiuixTheme.colorScheme.primary
-                    } else {
-                        MiuixTheme.colorScheme.onBackground
-                    },
-                )
-            }
-            // 分类名放在两个按钮后面：标签排在前面会先吃掉剩余宽度，把 32dp 的按钮挤没。
-            categoryUi.categoryName?.let { categoryName ->
-                Text(
-                    text = categoryName,
-                    style = HistoryPanelTypography.meta(),
-                    color = MiuixTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(start = 4.dp),
-                )
-            }
-        },
-        content = {
-            when (entry.type) {
-                StashEntryType.TEXT -> {
-                    HistoryExpandableContentSection(
-                        entryId = entry.id,
-                        canExpand = canExpand,
-                        expanded = expanded,
-                        onExpandedChange = onExpandedChange,
-                        contentBlocks = richBlocks,
-                        imageSource = HistoryImageSource.Stash,
-                        previewWidthPx = previewWidthPx,
-                        previewHeightPx = previewHeightPx,
-                        onLongPressDrag = onLongPressDrag,
-                        collapsedContent = {
-                            HistoryCollapsedSummaryText(
-                                text = entry.text.orEmpty(),
-                                maxLines = if (canExpand) 3 else Int.MAX_VALUE,
-                            )
-                        },
-                    )
-                }
-                StashEntryType.IMAGE -> {
-                    HistoryExpandableContentSection(
-                        entryId = entry.id,
-                        canExpand = canExpand,
-                        expanded = expanded,
-                        onExpandedChange = onExpandedChange,
-                        contentBlocks = entry.resolvedContentBlocks(),
-                        imageSource = HistoryImageSource.Stash,
-                        previewWidthPx = previewWidthPx,
-                        previewHeightPx = previewHeightPx,
-                        onLongPressDrag = onLongPressDrag,
-                        collapsedContent = {
-                            HistorySingleImageThumb(bitmap = singleThumb)
-                        },
-                    )
-                }
-                StashEntryType.RICH -> {
-                    HistoryExpandableContentSection(
-                        entryId = entry.id,
-                        canExpand = canExpand,
-                        expanded = expanded,
-                        onExpandedChange = onExpandedChange,
-                        contentBlocks = richBlocks,
-                        imageSource = HistoryImageSource.Stash,
-                        previewWidthPx = previewWidthPx,
-                        previewHeightPx = richPreviewHeightPx,
-                        onLongPressDrag = onLongPressDrag,
-                        collapsedContent = {
-                            if (richHasImages) {
-                                HistoryImagePagerSection(
-                                    thumbnails = richThumbnails,
-                                    selectedIndex = selectedImageIndex,
-                                    onSelectedIndexChange = onSelectedImageIndexChange,
-                                    onLongPressDrag = onLongPressDrag,
-                                )
-                            } else if (richImageLoadFailed) {
-                                Text(
-                                    text = stringResource(R.string.clipboard_image_unavailable),
-                                    style = HistoryPanelTypography.hint(),
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                                )
-                            }
-                            HistoryCollapsedSummaryText(text = summaryText)
-                        },
-                    )
-                }
-            }
-        },
+        actionsOnStart = actionsOnStart,
         actions = {
             HistoryCardActionIcon(
                 icon = Icons.Default.ContentCopy,
                 contentDescription = stringResource(R.string.clipboard_history_float_copy),
                 onClick = onCopy,
+                buttonSize = StashCardButtonSize,
             )
             HistoryCardActionIcon(
                 icon = Icons.Default.Share,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.float_ball_action_share),
                 onClick = {
                     when {
-                        entry.type == StashEntryType.RICH && !expanded && richHasImages && richSelectedBitmap != null -> {
-                            FloatBallTextPick.shareScreenshot(context, richSelectedBitmap)
-                        }
-                        entry.type == StashEntryType.RICH && !expanded && summaryText.isNotBlank() -> {
+                        entry.type == StashEntryType.RICH && shownBitmap != null ->
+                            FloatBallTextPick.shareScreenshot(context, shownBitmap)
+                        entry.type == StashEntryType.RICH && summaryText.isNotBlank() ->
                             FloatBallTextPick.shareText(context, summaryText)
-                        }
                         else -> onShare()
                     }
                 },
+                buttonSize = StashCardButtonSize,
             )
             HistoryCardActionIcon(
                 icon = Icons.AutoMirrored.Filled.Send,
                 contentDescription = stringResource(R.string.stash_send_action),
                 onClick = onSend,
+                buttonSize = StashCardButtonSize,
             )
-            Spacer(modifier = Modifier.weight(1f))
             HistoryCardOverflowMenu(
                 contentDescription = moreLabel,
+                buttonSize = StashCardButtonSize,
                 actions = buildList {
                     add(
                         HistoryCardMenuAction(
@@ -511,18 +422,27 @@ internal fun HistoryStashEntryCard(
                     )
                     add(
                         HistoryCardMenuAction(
+                            label = pickLabel,
+                            icon = Icons.Outlined.TextFields,
+                            onClick = {
+                                PickResultFromHistoryCoordinator.openFromStash(context, entry, 0)
+                            },
+                        ),
+                    )
+                    add(
+                        HistoryCardMenuAction(
                             label = moveToCategoryLabel,
                             icon = Icons.Outlined.Folder,
                             onClick = { showCategoryMenu = true },
                         ),
                     )
-                    if (entry.type == StashEntryType.RICH && !expanded && richHasImages && richSelectedBitmap != null) {
+                    if (entry.type == StashEntryType.RICH && shownBitmap != null) {
                         add(
                             HistoryCardMenuAction(
                                 label = saveImageLabel,
                                 icon = Icons.Outlined.Save,
                                 onClick = {
-                                    val saved = FloatBallTextPick.saveScreenshot(context, richSelectedBitmap)
+                                    val saved = FloatBallTextPick.saveScreenshot(context, shownBitmap)
                                     onShowMessage(
                                         if (saved) R.string.float_ball_screenshot_saved else R.string.float_ball_action_failed,
                                     )
@@ -549,6 +469,81 @@ internal fun HistoryStashEntryCard(
                 },
             )
         },
+        content = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = formatHistoryRelativeTime(entry.createdAtEpochMs),
+                        style = HistoryPanelTypography.meta(),
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                        maxLines = 1,
+                    )
+                    categoryUi.categoryName?.let { categoryName ->
+                        Text(
+                            text = categoryName,
+                            style = HistoryPanelTypography.meta(),
+                            color = MiuixTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                    }
+                }
+                IconButton(onClick = onToggleStar, modifier = Modifier.size(24.dp)) {
+                    MiuixIcon(
+                        imageVector = if (entry.starred) Icons.Default.Star else Icons.Outlined.StarOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (entry.starred) {
+                            MiuixTheme.colorScheme.primary
+                        } else {
+                            MiuixTheme.colorScheme.onBackground
+                        },
+                    )
+                }
+            }
+            // 点按不做任何事，只留长按拖出；文案固定两行，超出截断。
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .combinedClickable(onClick = {}, onLongClick = onLongPressDrag),
+            ) {
+                when (entry.type) {
+                    StashEntryType.TEXT -> HistoryCollapsedSummaryText(text = summaryText, maxLines = 2)
+                    StashEntryType.IMAGE -> StashCardThumb(singleThumb, fillWidth = true)
+                    StashEntryType.RICH -> Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        richThumbnails.firstOrNull()?.let { StashCardThumb(it, fillWidth = false) }
+                        HistoryCollapsedSummaryText(text = summaryText, maxLines = 2)
+                    }
+                }
+            }
+        },
+    )
+}
+
+private val StashCardThumbHeight = 56.dp
+
+/** 卡片里的小缩略图：图片条目铺满内容宽度，图文条目是文字前面的方块。 */
+@Composable
+private fun StashCardThumb(bitmap: Bitmap?, fillWidth: Boolean) {
+    val imageBitmap = rememberHistoryImageBitmap(bitmap) ?: return
+    Image(
+        bitmap = imageBitmap,
+        contentDescription = null,
+        modifier = (if (fillWidth) Modifier.fillMaxWidth() else Modifier.size(StashCardThumbHeight))
+            .height(StashCardThumbHeight)
+            .clip(RoundedCornerShape(8.dp)),
+        contentScale = ContentScale.Crop,
     )
 }
 

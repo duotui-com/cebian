@@ -311,14 +311,15 @@ internal fun HistoryCardActionIcon(
     icon: ImageVector,
     contentDescription: String?,
     onClick: () -> Unit,
+    buttonSize: androidx.compose.ui.unit.Dp = 32.dp,
 ) {
     val scheme = MiuixTheme.colorScheme
     val iconTint = scheme.onBackground
-    IconButton(onClick = onClick, modifier = Modifier.size(32.dp)) {
+    IconButton(onClick = onClick, modifier = Modifier.size(buttonSize)) {
         top.yukonga.miuix.kmp.basic.Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(buttonSize - 12.dp),
             tint = iconTint,
         )
     }
@@ -337,6 +338,7 @@ internal fun HistoryCardOverflowMenu(
     actions: List<HistoryCardMenuAction>,
     /** 和溢出菜单锚在同一个位置的附加内容，比如二级选择菜单。 */
     anchoredContent: @Composable () -> Unit = {},
+    buttonSize: androidx.compose.ui.unit.Dp = 32.dp,
 ) {
     if (actions.isEmpty()) return
     val scheme = MiuixTheme.colorScheme
@@ -344,12 +346,12 @@ internal fun HistoryCardOverflowMenu(
     Box {
         IconButton(
             onClick = { expanded = true },
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(buttonSize),
         ) {
             top.yukonga.miuix.kmp.basic.Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = contentDescription,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(buttonSize - 12.dp),
                 tint = scheme.onBackground,
             )
         }

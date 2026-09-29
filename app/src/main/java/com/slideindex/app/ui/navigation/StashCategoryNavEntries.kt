@@ -2,7 +2,6 @@ package com.slideindex.app.ui.navigation
 
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -80,8 +79,10 @@ fun NavEntryBuilder.stashCategoryNavEntries(ctx: MainNavContext) {
         val existingImage by produceState<Bitmap?>(null, key.entryId, existingFileName) {
             value = existingFileName?.let { viewModel.loadExistingImage(key.entryId, it) }
         }
+        // 用系统文件选择器（GetContent）而不是照片选择器：和应用里其他选图入口一致，能浏览所有文件夹，
+        // 不像照片选择器那样只列出系统认为的“相册”，也不需要额外的媒体权限。
         val imagePicker = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickVisualMedia(),
+            contract = ActivityResultContracts.GetContent(),
         ) { uri -> uri?.let(viewModel::pickImage) }
         StashPhraseEditorScreen(
             isNew = key.entryId.isEmpty(),
@@ -90,7 +91,7 @@ fun NavEntryBuilder.stashCategoryNavEntries(ctx: MainNavContext) {
             onBack = { ctx.navigateBackTo(AppNavKey.StashCategoryEntries(key.categoryId)) },
             onTextChange = viewModel::setText,
             onPickImage = {
-                imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                imagePicker.launch("image/*")
             },
             onRemoveImage = viewModel::removeImage,
             onSave = {

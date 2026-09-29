@@ -284,10 +284,8 @@ internal fun HistoryPanelScreen(
                                 listTopPadding = listTopPadding + StashCategoryBarHeight,
                                 listBackdrop = barBackdrop,
                                 repo = stashRepo,
-                                expandedEntryIds = expandedEntryIds,
-                                selectedImageIndices = selectedImageIndices,
-                                onToggleExpanded = viewModel::toggleExpanded,
-                                onSelectedImageIndexChange = viewModel::setSelectedImageIndex,
+                                // 面板停靠在右边时，卡片的操作按钮放左边（抽屉外侧），反之亦然。
+                                actionsOnStart = gravityEnd,
                                 onShowMessage = showPanelMessage,
                             )
                             StashCategoryChipBar(
@@ -411,10 +409,7 @@ private fun HistoryStashTabBody(
     listTopPadding: Dp,
     listBackdrop: LayerBackdrop?,
     repo: com.slideindex.app.stash.StashRepository?,
-    expandedEntryIds: Set<String>,
-    selectedImageIndices: Map<String, Int>,
-    onToggleExpanded: (String) -> Unit,
-    onSelectedImageIndexChange: (String, Int) -> Unit,
+    actionsOnStart: Boolean,
     onShowMessage: (Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -483,14 +478,9 @@ private fun HistoryStashTabBody(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(filteredEntries, key = { it.id }) { entry ->
-                    val expanded = entry.id in expandedEntryIds
-                    val selectedIndex = selectedImageIndices[entry.id] ?: 0
                     HistoryStashEntryCard(
                         entry = entry,
-                        expanded = expanded,
-                        onExpandedChange = { onToggleExpanded(entry.id) },
-                        selectedImageIndex = selectedIndex,
-                        onSelectedImageIndexChange = { onSelectedImageIndexChange(entry.id, it) },
+                        actionsOnStart = actionsOnStart,
                         onShowMessage = onShowMessage,
                         onPin = {
                             when (entry.type) {
