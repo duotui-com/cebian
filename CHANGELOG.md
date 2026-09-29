@@ -7,6 +7,7 @@ All notable changes to XGesture are documented in this file.
 ### ⚠️ Breaking
 - **外部协议改名**：调起协议由 `cebian://` 换成 `xgesture://`，旧 scheme 不再注册、不再解析。用 Tasker / MacroDroid 等按 deeplink 唤起面板的自动化，需要把链接前缀改成 `xgesture://`；host、路径与 `?q=` 参数完全不变。走 Intent Action（`com.slideindex.app.action.*`）的自动化不受影响
 - **应用与仓库改名**：`边栏 / Cebian` → `X手势 / XGesture`；仓库迁移到 `github.com/qpst4/XGesture`（旧地址仍重定向），Release 资产名由 `cebian-<版本>-*.apk` 改为 `xgesture-<版本>-*.apk`。应用包名 `com.slideindex.app` 保持不变，可直接覆盖安装、配置与数据保留
+- **用 Obtainium 自动更新的用户**：需要在应用里把「APK 资产匹配规则」由 `cebian-*` 改成 `xgesture-*`；旧规则匹配不到时会静默停更（不报错），改用应用内更新的用户不受影响
 
 ### Changed
 - **对外协议收敛为单一真源**：新增 `AppLinks`（scheme / host / 路径 / 查询参数），原先散落在 4 个 Kotlin 常量、4 处 Manifest 与多语言 UI 文案里的字面量收敛为单点；解析入口统一走 `AppLinks.isAppLink()`，避免「改了一侧、漏改另一侧」这类不崩溃也不报错的静默故障
