@@ -18,6 +18,7 @@ import com.slideindex.app.stash.StashCategory
 import com.slideindex.app.stash.StashCategoryRepository
 import com.slideindex.app.ui.miuix.MiuixConfirmDialog
 import com.slideindex.app.ui.miuix.MiuixFormDialog
+import com.slideindex.app.ui.miuix.MiuixLabeledTextField
 import com.slideindex.app.ui.miuix.groupedCardItems
 import com.slideindex.app.ui.miuix.miuixGroupedCardItem
 import com.slideindex.app.ui.settings.components.LazySettingsItem
@@ -242,7 +243,7 @@ private fun CategoryNameDialog(
         confirmEnabled = input.trim().isNotEmpty(),
         onConfirm = { onConfirm(input.trim()) },
     ) {
-        StashTextField(
+        MiuixLabeledTextField(
             value = input,
             onValueChange = { input = it },
             label = stringResource(R.string.stash_category_name_hint),

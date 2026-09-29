@@ -25,6 +25,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.slideindex.app.R
+import com.slideindex.app.ui.miuix.MiuixLabeledTextField
 import com.slideindex.app.ui.settings.components.LazySettingsItem
 import com.slideindex.app.ui.settings.components.SettingsScreenScaffold
 import com.slideindex.app.ui.settings.components.settingsLazyTipCard
@@ -94,7 +95,7 @@ fun StashPhraseEditorScreen(
                             text = stringResource(R.string.stash_category_editor_text_section),
                             insideMargin = PaddingValues(bottom = 8.dp),
                         )
-                        StashTextField(
+                        MiuixLabeledTextField(
                             value = state.text,
                             onValueChange = onTextChange,
                             label = stringResource(R.string.stash_category_editor_text_label),
