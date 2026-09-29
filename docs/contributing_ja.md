@@ -36,10 +36,10 @@
 ### Pull Request で翻訳（代替）
 
 ```text
-app/src/main/res/values/strings.xml       # ソース（中国語）
-app/src/main/res/values-en/strings.xml    # 英語
+app/src/main/res/values/strings.xml       # ソース（英語）
+app/src/main/res/values-zh/strings.xml    # 簡体字中国語
 app/src/main/res/values-ja/strings.xml    # 日本語
-app/src/main/res/values-xx/strings.xml    # 新言語：values-en をコピーして翻訳
+app/src/main/res/values-xx/strings.xml    # 新言語：values/（英語ソース）をコピーして翻訳
 ```
 
 1. リポジトリを Fork してブランチ作成。

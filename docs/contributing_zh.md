@@ -36,10 +36,10 @@
 ### 通过 Pull Request 翻译（备选）
 
 ```text
-app/src/main/res/values/strings.xml       # 源语言（中文）
-app/src/main/res/values-en/strings.xml    # 英文
+app/src/main/res/values/strings.xml       # 源语言（英文）
+app/src/main/res/values-zh/strings.xml    # 简体中文
 app/src/main/res/values-ja/strings.xml    # 日文
-app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再翻译
+app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values/（英文源）再翻译
 ```
 
 1. Fork 仓库并建分支。

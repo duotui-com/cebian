@@ -6,7 +6,7 @@
 # Maintainer one-time setup on hosted.weblate.org:
 # 1. Create project "XGesture" (slug: cebian), link https://github.com/qpst4/XGesture.git
 # 2. Import this file or add component manually with the fields below
-# 3. Set source language to Chinese (Simplified) — template is values/strings.xml
+# 3. Set source language to English — template is values/strings.xml (Simplified Chinese lives in values-zh/)
 # 4. Enable "Create pull request" / push addon; do not push directly to main
 
 component:

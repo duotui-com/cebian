@@ -10,6 +10,7 @@ All notable changes to XGesture are documented in this file.
 - **用 Obtainium 自动更新的用户**：需要在应用里把「APK 资产匹配规则」由 `cebian-*` 改成 `xgesture-*`；旧规则匹配不到时会静默停更（不报错），改用应用内更新的用户不受影响
 
 ### Changed
+- **默认语言改为英语**：`values/` 由中文换成英语、中文迁至 `values-zh/`，因此**没有对应翻译的语言现在回退到英语而不是中文**；同时把英文补齐到与源 100% 对齐（新增 166 条英文串），并把 Weblate 的源语言从简体中文改为英语
 - **对外协议收敛为单一真源**：新增 `AppLinks`（scheme / host / 路径 / 查询参数），原先散落在 4 个 Kotlin 常量、4 处 Manifest 与多语言 UI 文案里的字面量收敛为单点；解析入口统一走 `AppLinks.isAppLink()`，避免「改了一侧、漏改另一侧」这类不崩溃也不报错的静默故障
 - **快捷方式随新协议迁移**：`LauncherShortcutsApplier` 在 `setDynamicShortcuts` 之后补调一次 `updateShortcuts`，让用户已固定到桌面的快捷方式一并迁移，避免旧的「剪贴板」快捷方式落到收纳夹
 - **全量品牌词替换**：中文 `边栏` → `X手势`、英文/日文 `Cebian` → `XGesture`、阿拉伯语改用拉丁品牌 `XGesture`；无障碍服务名保留 `#…👈` 的排序前缀。通用词「侧边栏」与已持久化的 `cebianshell:` 协议前缀保持不变

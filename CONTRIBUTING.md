@@ -38,10 +38,10 @@ The easiest way to help with **in-app UI text** is [Weblate](https://hosted.webl
 If you prefer Git:
 
 ```text
-app/src/main/res/values/strings.xml       # Source (Chinese)
-app/src/main/res/values-en/strings.xml    # English
+app/src/main/res/values/strings.xml       # Source (English)
+app/src/main/res/values-zh/strings.xml    # Simplified Chinese
 app/src/main/res/values-ja/strings.xml    # Japanese
-app/src/main/res/values-xx/strings.xml    # New locale: copy values-en, translate
+app/src/main/res/values-xx/strings.xml    # New locale: copy values/ (English source), translate
 ```
 
 1. Fork the repo and create a branch.
