@@ -1814,8 +1814,13 @@
     <string name="search_engine_type_extern_jump">应用深链 (Scheme)</string>
     <string name="search_engine_url_link_hint">URL / Scheme 链接地址</string>
     <string name="search_engine_url_link_support" formatted="false">支持 https://、coolmarket://、intent:// 等；可用 %s 或 %q 作为关键词占位符</string>
-    <string name="search_engine_url_link_flow_desc" formatted="false">执行规则与流程：&#10;1. 带参跳转：若包含 %s 占位符（如 example.com/search?q=%s），直接将关键词替换入链接带参跳转&#10;2. 指定应用：若填了目标包名则强制由该 App 打开，留空则使用默认应用&#10;3. 无障碍填字：若未用 %s 且开启了自动输入，跳转后自动在搜索框中填字并回车</string>
-    <string name="search_engine_jump_activity_flow_desc">执行规则与流程：&#10;1. 组件拉起：通过包名和 Activity 直接打开目标 App 界面（未导出 Activity 自动由 Shizuku 尝试拉起）&#10;2. 无障碍填字：界面打开后（需开启自动输入），在 600ms~3000ms 内自动寻找搜索框并填字回车</string>
+    <string name="search_engine_url_link_flow_desc" formatted="false">执行规则与流程：
+1. 带参跳转：若包含 %s 占位符（如 example.com/search?q=%s），直接将关键词替换入链接带参跳转
+2. 指定应用：若填了目标包名则强制由该 App 打开，留空则使用默认应用
+3. 无障碍填字：若未用 %s 且开启了自动输入，跳转后自动在搜索框中填字并回车</string>
+    <string name="search_engine_jump_activity_flow_desc">执行规则与流程：
+1. 组件拉起：通过包名和 Activity 直接打开目标 App 界面（未导出 Activity 自动由 Shizuku 尝试拉起）
+2. 无障碍填字：界面打开后（需开启自动输入），在 600ms~3000ms 内自动寻找搜索框并填字回车</string>
     <string name="search_engine_type_share">分享</string>
     <string name="search_engine_type_share_image">分享图片</string>
     <string name="search_engine_import_preview_title">确认导入</string>
@@ -2356,7 +2361,7 @@
     <string name="otp_settings_desc">从通知内容提取验证码，支持关键词匹配与按应用规则过滤</string>
     <string name="otp_copy_to_clipboard_title">复制到剪贴板</string>
     <string name="otp_copy_to_clipboard_desc">提取成功后自动复制验证码</string>
-   <string name="otp_copied_to_clipboard">已复制验证码：%1$s</string>
+    <string name="otp_copied_to_clipboard">已复制验证码：%1$s</string>
     <string name="otp_alerts_section">提醒</string>
     <string name="otp_code_notification_title">系统通知提醒</string>
     <string name="otp_code_notification_desc">提取成功后弹出验证码通知，点击即可复制</string>
@@ -2374,9 +2379,9 @@
     <string name="otp_code_toast_text">验证码：%1$s</string>
     <string name="otp_lsposed_status_section">LSPosed 状态</string>
     <string name="otp_lsposed_pill_partial">部分生效</string>
-   <string name="otp_hub_tab_settings">设置</string>
-   <string name="otp_extraction_entry_title">验证码提取</string>
-   <string name="otp_extraction_entry_desc">提取成功后做什么：系统通知、Toast、自动复制；以及短信拦截与安全</string>
+    <string name="otp_hub_tab_settings">设置</string>
+    <string name="otp_extraction_entry_title">验证码提取</string>
+    <string name="otp_extraction_entry_desc">提取成功后做什么：系统通知、Toast、自动复制；以及短信拦截与安全</string>
     <string name="otp_intercept_section">拦截</string>
     <string name="otp_intercept_tip">拦截、标记已读、提取后删除都由电话进程执行；改动后请重启手机，或点「重启电话进程」立即生效。</string>
     <string name="otp_a11y_pill_on">已开启</string>
@@ -2582,7 +2587,6 @@
     <string name="otp_hub_tab_rules">规则</string>
     <string name="otp_hub_tab_records">记录</string>
     <string name="otp_hub_tab_extensions">扩展</string>
-
     <!-- Accessibility -->
     <string name="cd_navigate_back">返回</string>
     <string name="cd_navigate_forward">前进</string>
@@ -2646,7 +2650,6 @@
     <string name="weekday_short_thursday">四</string>
     <string name="weekday_short_friday">五</string>
     <string name="weekday_short_saturday">六</string>
-
     <!-- Settings backup -->
     <string name="settings_backup_title">设置备份</string>
     <string name="settings_backup_section_actions">备份操作</string>
@@ -2684,7 +2687,6 @@
     <string name="settings_domain_sensitive_notification_filter_rules">通知过滤规则</string>
     <string name="settings_domain_sensitive_notification_filter_prefs">通知过滤偏好</string>
     <string name="settings_domain_sensitive_otp_stats">OTP 自动填充统计</string>
-
     <!-- Onboarding -->
     <string name="onboarding_next">下一步</string>
     <string name="onboarding_welcome_body">X手势通过边缘手势、摇一摇和通知增强，帮助你更高效地使用手机。接下来需要授予几项系统权限。</string>
@@ -2706,7 +2708,6 @@
     <string name="onboarding_permission_app_list_short">用于在侧边栏和快速启动面板中展示与搜索应用</string>
     <string name="onboarding_permission_status_ready">已就绪</string>
     <string name="onboarding_permission_status_grant">去授权</string>
-
     <string name="shell_panel_restart_success">Shell 服务已重启（build=%1$d）</string>
     <string name="shell_panel_restart_outdated">Shell 服务版本过旧（api=%1$d），请在 Shizuku 中更新</string>
     <string name="shell_panel_restart_failed">Shell 服务重启失败，请检查 Shizuku 状态</string>
@@ -2726,7 +2727,6 @@
 前台服务（Special Use）：OverlayService 用于维持边缘手势与摇一摇监听，子类型为 overlay_sidebar，不用于广告或无关后台任务。
 
 如有疑问，请通过项目 GitHub Issues 联系。</string>
-
     <string name="otp_autofill_stats_title">填充统计</string>
     <string name="otp_autofill_stats_screen_desc">查看自动填充尝试次数、成功率与上次失败原因</string>
     <string name="otp_autofill_stats_entry_empty">尚无记录</string>
@@ -2870,7 +2870,6 @@
     <string name="about_open_source_license_desc">GNU Affero GPL v3.0（AGPLv3）</string>
     <string name="about_third_party_notices_title">第三方开源组件</string>
     <string name="about_third_party_notices_subtitle">致谢与许可证说明</string>
-
     <string name="search_panel_default_engine_title">默认搜索引擎</string>
     <string name="search_panel_default_engine_none">无（不执行搜索）</string>
     <string name="search_panel_default_engine_desc">回车键动作选择「搜索引擎」时生效</string>
@@ -2989,7 +2988,6 @@
     <string name="keyboard_switch_to_number">数字键盘</string>
     <string name="keyboard_switch_back">普通键盘</string>
     <string name="search_panel_phone_call">电话呼叫</string>
-
     <string name="settings_backup_section_permissions">权限</string>
     <string name="settings_backup_diff_overwritten">将覆盖：%1$s</string>
     <string name="settings_backup_diff_new">将新增：%1$s</string>
@@ -3056,7 +3054,6 @@
     <string name="clipboard_overlay_send_nearby_description">发送到附近设备</string>
     <string name="clipboard_overlay_dismiss_description">关闭剪贴板预览</string>
     <string name="clipboard_overlay_image_preview">剪贴板图片预览</string>
-    <string name="clipboard_overlay_screenshot_editor" translatable="false" />
     <string name="clipboard_overlay_remote_copy_package" translatable="false">com.google.android.gms/.nearby.sharing.RemoteCopyShareSheetActivity</string>
     <string name="clipboard_background_monitoring_mode_title">监听方式</string>
     <string name="clipboard_monitoring_mode_follow_privilege">跟随特权模式（推荐）</string>
@@ -3261,7 +3258,6 @@
     <string name="stash_clear_all">清空暂存夹</string>
     <string name="stash_clear_all_confirm_title">清空暂存夹？</string>
     <string name="stash_clear_all_confirm_message">将删除全部暂存内容（含图片），此操作不可撤销。</string>
-
     <string name="keyevent_category_system">系统控制</string>
     <string name="keyevent_category_media">媒体与声音</string>
     <string name="keyevent_category_navigation">方向与网页导航</string>
@@ -3667,7 +3663,6 @@ adb 模式应返回 uid=2000。
     <string name="task_switcher_quick_share">快速分享</string>
     <string name="toggle_gesture_enabled">手势已开启</string>
     <string name="toggle_gesture_disabled">手势已关闭</string>
-
     <string name="inspire_image_edit_add_text">添加文字</string>
     <string name="inspire_image_edit_brush_drag_hint">点击或左右拖动可调节笔刷大小</string>
     <string name="inspire_image_edit_brush_value">%1$d px</string>
