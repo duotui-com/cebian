@@ -2873,6 +2873,14 @@
     <string name="search_panel_history_clear">مسح سجل البحث</string>
     <string name="search_panel_history_clear_confirm_title">مسح سجل البحث؟</string>
     <string name="search_panel_history_clear_confirm_message">سيتم حذف جميع سجلات البحث، ولا يمكن التراجع عن هذه العملية.</string>
+    <plurals name="search_panel_history_count">
+        <item quantity="zero">%1$d سجل</item>
+        <item quantity="one">%1$d سجل</item>
+        <item quantity="two">%1$d سجل</item>
+        <item quantity="few">%1$d سجلات</item>
+        <item quantity="many">%1$d سجلاً</item>
+        <item quantity="other">%1$d سجل</item>
+    </plurals>
     <string name="search_panel_history_hint">عند ترك مربع الإدخال فارغًا، اضغط على مسافة لعرض سجل البحث</string>
     <string name="search_panel_contact_action_call">إجراء مكالمة</string>
     <string name="search_panel_contact_action_sms">إرسال رسالة</string>
