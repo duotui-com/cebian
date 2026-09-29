@@ -22,17 +22,20 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.slideindex.app.MainActivity
 import com.slideindex.app.R
 import com.slideindex.app.overlay.FloatBallStashPanel
+import com.slideindex.app.settings.TopAppBarBlurStyle
 import com.slideindex.app.stash.StashCategory
 import com.slideindex.app.stash.StashCategoryFilter
+import com.slideindex.app.ui.miuix.MiuixBlurredTopBar
+import com.slideindex.app.ui.miuix.miuixAppBarColor
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** 暂存夹页底部分类筛选条的固定高度；列表要在自己的底部让出这块空间。 */
@@ -49,63 +52,76 @@ internal fun StashCategoryChipBar(
     categories: List<StashCategory>,
     selected: StashCategoryFilter,
     panelBlurActive: Boolean,
+    backdrop: LayerBackdrop?,
     onSelect: (StashCategoryFilter) -> Unit,
     onManage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // 底色与上面的列表一致（不再是白色的顶栏色），未选中的分类也不再有白底胶囊。
-    Box(
+    val blurActive = backdrop != null
+    MiuixBlurredTopBar(
+        backdrop = backdrop,
+        enabled = blurActive,
+        blurStyle = TopAppBarBlurStyle.GAUSSIAN,
         modifier = modifier
             .fillMaxWidth()
-            .height(StashCategoryBarHeight)
-            .background(HistoryPanelColors.listBackground(panelBlurActive)),
+            .height(StashCategoryBarHeight),
     ) {
-        LazyRow(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            item(key = "filter_all") {
-                StashCategoryChip(
-                    label = stringResource(R.string.stash_category_all),
-                    selected = selected == StashCategoryFilter.All,
-                    onClick = { onSelect(StashCategoryFilter.All) },
-                )
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        if (blurActive) {
+                            backdrop.miuixAppBarColor()
+                        } else {
+                            HistoryPanelColors.panelChrome(panelBlurActive)
+                        },
+                    ),
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                item(key = "filter_all") {
+                    StashCategoryChip(
+                        label = stringResource(R.string.stash_category_all),
+                        selected = selected == StashCategoryFilter.All,
+                        onClick = { onSelect(StashCategoryFilter.All) },
+                    )
+                }
+                item(key = "filter_uncategorized") {
+                    StashCategoryChip(
+                        label = stringResource(R.string.stash_category_uncategorized),
+                        selected = selected == StashCategoryFilter.Uncategorized,
+                        onClick = { onSelect(StashCategoryFilter.Uncategorized) },
+                    )
+                }
+                items(categories, key = { it.id }) { category ->
+                    val filter = StashCategoryFilter.Category(category.id)
+                    StashCategoryChip(
+                        label = category.name,
+                        selected = selected == filter,
+                        onClick = { onSelect(filter) },
+                    )
+                }
+                item(key = "manage") {
+                    Text(
+                        text = stringResource(R.string.stash_category_manage),
+                        style = HistoryPanelTypography.hint(),
+                        color = MiuixTheme.colorScheme.primary,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(15.dp))
+                            .clickable(onClick = onManage)
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                    )
+                }
             }
-            item(key = "filter_uncategorized") {
-                StashCategoryChip(
-                    label = stringResource(R.string.stash_category_uncategorized),
-                    selected = selected == StashCategoryFilter.Uncategorized,
-                    onClick = { onSelect(StashCategoryFilter.Uncategorized) },
-                )
-            }
-            items(categories, key = { it.id }) { category ->
-                val filter = StashCategoryFilter.Category(category.id)
-                StashCategoryChip(
-                    label = category.name,
-                    selected = selected == filter,
-                    onClick = { onSelect(filter) },
-                )
-            }
-            item(key = "manage") {
-                Text(
-                    text = stringResource(R.string.stash_category_manage),
-                    style = HistoryPanelTypography.hint(),
-                    color = MiuixTheme.colorScheme.primary,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(15.dp))
-                        .clickable(onClick = onManage)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                )
-            }
+            // 底部筛选条与上面列表之间的分隔线。
+            HorizontalDivider(
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = MiuixTheme.colorScheme.dividerLine,
+            )
         }
-        // 底部筛选条与上面列表之间的分隔线。
-        HorizontalDivider(
-            modifier = Modifier.align(Alignment.TopCenter),
-            color = MiuixTheme.colorScheme.dividerLine,
-        )
     }
 }
 
@@ -121,7 +137,7 @@ private fun StashCategoryChip(
             .height(30.dp)
             .widthIn(max = 140.dp)
             .clip(RoundedCornerShape(15.dp))
-            .background(if (selected) scheme.primary.copy(alpha = 0.16f) else Color.Transparent)
+            .background(if (selected) scheme.primary.copy(alpha = 0.16f) else scheme.surface)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
