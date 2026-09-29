@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -143,7 +144,13 @@ private fun StashCategoryChip(
     }
 }
 
-/** 卡片上和分类相关的信息与操作，由暂存夹页统一组装后交给每张卡片。 */
+/**
+ * 卡片上和分类相关的信息与操作，由暂存夹页统一组装后交给每张卡片。
+ *
+ * 标 [Immutable]：否则 Compose 把它判成不稳定（含 List），每次重组新建的实例都“不相等”，
+ * 展开或切换任一张卡片时所有可见卡片都会跟着重组。
+ */
+@Immutable
 internal data class StashCardCategoryUi(
     /** 条目当前所属分类的名字；没有分类为 null。 */
     val categoryName: String?,

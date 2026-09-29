@@ -82,8 +82,9 @@ fun StashClipboardSettingsScreen(
             key = "stash-section",
             title = stashSectionTitle,
         )
+        // 带图标的导航行单独一张卡：和不带图标的“清空暂存夹”放在同一张卡里，两行文字的起点对不齐。
         groupedCardItems(
-            keyPrefix = "stash-clear",
+            keyPrefix = "stash-categories",
             items = listOf(
                 settingsCardScopeItem("stash-categories") {
                     SettingNavigationRow(
@@ -93,6 +94,11 @@ fun StashClipboardSettingsScreen(
                         onClick = onOpenStashCategories,
                     )
                 },
+            ),
+        )
+        groupedCardItems(
+            keyPrefix = "stash-clear",
+            items = listOf(
                 settingsCardScopeItem("stash-clear-all") {
                     SettingLinkRow(
                         title = stringResource(R.string.stash_clear_all),

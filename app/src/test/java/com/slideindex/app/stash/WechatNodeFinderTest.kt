@@ -276,6 +276,38 @@ class WechatNodeFinderTest {
     }
 
     @Test
+    fun findEditText_accessibilityFocusOnNonEditableNode_isIgnored() {
+        val root = chatRoot()
+        val editText = root.add(FakeChatNode(className = "android.widget.EditText"))
+        root.accessibilityFocus = root.add(FakeChatNode(className = "android.widget.TextView", isFocused = true))
+
+        assertSame(editText, WechatNodeFinder.findEditText(root))
+    }
+
+    @Test
+    fun findEditText_inputFocusOnEditLikeClassName_countsEvenWhenNotEditable() {
+        // 自定义控件类名里带 Edit、但没声明 isEditable：拥有输入焦点就够了。
+        val root = chatRoot()
+        val custom = root.add(FakeChatNode(className = "com.tencent.mm.ui.MMEditView", isFocused = true))
+        root.inputFocus = custom
+        root.add(FakeChatNode(className = "android.widget.EditText"))
+
+        assertSame(custom, WechatNodeFinder.findEditText(root))
+    }
+
+    @Test
+    fun findEditText_focusedEditableNodeEndsTheSearchEarly() {
+        // 已聚焦的可编辑节点在遍历中先出现：不再往后找类名含 EditText 的节点（速聊原实现的行为）。
+        val root = chatRoot()
+        val focusedEditable = root.add(
+            FakeChatNode(className = "android.view.View", isEditable = true, isFocused = true, isFocusable = true)
+        )
+        root.add(FakeChatNode(className = "android.widget.EditText"))
+
+        assertSame(focusedEditable, WechatNodeFinder.findEditText(root))
+    }
+
+    @Test
     fun findEditText_priority_className_then_editable_then_hint_then_focus() {
         val byFocus = FakeChatNode(className = "android.view.View", isFocused = true, isFocusable = true)
         val byHint = FakeChatNode(className = "android.view.View", hintText = "输入消息", isEnabled = true)

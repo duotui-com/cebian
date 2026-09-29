@@ -223,7 +223,7 @@ private fun StashEntryRow(
             IconButton(onClick = onDelete) {
                 MiuixIcon(
                     imageVector = MiuixIcons.Delete,
-                    contentDescription = stringResource(R.string.stash_category_entry_delete_title),
+                    contentDescription = stringResource(R.string.stash_action_delete),
                 )
             }
         },

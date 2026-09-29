@@ -362,16 +362,6 @@ internal fun HistoryStashEntryCard(
         createdAtEpochMs = entry.createdAtEpochMs,
         starred = entry.starred,
         headerTrailing = {
-            categoryUi.categoryName?.let { categoryName ->
-                Text(
-                    text = categoryName,
-                    style = HistoryPanelTypography.meta(),
-                    color = MiuixTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 4.dp),
-                )
-            }
             IconButton(
                 onClick = {
                     val imageIndex = when (entry.type) {
@@ -399,6 +389,17 @@ internal fun HistoryStashEntryCard(
                     } else {
                         MiuixTheme.colorScheme.onBackground
                     },
+                )
+            }
+            // 分类名放在两个按钮后面：标签排在前面会先吃掉剩余宽度，把 32dp 的按钮挤没。
+            categoryUi.categoryName?.let { categoryName ->
+                Text(
+                    text = categoryName,
+                    style = HistoryPanelTypography.meta(),
+                    color = MiuixTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 4.dp),
                 )
             }
         },

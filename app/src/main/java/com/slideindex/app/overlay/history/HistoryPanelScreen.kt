@@ -174,7 +174,11 @@ internal fun HistoryPanelScreen(
         }
         viewModel.setSelectedTab(tab)
         when (tab) {
-            HistoryPanelTab.Stash -> viewModel.setStashSearchQuery(pending.query)
+            HistoryPanelTab.Stash -> {
+                // 上次选中的分类会跨次保留；深链带来的搜索要在整个暂存夹里找，别被它静默缩小范围。
+                viewModel.setStashCategoryFilter(com.slideindex.app.stash.StashCategoryFilter.All)
+                viewModel.setStashSearchQuery(pending.query)
+            }
             HistoryPanelTab.Clipboard -> viewModel.setClipboardSearchQuery(pending.query)
         }
         searchExpanded = true
@@ -448,12 +452,12 @@ private fun HistoryStashTabBody(
                 Text(
                     text = stringResource(
                         when {
-                            allEntries.isEmpty() -> R.string.stash_empty
-                            searchQuery.isNotBlank() -> R.string.stash_search_empty
+                            searchQuery.isNotBlank() && allEntries.isNotEmpty() -> R.string.stash_search_empty
+                            // 先建分类、再放内容是常见流程：整个暂存夹还是空的时候，新建的空分类也要给分类的提示。
                             categoryFilter is com.slideindex.app.stash.StashCategoryFilter.Category ->
                                 R.string.stash_category_empty_hint
-                            categoryFilter == com.slideindex.app.stash.StashCategoryFilter.Uncategorized ->
-                                R.string.stash_category_uncategorized_empty_hint
+                            categoryFilter == com.slideindex.app.stash.StashCategoryFilter.Uncategorized &&
+                                allEntries.isNotEmpty() -> R.string.stash_category_uncategorized_empty_hint
                             else -> R.string.stash_empty
                         },
                     ),
@@ -533,8 +537,9 @@ private fun HistoryStashTabBody(
                             categories = categories,
                             onMove = { targetCategoryId ->
                                 scope.launch {
-                                    repo?.moveToCategory(entry.id, targetCategoryId)
-                                    onShowMessage(R.string.stash_category_moved)
+                                    if (repo?.moveToCategory(entry.id, targetCategoryId) == true) {
+                                        onShowMessage(R.string.stash_category_moved)
+                                    }
                                 }
                             },
                             onManage = { openStashCategoryManagement(context) },

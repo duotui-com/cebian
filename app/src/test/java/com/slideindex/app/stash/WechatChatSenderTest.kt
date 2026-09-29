@@ -411,6 +411,15 @@ class WechatChatSenderTest {
     }
 
     @Test
+    fun sendAll_trimsTextBeforeSending() = runTest {
+        val driver = RecordingDriver()
+
+        StashBlockSender.sendAll(listOf(ClipboardContentBlock.text("  您好\n")), driver)
+
+        assertEquals(listOf("text:您好"), driver.calls)
+    }
+
+    @Test
     fun sendAll_singleBlock_hasNoGap() = runTest {
         val driver = RecordingDriver().also { it.clock = { currentTime } }
 

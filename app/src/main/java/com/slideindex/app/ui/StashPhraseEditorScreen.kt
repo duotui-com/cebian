@@ -25,7 +25,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.slideindex.app.R
-import com.slideindex.app.ui.miuix.MiuixLabeledTextField
 import com.slideindex.app.ui.settings.components.LazySettingsItem
 import com.slideindex.app.ui.settings.components.SettingsScreenScaffold
 import com.slideindex.app.ui.settings.components.settingsLazyTipCard
@@ -68,6 +67,8 @@ fun StashPhraseEditorScreen(
                 MiuixIcon(
                     imageVector = Icons.Default.Check,
                     contentDescription = stringResource(R.string.stash_category_editor_save),
+                    // Miuix 的 IconButton 禁用时只是不响应点击、外观不变；不能保存时把对勾调暗，别让人误以为点得动。
+                    tint = MiuixTheme.colorScheme.onBackground.copy(alpha = if (state.canSave) 1f else 0.35f),
                 )
             }
         },
@@ -93,7 +94,7 @@ fun StashPhraseEditorScreen(
                             text = stringResource(R.string.stash_category_editor_text_section),
                             insideMargin = PaddingValues(bottom = 8.dp),
                         )
-                        MiuixLabeledTextField(
+                        StashTextField(
                             value = state.text,
                             onValueChange = onTextChange,
                             label = stringResource(R.string.stash_category_editor_text_label),
