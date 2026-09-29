@@ -10,6 +10,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.lifecycle.lifecycleScope
 import com.slideindex.app.R
 import com.slideindex.app.di.AppDependencies
+import com.slideindex.app.external.AppLinks
 import com.slideindex.app.overlay.FloatBallStashPanel
 import com.slideindex.app.overlay.StashPanelInitialTab
 import com.slideindex.app.util.PermissionHelper
@@ -108,31 +109,19 @@ class StashClipboardTrampolineActivity : ComponentActivity() {
         const val SHORTCUT_ID_STASH = "stash_panel"
         const val SHORTCUT_ID_CLIPBOARD = "clipboard_panel"
 
-        private const val SCHEME = "cebian"
-        private const val HOST = "open"
-        private const val PATH_STASH = "stash"
-        private const val PATH_CLIPBOARD = "clipboard"
-        private const val QUERY_PARAM = "q"
+        private const val QUERY_PARAM = AppLinks.QUERY_PARAM
 
         private const val SHOW_RETRY_ATTEMPTS = 5
         private const val SHOW_RETRY_DELAY_MS = 150L
 
         fun uriFor(tab: StashPanelInitialTab, query: String? = null): Uri =
-            Uri.Builder()
-                .scheme(SCHEME)
-                .authority(HOST)
-                .appendPath(
-                    when (tab) {
-                        StashPanelInitialTab.Stash -> PATH_STASH
-                        StashPanelInitialTab.Clipboard -> PATH_CLIPBOARD
-                    }
-                )
-                .apply {
-                    query?.trim()?.takeIf { it.isNotEmpty() }?.let {
-                        appendQueryParameter(QUERY_PARAM, it)
-                    }
-                }
-                .build()
+            AppLinks.uri(
+                path = when (tab) {
+                    StashPanelInitialTab.Stash -> AppLinks.PATH_STASH
+                    StashPanelInitialTab.Clipboard -> AppLinks.PATH_CLIPBOARD
+                },
+                query = query
+            )
 
         fun createIntent(context: Context, tab: StashPanelInitialTab, query: String? = null): Intent =
             Intent(Intent.ACTION_VIEW, uriFor(tab, query)).apply {
@@ -159,10 +148,10 @@ class StashClipboardTrampolineActivity : ComponentActivity() {
 
         fun resolveInitialTab(intent: Intent?): StashPanelInitialTab {
             intent?.data?.let { uri ->
-                if (uri.scheme.equals(SCHEME, ignoreCase = true) && uri.host == HOST) {
+                if (AppLinks.isAppLink(uri)) {
                     return when (uri.pathSegments.firstOrNull()?.lowercase()) {
-                        PATH_CLIPBOARD -> StashPanelInitialTab.Clipboard
-                        PATH_STASH -> StashPanelInitialTab.Stash
+                        AppLinks.PATH_CLIPBOARD -> StashPanelInitialTab.Clipboard
+                        AppLinks.PATH_STASH -> StashPanelInitialTab.Stash
                         else -> StashPanelInitialTab.Stash
                     }
                 }

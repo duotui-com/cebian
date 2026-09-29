@@ -40,5 +40,15 @@ object LauncherShortcutsApplier {
         }.onFailure {
             Log.w(TAG, "setDynamicShortcuts failed", it)
         }
+
+        // 用户把快捷方式拖到桌面后，系统保存的是当时那个 Intent 的副本，
+        // setDynamicShortcuts 只替换动态列表，不会改写已固定的实例。用同一批 id 再调一次
+        // updateShortcuts，把固定实例里的旧 deeplink 一起迁移掉；否则旧的「剪贴板」快捷方式
+        // 会因为 resolveInitialTab 的兜底分支静默变成「收纳夹」。
+        runCatching {
+            ShortcutManagerCompat.updateShortcuts(appContext, shortcuts)
+        }.onFailure {
+            Log.w(TAG, "updateShortcuts failed", it)
+        }
     }
 }

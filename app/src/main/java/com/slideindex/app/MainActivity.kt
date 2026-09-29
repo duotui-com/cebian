@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.ContentObserver
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -26,6 +25,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
 import com.slideindex.app.clipboard.monitor.ClipboardMonitorStartup
 import com.slideindex.app.di.AppDependencies
+import com.slideindex.app.external.AppLinks
 import com.slideindex.app.freezer.FreezerLaunchState
 import com.slideindex.app.freezer.FreezerTab
 import com.slideindex.app.launcher.LauncherShortcutsApplier
@@ -181,11 +181,11 @@ class MainActivity : ComponentActivity() {
 
     private fun resolveLaunchAction(intent: Intent?): String? {
         intent?.data?.let { uri ->
-            if (uri.scheme.equals(DEEP_LINK_SCHEME, ignoreCase = true) && uri.host == DEEP_LINK_HOST) {
+            if (AppLinks.isAppLink(uri)) {
                 when (uri.pathSegments.firstOrNull()?.lowercase()) {
-                    PATH_NOTIFICATION_HISTORY -> {
+                    AppLinks.PATH_NOTIFICATION_HISTORY -> {
                         NotificationHistoryLaunchState.setPendingSearchQuery(
-                            uri.getQueryParameter(QUERY_PARAM)
+                            uri.getQueryParameter(AppLinks.QUERY_PARAM)
                         )
                         return ACTION_OPEN_NOTIFICATION_HISTORY
                     }
@@ -354,24 +354,7 @@ class MainActivity : ComponentActivity() {
         const val NAV_ROUTE_EXTENSION_FREEZER_APPS = "extension_freezer_apps"
         const val FREEZER_TAB_FROZEN = "frozen"
 
-        private const val DEEP_LINK_SCHEME = "cebian"
-        private const val DEEP_LINK_HOST = "open"
-        private const val PATH_NOTIFICATION_HISTORY = "notification-history"
-        private const val QUERY_PARAM = "q"
-
         /** Gaps after resume; first tick is relative to scheduling (see [schedulePermissionRefreshRetries]). */
         private val PERMISSION_REFRESH_RETRY_DELAYS_MS = longArrayOf(300L, 500L)
-
-        fun notificationHistoryUri(query: String? = null): Uri =
-            Uri.Builder()
-                .scheme(DEEP_LINK_SCHEME)
-                .authority(DEEP_LINK_HOST)
-                .appendPath(PATH_NOTIFICATION_HISTORY)
-                .apply {
-                    query?.trim()?.takeIf { it.isNotEmpty() }?.let {
-                        appendQueryParameter(QUERY_PARAM, it)
-                    }
-                }
-                .build()
     }
 }
