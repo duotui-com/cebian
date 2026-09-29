@@ -452,6 +452,8 @@ private fun HistoryStashTabBody(
                             searchQuery.isNotBlank() -> R.string.stash_search_empty
                             categoryFilter is com.slideindex.app.stash.StashCategoryFilter.Category ->
                                 R.string.stash_category_empty_hint
+                            categoryFilter == com.slideindex.app.stash.StashCategoryFilter.Uncategorized ->
+                                R.string.stash_category_uncategorized_empty_hint
                             else -> R.string.stash_empty
                         },
                     ),

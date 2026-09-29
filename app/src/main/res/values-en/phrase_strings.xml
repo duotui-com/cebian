@@ -70,6 +70,7 @@
     <string name="stash_category_uncategorized">Uncategorized</string>
     <string name="stash_category_manage">Manage</string>
     <string name="stash_category_empty_hint">This category is empty. Add items in the manage page, or use “Move to category” on a stash item</string>
+    <string name="stash_category_uncategorized_empty_hint">No uncategorized items</string>
     <string name="stash_category_move_to">Move to category</string>
     <string name="stash_category_move_out">Remove from category</string>
     <string name="stash_category_move_manage">Manage categories…</string>

@@ -70,6 +70,7 @@
     <string name="stash_category_uncategorized">未分類</string>
     <string name="stash_category_manage">管理</string>
     <string name="stash_category_empty_hint">このカテゴリは空です。管理ページで追加するか、ストッシュ項目の「カテゴリへ移動」を使ってください</string>
+    <string name="stash_category_uncategorized_empty_hint">未分類の項目はありません</string>
     <string name="stash_category_move_to">カテゴリへ移動</string>
     <string name="stash_category_move_out">カテゴリから外す</string>
     <string name="stash_category_move_manage">カテゴリを管理…</string>
