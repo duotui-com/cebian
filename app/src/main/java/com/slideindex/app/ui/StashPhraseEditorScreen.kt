@@ -55,6 +55,9 @@ fun StashPhraseEditorScreen(
     onRemoveImage: () -> Unit,
     onSave: () -> Unit,
 ) {
+    // LazyListScope 顶层不能调用 @Composable，文案先在外面取好。
+    val notEditableHint = stringResource(R.string.stash_category_editor_complex)
+
     SettingsScreenScaffold(
         title = stringResource(
             if (isNew) R.string.stash_category_editor_add_title else R.string.stash_category_editor_edit_title,
@@ -72,7 +75,7 @@ fun StashPhraseEditorScreen(
         if (!state.editable) {
             settingsLazyTipCard(
                 key = "stash-phrase-not-editable",
-                text = stringResource(R.string.stash_category_editor_complex),
+                text = notEditableHint,
             )
         } else {
             LazySettingsItem(key = "stash-phrase-editor") {

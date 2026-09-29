@@ -79,6 +79,9 @@ fun StashCategoryEntriesScreen(
     var deleting by remember { mutableStateOf<StashEntry?>(null) }
     var confirmClear by remember { mutableStateOf(false) }
 
+    // LazyListScope 顶层不能调用 @Composable，文案先在外面取好。
+    val entriesEmptyHint = stringResource(R.string.stash_category_entries_empty)
+    val reorderHint = stringResource(R.string.stash_category_entries_reorder_hint)
     val uncategorizedLabel = stringResource(R.string.stash_category_move_uncategorized)
     val moveTargets = remember(otherCategories, uncategorizedLabel) {
         listOf(MoveTarget(categoryId = null, label = uncategorizedLabel)) +
@@ -111,12 +114,12 @@ fun StashCategoryEntriesScreen(
         if (entries.isEmpty()) {
             settingsLazyHint(
                 key = "stash-entries-empty",
-                text = stringResource(R.string.stash_category_entries_empty),
+                text = entriesEmptyHint,
             )
         } else {
             settingsLazyHint(
                 key = "stash-entries-reorder-hint",
-                text = stringResource(R.string.stash_category_entries_reorder_hint),
+                text = reorderHint,
             )
             LazySettingsItem(key = "stash-entry-list") {
                 SettingsVerticalReorderList(

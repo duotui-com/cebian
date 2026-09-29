@@ -61,6 +61,12 @@ fun StashCategoriesScreen(
     var nameDialog by remember { mutableStateOf<CategoryNameDialogState?>(null) }
     var deleting by remember { mutableStateOf<StashCategory?>(null) }
 
+    // LazyListScope 顶层不能调用 @Composable，文案先在外面取好。
+    val sendSectionTitle = stringResource(R.string.stash_category_send_section)
+    val wechatEnvHint = stringResource(R.string.stash_category_wechat_env_hint)
+    val categoriesSectionTitle = stringResource(R.string.stash_category_section)
+    val categoriesEmptyHint = stringResource(R.string.stash_category_empty)
+
     SettingsScreenScaffold(
         title = stringResource(R.string.stash_category_settings_title),
         subtitle = stringResource(R.string.stash_category_settings_subtitle),
@@ -68,7 +74,7 @@ fun StashCategoriesScreen(
     ) {
         settingsLazySmallTitle(
             key = "stash-send-section",
-            title = stringResource(R.string.stash_category_send_section),
+            title = sendSectionTitle,
         )
         groupedCardItems(
             keyPrefix = "stash-send",
@@ -99,12 +105,12 @@ fun StashCategoriesScreen(
         )
         settingsLazyTipCard(
             key = "stash-wechat-env-hint",
-            text = stringResource(R.string.stash_category_wechat_env_hint),
+            text = wechatEnvHint,
         )
 
         settingsLazySmallTitle(
             key = "stash-categories-section",
-            title = stringResource(R.string.stash_category_section),
+            title = categoriesSectionTitle,
         )
         groupedCardItems(
             keyPrefix = "stash-category-add",
@@ -128,7 +134,7 @@ fun StashCategoriesScreen(
         if (categories.isEmpty()) {
             settingsLazyHint(
                 key = "stash-categories-empty",
-                text = stringResource(R.string.stash_category_empty),
+                text = categoriesEmptyHint,
             )
         } else {
             LazySettingsItem(key = "stash-category-list") {
