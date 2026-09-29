@@ -281,11 +281,9 @@ internal fun HistoryPanelScreen(
                                 categoryFilter = stashCategoryFilter,
                                 isActive = selectedTab == HistoryPanelTab.Stash,
                                 panelBlurActive = panelBlurActive,
-                                listTopPadding = listTopPadding + StashCategoryBarHeight,
+                                listTopPadding = listTopPadding,
                                 listBackdrop = barBackdrop,
                                 repo = stashRepo,
-                                // 面板停靠在右边时，卡片的操作按钮放左边（抽屉外侧），反之亦然。
-                                actionsOnStart = gravityEnd,
                                 onShowMessage = showPanelMessage,
                             )
                             StashCategoryChipBar(
@@ -295,9 +293,7 @@ internal fun HistoryPanelScreen(
                                 backdrop = barBackdrop,
                                 onSelect = viewModel::setStashCategoryFilter,
                                 onManage = { openStashCategoryManagement(context) },
-                                modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(top = listTopPadding),
+                                modifier = Modifier.align(Alignment.BottomStart),
                             )
                         }
                         HistoryPanelTab.Clipboard -> HistoryClipboardTabBody(
@@ -390,7 +386,9 @@ internal fun HistoryPanelScreen(
                     state = snackbarHostState,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(horizontal = 12.dp, vertical = 16.dp),
+                        .padding(horizontal = 12.dp, vertical = 16.dp)
+                        // 暂存夹页底部有固定的分类筛选条，提示条要躲开它。
+                        .padding(bottom = if (selectedTab == HistoryPanelTab.Stash) StashCategoryBarHeight else 0.dp),
                 )
             }
         }
@@ -409,14 +407,12 @@ private fun HistoryStashTabBody(
     listTopPadding: Dp,
     listBackdrop: LayerBackdrop?,
     repo: com.slideindex.app.stash.StashRepository?,
-    actionsOnStart: Boolean,
     onShowMessage: (Int) -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val topEntryId = allEntries.firstOrNull()?.id
-    val categoryNames = remember(categories) { categories.associate { it.id to it.name } }
     // 换了分类，列表内容整个变了，回到顶部。
     LaunchedEffect(categoryFilter) { listState.scrollToItem(0) }
     var previousTopId by remember { mutableStateOf<String?>(null) }
@@ -469,18 +465,12 @@ private fun HistoryStashTabBody(
                     .fillMaxSize()
                     .background(HistoryPanelColors.listBackground(panelBlurActive))
                     .historyPanelListBackdrop(listBackdrop),
-                contentPadding = PaddingValues(
-                    start = 12.dp,
-                    end = 12.dp,
-                    top = 8.dp + listTopPadding,
-                    bottom = 8.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                // 没有卡片了：内容贴着抽屉边，条与条之间由每条自带的分隔线隔开。
+                contentPadding = PaddingValues(top = listTopPadding),
             ) {
                 items(filteredEntries, key = { it.id }) { entry ->
                     HistoryStashEntryCard(
                         entry = entry,
-                        actionsOnStart = actionsOnStart,
                         onShowMessage = onShowMessage,
                         onPin = {
                             when (entry.type) {
@@ -522,7 +512,6 @@ private fun HistoryStashTabBody(
                         onToggleStar = { scope.launch { repo?.toggleStar(entry.id) } },
                         onDelete = { scope.launch { repo?.delete(entry.id) } },
                         categoryUi = StashCardCategoryUi(
-                            categoryName = entry.categoryId?.let { categoryNames[it] },
                             currentCategoryId = entry.categoryId,
                             categories = categories,
                             onMove = { targetCategoryId ->

@@ -61,12 +61,15 @@ internal fun Modifier.historyPanelListBackdrop(backdrop: LayerBackdrop?): Modifi
 
 internal val HistoryListFooterPadding = 64.dp
 
+/** 收纳面板抽屉占屏幕宽度的比例。 */
+internal const val HistoryPanelWidthFraction = 0.6f
+
 @Composable
 internal fun historyPanelWidth(): Dp {
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
     return with(density) {
-        (windowInfo.containerSize.width / 2f).toDp()
+        (windowInfo.containerSize.width * HistoryPanelWidthFraction).toDp()
     }
 }
 
