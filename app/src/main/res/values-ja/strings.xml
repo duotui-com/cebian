@@ -324,9 +324,7 @@
     <string name="secure_settings_grant_success">Shizuku 経由で許可しました</string>
     <string name="secure_settings_grant_failed">許可に失敗しました。ADB コマンドを手動で実行してください。</string>
     <string name="secure_settings_adb_dialog_title">ADB 許可手順</string>
-    <string name="secure_settings_adb_dialog_message">USB またはワイヤレスデバッグで接続し、ターミナルで次のコマンドを実行してください（アプリ再インストール後は再実行）:
-
-%1$s</string>
+    <string name="secure_settings_adb_dialog_message">USB またはワイヤレスデバッグで接続し、ターミナルで次のコマンドを実行してください（アプリ再インストール後は再実行）: %1$s</string>
     <string name="secure_settings_adb_copy">コマンドをコピー</string>
     <string name="secure_settings_adb_copied">クリップボードにコピーしました</string>
     <string name="accessibility_recover_reopen_app_hint">エッジジェスチャーが接続されていません。アプリを完全終了してから再度開いてください。</string>
@@ -1785,13 +1783,8 @@
     <string name="search_engine_type_extern_jump">アプリスキーム</string>
     <string name="search_engine_url_link_hint">URL / スキームアドレス</string>
     <string name="search_engine_url_link_support" formatted="false">https://、coolmarket://、intent:// などに対応。プレースホルダーに %s または %q を使用</string>
-    <string name="search_engine_url_link_flow_desc" formatted="false">実行ルールとフロー:
-1. パラメータ付きジャンプ: %s を使用する場合（例: example.com/search?q=%s）、クエリを URL に直接置換
-2. 対象アプリ: 対象パッケージを設定すると指定アプリで強制起動。未設定時はデフォルトアプリを使用
-3. 自動入力: %s 未使用かつ自動入力オン時、起動後にアクセシビリティで検索バーに入力</string>
-    <string name="search_engine_jump_activity_flow_desc">実行ルールとフロー:
-1. アクティビティ起動: 対象アプリのアクティビティを直接開く（非エクスポートのアクティビティは必要に応じて Shizuku 経由）
-2. 自動入力: 起動後（自動入力オン時）、600ms〜3000ms 以内に検索バーを探して入力・Enter</string>
+    <string name="search_engine_url_link_flow_desc" formatted="false">実行ルールとフロー: 1. パラメータ付きジャンプ: %s を使用する場合（例: example.com/search?q=%s）、クエリを URL に直接置換 2. 対象アプリ: 対象パッケージを設定すると指定アプリで強制起動。未設定時はデフォルトアプリを使用 3. 自動入力: %s 未使用かつ自動入力オン時、起動後にアクセシビリティで検索バーに入力</string>
+    <string name="search_engine_jump_activity_flow_desc">実行ルールとフロー: 1. アクティビティ起動: 対象アプリのアクティビティを直接開く（非エクスポートのアクティビティは必要に応じて Shizuku 経由） 2. 自動入力: 起動後（自動入力オン時）、600ms〜3000ms 以内に検索バーを探して入力・Enter</string>
     <string name="search_engine_type_share">共有</string>
     <string name="search_engine_type_share_image">画像を共有</string>
     <string name="search_engine_import_preview_title">インポートを確認</string>
@@ -2675,16 +2668,7 @@
     <string name="privacy_policy_subtitle">データの取り扱いとアップロードの有無</string>
     <string name="privacy_policy_entry_title">プライバシーポリシー</string>
     <string name="privacy_policy_entry_desc">ローカルデータの取り扱いと権限の目的</string>
-    <string name="privacy_policy_body">XGesture は端末内処理を基本としています。
-
-• 通知と OTP: 読み取り、フィルタリング、抽出、表示はすべて端末内のみ。デフォルトではアップロードしません。
-• OTP 記録と通知履歴: アプリ専用ストレージに保存し、デフォルトではシステムバックアップから除外。設定バックアップで任意エクスポート可能。
-• LSPosed / Shizuku: ご自身で有効にする任意の拡張機能。
-• 個人を特定できる情報の収集や開発者サーバーへの送信は行いません。
-
-フォアグラウンドサービス（特殊用途）: OverlayService はエッジジェスチャとシェイク検出を維持するため subtype overlay_sidebar を使用 — 広告や無関係なバックグラウンド処理ではありません。
-
-ご質問: プロジェクトリポジトリで GitHub Issue を開いてください。</string>
+    <string name="privacy_policy_body">XGesture は端末内処理を基本としています。 • 通知と OTP: 読み取り、フィルタリング、抽出、表示はすべて端末内のみ。デフォルトではアップロードしません。 • OTP 記録と通知履歴: アプリ専用ストレージに保存し、デフォルトではシステムバックアップから除外。設定バックアップで任意エクスポート可能。 • LSPosed / Shizuku: ご自身で有効にする任意の拡張機能。 • 個人を特定できる情報の収集や開発者サーバーへの送信は行いません。 フォアグラウンドサービス（特殊用途）: OverlayService はエッジジェスチャとシェイク検出を維持するため subtype overlay_sidebar を使用 — 広告や無関係なバックグラウンド処理ではありません。 ご質問: プロジェクトリポジトリで GitHub Issue を開いてください。</string>
     <string name="otp_autofill_stats_title">入力統計</string>
     <string name="otp_autofill_stats_screen_desc">試行回数、成功率、最後の失敗理由を表示</string>
     <string name="otp_autofill_stats_entry_empty">記録はまだありません</string>
@@ -2816,7 +2800,7 @@
     <string name="about_telegram_chat_desc">XGesture · X手势</string>
     <string name="about_telegram_chat_url">https://t.me/+NtcG5HPiKXVmNTU1</string>
     <string name="about_telegram_releases_title">Telegram Releases</string>
-    <string name="about_telegram_releases_desc">@cebian_channel</string>
+    <string name="about_telegram_releases_desc">\@cebian_channel</string>
     <string name="about_telegram_releases_url">https://t.me/cebian_channel</string>
     <string name="about_qq_group_title">QQ グループ</string>
     <string name="about_qq_group_desc">1042783385</string>
@@ -3401,10 +3385,8 @@
     <string name="foreground_inspector_app_name">アプリ名: %1$s</string>
     <string name="foreground_inspector_package_name">パッケージ: %1$s</string>
     <string name="foreground_inspector_activity_name">ACTIVITY: %1$s</string>
-    <string name="shell_downgrade_hint">注意: root を shell に降格しました
-</string>
-    <string name="shell_downgrade_failed">adb/shell に降格できません（Shizuku が Root で実行中）。
-adb/ワイヤレスデバッグで Shizuku を起動してください。</string>
+    <string name="shell_downgrade_hint">注意: root を shell に降格しました</string>
+    <string name="shell_downgrade_failed">adb/shell に降格できません（Shizuku が Root で実行中）。 adb/ワイヤレスデバッグで Shizuku を起動してください。</string>
     <string name="shell_su_exec_failed">su の実行に失敗しました</string>
     <string name="privileged_task_skipped_main_thread">メインスレッドで特権タスクをスキップ</string>
     <string name="privileged_no_root">Root 権限がありません</string>
@@ -3412,17 +3394,13 @@ adb/ワイヤレスデバッグで Shizuku を起動してください。</strin
     <string name="shell_user_service_failed">Shizuku UserService への接続に失敗しました。Shizuku を再起動して再試行してください。</string>
     <string name="shell_command_timeout">Shell コマンドがタイムアウトしました（%1$d 秒）。再試行してください。</string>
     <string name="shell_command_empty">コマンドが空です</string>
-    <string name="shell_connect_failed">Shell サービスに接続できません（期待 build=%1$d）。
-「Shell サービスを再起動」をタップ。失敗する場合は Shizuku と本アプリを完全終了して再試行してください。</string>
+    <string name="shell_connect_failed">Shell サービスに接続できません（期待 build=%1$d）。 「Shell サービスを再起動」をタップ。失敗する場合は Shizuku と本アプリを完全終了して再試行してください。</string>
     <string name="shell_shizuku_api_outdated">Shizuku サービスのバージョンが古いです (api=%1$d)。Shizuku を再起動して再試行してください。</string>
-    <string name="shell_root_uid_warning">コマンドは root 権限 (uid=0) で実行されています。
-adb モードでは uid=2000 である必要があります。
-Shizuku を Root で起動した場合はワイヤレスデバッグ/adb で起動するか、
-APatch で Shell の永久 Root 権限を取り消してください。</string>
+    <string name="shell_root_uid_warning">コマンドは root 権限 (uid=0) で実行されています。 adb モードでは uid=2000 である必要があります。 Shizuku を Root で起動した場合はワイヤレスデバッグ/adb で起動するか、 APatch で Shell の永久 Root 権限を取り消してください。</string>
     <string name="shell_no_response">Shell サービスが応答しません。Shizuku を完全に再起動し、本アプリを開き直してください。</string>
     <string name="app_carousel_cancel_hint">画面上部または下部へ移動して離すとキャンセル</string>
     <string name="extension_about_subtitle">バージョン、更新、プライバシーポリシー</string>
-    <string name="external_invocation_keyword_example"> "キーワード"</string>
+    <string name="external_invocation_keyword_example">キーワード</string>
     <string name="search_panel_aggregated_image_search">画像検索を集約</string>
     <string name="search_panel_aggregated_image_icon">集</string>
     <string name="pick_result_copy_selection">選択をコピー</string>
