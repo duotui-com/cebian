@@ -9,7 +9,7 @@
 
 **简体中文** | [English](README.md) | [日本語](README_ja.md)
 
-[![Release](https://img.shields.io/github/v/release/qpst4/xgesture?style=flat-square&color=6340e6)](https://github.com/qpst4/xgesture/releases)
+[![Release](https://img.shields.io/github/v/release/qpst4/XGesture?style=flat-square&color=6340e6)](https://github.com/qpst4/XGesture/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%2012%2B-brightgreen?style=flat-square)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple?style=flat-square)](https://kotlinlang.org)
@@ -42,8 +42,8 @@
 
 <div align="center">
 
-[![Download Full APK](https://img.shields.io/badge/下载%20Full%20完整包-内置离线引擎-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/xgesture/releases/latest)
-[![Download Lite APK](https://img.shields.io/badge/下载%20Lite%20轻量包-体积小巧-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/xgesture/releases/latest)
+[![Download Full APK](https://img.shields.io/badge/下载%20Full%20完整包-内置离线引擎-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
+[![Download Lite APK](https://img.shields.io/badge/下载%20Lite%20轻量包-体积小巧-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
 
 </div>
 
@@ -362,7 +362,7 @@ Android 历史上诞生过许多极具开创性的手势与效率神器：
 ### 构建命令
 ```bash
 # 克隆仓库
-git clone https://github.com/qpst4/xgesture.git
+git clone https://github.com/qpst4/XGesture.git
 cd XGesture
 
 # 编译 Full Debug 包（含内置离线引擎）
@@ -388,8 +388,8 @@ cd XGesture
 
 <div align="center">
 
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/xgesture/discussions)
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues%20反馈-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/xgesture/issues)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/discussions)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues%20反馈-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/issues)
 <br>
 [![Telegram 讨论群](https://img.shields.io/badge/Telegram-XGesture_·_X手势-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
 [![Telegram 公告](https://img.shields.io/badge/Telegram-Releases-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/cebian_channel)

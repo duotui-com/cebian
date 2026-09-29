@@ -2849,9 +2849,9 @@
     <string name="update_notification_failed_content">点击重试</string>
     <string name="update_notification_permission_title">开启通知权限</string>
     <string name="update_notification_permission_rationale">开启通知后，可在后台发现新版本或下载完成时收到提醒。</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/XGesture</string>
     <string name="about_star_github_title">GitHub 源码仓库 ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · 点亮 Star 支持作者</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/XGesture · 点亮 Star 支持作者</string>
     <string name="about_feedback_issues_title">问题反馈与需求建议</string>
     <string name="about_feedback_issues_desc">在 GitHub 提交 Bug 反馈、新功能想法或分享配置</string>
     <string name="about_help_translate_title">参与翻译</string>

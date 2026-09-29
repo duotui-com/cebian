@@ -50,8 +50,8 @@
 
 ### 📥 下载与开源主页
 
-- **GitHub 源码主页**：https://github.com/qpst4/xgesture
-- **最新版 APK 下载**：https://github.com/qpst4/xgesture/releases/latest
+- **GitHub 源码主页**：https://github.com/qpst4/XGesture
+- **最新版 APK 下载**：https://github.com/qpst4/XGesture/releases/latest
   （提供内置离线引擎的 Full 完整包，以及体积轻盈的 Lite 轻量包）
 - **官方 QQ 交流群**：1042783385
 

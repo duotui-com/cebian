@@ -2,7 +2,7 @@
 
 > **给 AI 工具与维护者：** 本仓库采用 **Tag 驱动的全自动云端闭环流水线（Tag-Driven Release CI）**。发版时只需**更新日志、升版本号并推送 Tag**，云端 GitHub Actions 会自动完成构建、签名、校验、发布 GitHub Release、回填 `update.json` 与 CDN 缓存刷新。
 
-远程仓库：`qpst4/xgesture`
+远程仓库：`qpst4/XGesture`
 
 ---
 

@@ -18,7 +18,7 @@
 [CENTER]
 [B][SIZE="5"]📱 XGesture (Sidebar)[/SIZE][/B]
 [SIZE="3"][I]All-in-One Open-Source Gesture, Reachability Pointer & Productivity Suite for Android 12+[/I][/SIZE]
-[URL="https://github.com/qpst4/xgesture"][B]GitHub Repository[/B][/URL] | [URL="https://github.com/qpst4/xgesture/releases/latest"][B]Latest Releases[/B][/URL] | [URL="https://github.com/qpst4/xgesture/blob/main/LICENSE"][B]AGPL-3.0 License[/B][/URL]
+[URL="https://github.com/qpst4/XGesture"][B]GitHub Repository[/B][/URL] | [URL="https://github.com/qpst4/XGesture/releases/latest"][B]Latest Releases[/B][/URL] | [URL="https://github.com/qpst4/XGesture/blob/main/LICENSE"][B]AGPL-3.0 License[/B][/URL]
 [/CENTER]
 
 Hey XDA,
@@ -54,8 +54,8 @@ I wanted to share **XGesture**, a system-level gesture and productivity tool I'v
 
 ### 📥 Download & Source
 
-* **GitHub**: https://github.com/qpst4/xgesture
-* **Releases**: https://github.com/qpst4/xgesture/releases
+* **GitHub**: https://github.com/qpst4/XGesture
+* **Releases**: https://github.com/qpst4/XGesture/releases
   * `xgesture-*-full.apk`: Out-of-the-box experience with bundled offline OCR & segmentation models.
   * `xgesture-*-lite.apk`: Smaller package size; extension engines download on demand.
 

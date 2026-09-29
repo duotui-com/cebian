@@ -2804,9 +2804,9 @@
     <string name="update_notification_failed_content">タップして再試行</string>
     <string name="update_notification_permission_title">通知を有効にする</string>
     <string name="update_notification_permission_rationale">新バージョンの検出やダウンロード完了時に通知を受け取るには、通知を許可してください。</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/XGesture</string>
     <string name="about_star_github_title">GitHub リポジトリ ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · Star で開発を支援</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/XGesture · Star で開発を支援</string>
     <string name="about_feedback_issues_title">Issues と機能リクエスト</string>
     <string name="about_feedback_issues_desc">GitHub でバグ報告、機能提案、プリセット共有</string>
     <string name="about_help_translate_title">翻訳に参加</string>

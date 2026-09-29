@@ -16,15 +16,15 @@ data class UpdateNotesGroup(
 
 object UpdateChecker {
     private val MANIFEST_URLS = listOf(
-        "https://raw.githubusercontent.com/qpst4/xgesture/main/update.json",
-        "https://cdn.jsdelivr.net/gh/qpst4/xgesture@main/update.json",
+        "https://raw.githubusercontent.com/qpst4/XGesture/main/update.json",
+        "https://cdn.jsdelivr.net/gh/qpst4/XGesture@main/update.json",
     )
     private const val TIMEOUT_MS = 8000
 
     private val USER_AGENT = "xgesture/${BuildConfig.VERSION_NAME} (Android)"
     private val json = Json { ignoreUnknownKeys = true }
 
-    const val RELEASES_PAGE_URL = "https://github.com/qpst4/xgesture/releases"
+    const val RELEASES_PAGE_URL = "https://github.com/qpst4/XGesture/releases"
 
     sealed interface FetchResult {
         data class Success(val manifest: UpdateManifest) : FetchResult

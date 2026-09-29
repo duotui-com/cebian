@@ -57,10 +57,10 @@ Over the past few months, I built **XGesture** (formerly "Sidebar"), an all-in-o
 
 ### 📥 Links & Download
 
-- **GitHub Repository**: https://github.com/qpst4/xgesture
-- **Releases (Full & Lite APKs)**: https://github.com/qpst4/xgesture/releases/latest
+- **GitHub Repository**: https://github.com/qpst4/XGesture
+- **Releases (Full & Lite APKs)**: https://github.com/qpst4/XGesture/releases/latest
   *(Full package includes offline OCR/segmentation engines; Lite downloads them on-demand)*
-- **Issue Tracker & Discussions**: https://github.com/qpst4/xgesture/issues
+- **Issue Tracker & Discussions**: https://github.com/qpst4/XGesture/issues
 
 I would love to hear your feedback, feature requests, or bug reports! If you find it useful, dropping a ⭐ Star on GitHub would mean the world to support ongoing development.
 ```

@@ -126,7 +126,7 @@ if ([string]::IsNullOrWhiteSpace($resolvedNotes)) {
     throw "Notes are empty. Pass -Notes, -NotesFile, or -FromChangelog."
 }
 
-$apkUrl = "https://github.com/qpst4/xgesture/releases/download/v$Version/$ApkFileName"
+$apkUrl = "https://github.com/qpst4/XGesture/releases/download/v$Version/$ApkFileName"
 $manifest = [ordered]@{
     version     = $Version
     versionCode = $VersionCode
@@ -149,7 +149,7 @@ if ($written.notes -ne $resolvedNotes) {
     throw "Local update.json notes validation failed."
 }
 
-$jsDelivrUrl = "https://cdn.jsdelivr.net/gh/qpst4/xgesture@main/update.json"
+$jsDelivrUrl = "https://cdn.jsdelivr.net/gh/qpst4/XGesture@main/update.json"
 $purgeUrl = $jsDelivrUrl -replace "https://cdn.jsdelivr.net/", "https://purge.jsdelivr.net/"
 try {
     $purgeResponse = Invoke-RestMethod -Uri $purgeUrl
@@ -160,7 +160,7 @@ try {
 }
 
 if ($VerifyRemote) {
-    $rawUrl = "https://raw.githubusercontent.com/qpst4/xgesture/main/update.json"
+    $rawUrl = "https://raw.githubusercontent.com/qpst4/XGesture/main/update.json"
     foreach ($url in @($rawUrl, $jsDelivrUrl)) {
         $remote = Invoke-RestMethod -Uri $url -TimeoutSec 30
         if ($remote.version -ne $Version) {

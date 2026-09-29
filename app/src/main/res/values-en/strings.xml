@@ -2824,9 +2824,9 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="update_notification_failed_content">Tap to retry</string>
     <string name="update_notification_permission_title">Enable notifications</string>
     <string name="update_notification_permission_rationale">Allow notifications to get alerts when a new version is found or download completes.</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/XGesture</string>
     <string name="about_star_github_title">GitHub Repository ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · Star to support development</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/XGesture · Star to support development</string>
     <string name="about_feedback_issues_title">Issues &amp; Feature Requests</string>
     <string name="about_feedback_issues_desc">Report bugs, propose features, or share presets on GitHub</string>
     <string name="about_help_translate_title">Help translate</string>

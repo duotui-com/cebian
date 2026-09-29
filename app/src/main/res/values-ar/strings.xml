@@ -2766,9 +2766,9 @@
     <string name="update_notification_failed_content">انقر لإعادة المحاولة</string>
     <string name="update_notification_permission_title">تفعيل إذن الإشعارات</string>
     <string name="update_notification_permission_rationale">بعد تفعيل الإشعارات، ستتلقى تذكيرًا عند اكتشاف إصدار جديد أو اكتمال التنزيل في الخلفية.</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/XGesture</string>
     <string name="about_star_github_title">مستودع الكود المصدري على GitHub ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · امنح نجمة لدعم المطور</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/XGesture · امنح نجمة لدعم المطور</string>
     <string name="about_feedback_issues_title">ملاحظات المشاكل واقتراحات الميزات</string>
     <string name="about_feedback_issues_desc">الإبلاغ عن الأخطاء، أو اقتراح ميزات جديدة، أو مشاركة الإعدادات على GitHub</string>
     <string name="about_help_translate_title">المشاركة في الترجمة</string>

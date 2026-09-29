@@ -7,7 +7,7 @@
 ### 一、 提交收录的好处
 1. **自动构建与发版同步**：只要你在 GitHub 发 Release 并上传 APK，IzzyOnDroid 每天自动拉取更新，无需手动维护。
 2. **全球曝光**：应用会出现在 IzzyOnDroid 网页版、每日新收录 RSS、以及数十万 F-Droid 客户端的新应用推荐中。
-3. **GitHub 反向引流**：应用卡片的主页链接直连 `https://github.com/qpst4/xgesture`，是海外自然 Star 最稳定的源头。
+3. **GitHub 反向引流**：应用卡片的主页链接直连 `https://github.com/qpst4/XGesture`，是海外自然 Star 最稳定的源头。
 
 ---
 
@@ -24,7 +24,7 @@
 
 ```markdown
 ### Repository URL
-https://github.com/qpst4/xgesture
+https://github.com/qpst4/XGesture
 
 ### Package Name
 com.slideindex.app

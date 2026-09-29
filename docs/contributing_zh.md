@@ -51,7 +51,7 @@ app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再�
 
 ## 贡献代码
 
-1. Fork 并克隆：`git clone https://github.com/qpst4/xgesture.git`
+1. Fork 并克隆：`git clone https://github.com/qpst4/XGesture.git`
 2. 从 `main` 创建功能分支。
 3. 改动尽量聚焦；风格与现有 Kotlin / Compose 一致。
 4. 本地执行：`.\gradlew.bat compileLiteDebugKotlin`（改 UI/字符串建议跑 `lintLiteDebug`）。
@@ -67,8 +67,8 @@ app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再�
 
 ## 社区
 
-- [GitHub Issues](https://github.com/qpst4/xgesture/issues) — Bug 与功能建议
-- [GitHub Discussions](https://github.com/qpst4/xgesture/discussions) — 讨论与提问
+- [GitHub Issues](https://github.com/qpst4/XGesture/issues) — Bug 与功能建议
+- [GitHub Discussions](https://github.com/qpst4/XGesture/discussions) — 讨论与提问
 - QQ 群：**1042783385**
 
 ---

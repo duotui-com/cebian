@@ -51,7 +51,7 @@ app/src/main/res/values-xx/strings.xml    # 新言語：values-en をコピー�
 
 ## コード貢献
 
-1. Fork & clone: `git clone https://github.com/qpst4/xgesture.git`
+1. Fork & clone: `git clone https://github.com/qpst4/XGesture.git`
 2. `main` から機能ブランチを作成。
 3. 変更は小さく、既存の Kotlin / Compose スタイルに合わせる。
 4. ローカル: `.\gradlew.bat compileLiteDebugKotlin`（UI/文字列変更時は `lintLiteDebug` 推奨）。
@@ -67,8 +67,8 @@ app/src/main/res/values-xx/strings.xml    # 新言語：values-en をコピー�
 
 ## コミュニティ
 
-- [GitHub Issues](https://github.com/qpst4/xgesture/issues)
-- [GitHub Discussions](https://github.com/qpst4/xgesture/discussions)
+- [GitHub Issues](https://github.com/qpst4/XGesture/issues)
+- [GitHub Discussions](https://github.com/qpst4/XGesture/discussions)
 - QQ グループ：**1042783385**
 
 ---

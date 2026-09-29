@@ -4,7 +4,7 @@
 
 ## 前置条件
 
-- GitHub 仓库：`https://github.com/qpst4/xgesture`
+- GitHub 仓库：`https://github.com/qpst4/XGesture`
 - 仓库根目录已包含 [`weblate.yml`](../weblate.yml)
 - 源语言为 **简体中文**（`app/src/main/res/values/strings.xml`）
 
@@ -17,7 +17,7 @@
 3. 项目信息建议：
    - **Name**：XGesture
    - **Slug**：`XGesture`（与 `weblate.yml` 中 `project` 一致）
-   - **Website**：`https://github.com/qpst4/xgesture`
+   - **Website**：`https://github.com/qpst4/XGesture`
    - **Source language**：Chinese (Simplified) / `zh_Hans`
 
 ### 2. 导入组件
@@ -25,7 +25,7 @@
 **方式 A（推荐）：从 weblate.yml 导入**
 
 1. 在项目中 **Add new translation component**
-2. Repository：`https://github.com/qpst4/xgesture.git`，Branch：`main`
+2. Repository：`https://github.com/qpst4/XGesture.git`，Branch：`main`
 3. 若界面提供 **Import from weblate.yml**，选用根目录配置
 
 **方式 B：手动创建 App strings 组件**

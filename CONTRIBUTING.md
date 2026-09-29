@@ -53,7 +53,7 @@ app/src/main/res/values-xx/strings.xml    # New locale: copy values-en, translat
 
 ## Contributing code
 
-1. Fork and clone: `git clone https://github.com/qpst4/xgesture.git`
+1. Fork and clone: `git clone https://github.com/qpst4/XGesture.git`
 2. Create a feature branch from `main`.
 3. Make focused changes; match existing Kotlin / Compose style.
 4. Run locally: `.\gradlew.bat compileLiteDebugKotlin` (or `lintLiteDebug` for UI/string changes).
@@ -69,8 +69,8 @@ app/src/main/res/values-xx/strings.xml    # New locale: copy values-en, translat
 
 ## Community
 
-- [GitHub Issues](https://github.com/qpst4/xgesture/issues) — bugs and feature requests
-- [GitHub Discussions](https://github.com/qpst4/xgesture/discussions) — questions and ideas
+- [GitHub Issues](https://github.com/qpst4/XGesture/issues) — bugs and feature requests
+- [GitHub Discussions](https://github.com/qpst4/XGesture/discussions) — questions and ideas
 - QQ group: **1042783385**
 
 ---
