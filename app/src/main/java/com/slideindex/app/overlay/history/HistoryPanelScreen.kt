@@ -290,7 +290,6 @@ internal fun HistoryPanelScreen(
                                 categories = stashCategories,
                                 selected = stashCategoryFilter,
                                 panelBlurActive = panelBlurActive,
-                                backdrop = barBackdrop,
                                 onSelect = viewModel::setStashCategoryFilter,
                                 onManage = { openStashCategoryManagement(context) },
                                 modifier = Modifier.align(Alignment.BottomStart),
