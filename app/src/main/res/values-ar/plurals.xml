@@ -320,4 +320,12 @@
         <item quantity="many">%d عناصر واجهة</item>
         <item quantity="other">%d عناصر واجهة</item>
     </plurals>
+    <plurals name="clipboard_lsposed_whitelist_desc">
+        <item quantity="zero">لم تتم إضافة أي تطبيق</item>
+        <item quantity="one">تمت إضافة تطبيق واحد</item>
+        <item quantity="two">تمت إضافة تطبيقين</item>
+        <item quantity="few">تمت إضافة %1$d تطبيقات</item>
+        <item quantity="many">تمت إضافة %1$d تطبيقًا</item>
+        <item quantity="other">تمت إضافة %1$d تطبيق</item>
+    </plurals>
 </resources>
