@@ -109,7 +109,7 @@ class WechatChatSenderTest {
         chat.sendButton.clickResult = false
 
         assertEquals(StashSendFailure.SEND_BUTTON_NOT_FOUND, chat.sender.sendText("hi"))
-        assertEquals(StashSendTiming.SEND_BUTTON_ATTEMPTS, chat.sendButton.actions.size)
+        assertEquals(StashSendTiming.SEND_BUTTON_RETRIES + 1, chat.sendButton.actions.size)
     }
 
     // ───────────────────────── 找不到输入框时的诊断 ─────────────────────────
@@ -177,6 +177,170 @@ class WechatChatSenderTest {
         assertNull(sender.sendText("hi"))
         assertEquals(listOf("focus", "setText:hi"), input.actions)
         assertEquals(listOf("click"), button.actions)
+    }
+
+    // ───────────────────────── 评审补的回归用例 ─────────────────────────
+
+    @Test
+    fun sendText_setTextRejectedAndClipboardWriteFails_neverPastesStaleClipboard() = runTest {
+        // 剪贴板没写进去就粘贴，会把用户之前复制的别的内容（验证码、口令……）贴进聊天框并发出去。
+        val chat = Chat()
+        chat.input.setTextResult = false
+        chat.clipboard.textResult = false
+
+        val failure = chat.sender.sendText("您好")
+
+        assertEquals(StashSendFailure.UNEXPECTED, failure)
+        assertEquals(listOf("focus", "setText:您好"), chat.input.actions)
+        assertTrue("不该点发送: ${chat.sendButton.actions}", chat.sendButton.actions.isEmpty())
+    }
+
+    @Test
+    fun sendText_primarySendInLaterWindow_beatsConfirmInEarlierWindow() = runTest {
+        val dialog = FakeChatNode(className = "android.widget.FrameLayout", top = 800, bottom = 1200)
+        val ok = dialog.add(FakeChatNode(text = "确定", isClickable = true, top = 1100, bottom = 1180))
+        val main = FakeChatNode(className = "android.widget.FrameLayout", top = 0, bottom = 2000)
+        main.add(FakeChatNode(className = "android.widget.EditText", isEditable = true, top = 1800, bottom = 1950))
+        val send = main.add(FakeChatNode(text = "发送", isClickable = true, top = 1800, bottom = 1950))
+
+        val failure = WechatChatSender(FakeChatWindow { listOf(dialog, main) }, FakeChatClipboard()).sendText("您好")
+
+        assertNull(failure)
+        assertEquals(listOf("click"), send.actions)
+        assertTrue("不该点弹窗里的“确定”: ${ok.actions}", ok.actions.isEmpty())
+    }
+
+    @Test
+    fun sendText_realEditTextInLaterWindow_beatsWeakCandidateInEarlierWindow() = runTest {
+        val popup = FakeChatNode(className = "android.widget.FrameLayout", top = 800, bottom = 1200)
+        val weak = popup.add(
+            FakeChatNode(className = "android.widget.Button", text = "取消", isFocused = true, isFocusable = true, isClickable = true)
+        )
+        val main = FakeChatNode(className = "android.widget.FrameLayout", top = 0, bottom = 2000)
+        val input = main.add(FakeChatNode(className = "android.widget.EditText", isEditable = true, top = 1800, bottom = 1950))
+        main.add(FakeChatNode(text = "发送", isClickable = true, top = 1800, bottom = 1950))
+
+        val failure = WechatChatSender(FakeChatWindow { listOf(popup, main) }, FakeChatClipboard()).sendText("您好")
+
+        assertNull(failure)
+        assertTrue("应写进真正的输入框: ${input.actions}", input.actions.contains("setText:您好"))
+        assertTrue("不该动弱候选: ${weak.actions}", weak.actions.isEmpty())
+    }
+
+    @Test
+    fun sendText_confirmBubbleIsIgnoredWhileTheRealSendButtonMayStillAppear() = runTest {
+        // 客户上一条回复恰好是“确定”；真正的“发送”按钮要慢半拍才出现。前几次尝试只认“发送”，不能误点气泡。
+        val chat = Chat(sendButtonVisible = false)
+        val bubbleBox = chat.root.add(FakeChatNode(isClickable = true, top = 500, bottom = 560))
+        bubbleBox.add(FakeChatNode(className = "android.widget.TextView", text = "确定", top = 500, bottom = 560))
+        var lookups = 0
+        val sender = WechatChatSender(
+            FakeChatWindow {
+                lookups++
+                // 第 1 次是找输入框；第 2、3 次找按钮时还没出现，第 4 次（第 3 次尝试）才出现。
+                if (lookups >= 4) chat.sendButton.isVisibleToUser = true
+                listOf(chat.root)
+            },
+            chat.clipboard
+        )
+
+        assertNull(sender.sendText("hi"))
+        assertEquals(listOf("click"), chat.sendButton.actions)
+        assertTrue("不该点气泡: ${bubbleBox.actions}", bubbleBox.actions.isEmpty())
+    }
+
+    @Test
+    fun sendText_confirmFallbackIsOnlyUsedOnTheLastAttempt() = runTest {
+        val root = FakeChatNode(className = "android.widget.FrameLayout", top = 0, bottom = 1000)
+        root.add(FakeChatNode(className = "android.widget.EditText", isEditable = true, top = 900, bottom = 980))
+        val confirm = root.add(FakeChatNode(text = "确定", isClickable = true, top = 900, bottom = 980))
+        var lookups = 0
+        val sender = WechatChatSender(FakeChatWindow { lookups++; listOf(root) }, FakeChatClipboard())
+
+        assertNull(sender.sendText("hi"))
+
+        // 1 次找输入框 + (第一次尝试 + 重试) 共 4 次找按钮；“确定”只在最后一次才被点。
+        assertEquals(1 + StashSendTiming.SEND_BUTTON_RETRIES + 1, lookups)
+        assertEquals(listOf("click"), confirm.actions)
+        val expectedTime = StashSendTiming.SETTLE_BEFORE_FIND_INPUT_MS +
+            StashSendTiming.TEXT_AFTER_FOCUS_MS +
+            StashSendTiming.TEXT_BEFORE_SEND_BUTTON_MS +
+            StashSendTiming.SEND_BUTTON_RETRIES * StashSendTiming.SEND_BUTTON_RETRY_MS
+        assertEquals(expectedTime, currentTime)
+    }
+
+    @Test
+    fun sendText_allWindowsHaveOnlyARootNode_meansEmptyTree() = runTest {
+        val sender = WechatChatSender(FakeChatWindow { listOf(FakeChatNode(), FakeChatNode()) }, FakeChatClipboard())
+
+        assertEquals(StashSendFailure.TREE_EMPTY, sender.sendText("hi"))
+    }
+
+    @Test
+    fun sendText_anyWindowWithContent_meansInputNotFoundNotEmptyTree() = runTest {
+        val busy = FakeChatNode().also { it.add(FakeChatNode(text = "朋友圈")) }
+        val sender = WechatChatSender(FakeChatWindow { listOf(FakeChatNode(), busy) }, FakeChatClipboard())
+
+        assertEquals(StashSendFailure.INPUT_NOT_FOUND, sender.sendText("hi"))
+    }
+
+    @Test
+    fun sendText_logsWhatItDoes() = runTest {
+        val lines = mutableListOf<String>()
+        val chat = Chat()
+        val sender = WechatChatSender(chat.window, chat.clipboard, log = { lines += it })
+
+        sender.sendText("hi")
+
+        assertTrue("应该有调试日志: $lines", lines.any { it.startsWith("awaitInputNode") })
+        assertTrue(lines.any { it.startsWith("clickSendButton") && it.contains("clicked=true") })
+    }
+
+    // ───────────────────────── 挑出微信窗口（纯函数）─────────────────────────
+
+    private data class Win(val pkg: String?, val name: String)
+
+    private fun pick(active: Win?, others: List<Win>) =
+        pickTargetRoots(active, others, { it.pkg }, StashSendLabels.PKG_WECHAT).map { it.name }
+
+    @Test
+    fun pickTargetRoots_activeFirstThenOtherTargetWindows() {
+        val active = Win("com.tencent.mm", "active")
+        val others = listOf(Win("com.other", "x"), Win("com.tencent.mm", "popup"), Win("com.tencent.mm", "main"))
+
+        assertEquals(listOf("active", "popup", "main"), pick(active, others))
+    }
+
+    @Test
+    fun pickTargetRoots_activeWindowFromAnotherApp_isNeverReturned() {
+        // 活动窗口是我们自己的面板 / 输入法：只取其余窗口里属于微信的。
+        val active = Win("com.slideindex.app", "panel")
+        val others = listOf(Win("com.tencent.mm", "main"), Win("com.android.inputmethod", "ime"))
+
+        assertEquals(listOf("main"), pick(active, others))
+    }
+
+    @Test
+    fun pickTargetRoots_targetNotOnScreen_neverFallsBackToOtherApps() {
+        val active = Win("com.other.app", "other")
+        val others = listOf(Win("com.slideindex.app", "panel"), Win(null, "unknown"))
+
+        assertTrue(pick(active, others).isEmpty())
+        assertTrue(pick(null, emptyList()).isEmpty())
+    }
+
+    @Test
+    fun pickTargetRoots_dropsTheActiveWindowListedAgain() {
+        val active = Win("com.tencent.mm", "active")
+
+        assertEquals(listOf("active"), pick(active, listOf(active, Win("com.tencent.mm", "active"))))
+    }
+
+    @Test
+    fun pickTargetRoots_packageNameMustMatchExactly() {
+        val others = listOf(Win("com.tencent.mm.extra", "lookalike"), Win("com.tencent.mmm", "lookalike2"))
+
+        assertTrue(pick(null, others).isEmpty())
     }
 
     // ───────────────────────── 图片 ─────────────────────────
@@ -342,10 +506,4 @@ class WechatChatSenderTest {
         assertFalse(isTargetForeground(null, hasTargetWindow = false))
     }
 
-    @Test
-    fun onlySendButtonFailureSkipsTheCopyFallback() {
-        val noCopy = StashSendFailure.entries.filterNot { it.fallsBackToCopy }
-
-        assertEquals(listOf(StashSendFailure.SEND_BUTTON_NOT_FOUND), noCopy)
-    }
 }

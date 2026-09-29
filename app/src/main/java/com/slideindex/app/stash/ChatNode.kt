@@ -45,7 +45,8 @@ internal interface ChatWindow {
 
 /** 发送用到的系统剪贴板。 */
 internal interface ChatClipboard {
-    fun setText(text: String)
+    /** 写入文字；失败返回 false。写失败时**不能**再去粘贴，否则会把用户之前复制的别的内容贴进聊天框。 */
+    fun setText(text: String): Boolean
 
     /** 把暂存夹里的图片放上剪贴板，并授权目标 App 读取；失败返回 false。 */
     fun setImage(fileName: String): Boolean

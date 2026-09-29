@@ -9,6 +9,7 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.view.accessibility.AccessibilityNodeInfo
 import com.slideindex.app.clipboard.ClipboardWriter
+import com.slideindex.app.clipboard.monitor.ClipboardMonitorController
 
 /** [ChatNode] 的真实实现，包装一个 [AccessibilityNodeInfo]。 */
 internal class AccessibilityChatNode(private val raw: AccessibilityNodeInfo) : ChatNode {
@@ -68,21 +69,35 @@ internal class AccessibilityChatWindow(
 ) : ChatWindow {
 
     override fun targetRoots(): List<ChatNode> {
-        val roots = ArrayList<ChatNode>(2)
-        val active = service.rootInActiveWindow
-        if (active != null && active.packageName?.toString() == targetPackage) {
-            roots += AccessibilityChatNode(active)
-        }
-        runCatching {
-            for (window in service.windows) {
-                val root = window.root ?: continue
-                if (root.packageName?.toString() != targetPackage) continue
-                if (active != null && root == active) continue
-                roots += AccessibilityChatNode(root)
-            }
-        }
-        return roots
+        // 无障碍服务随时可能在别的线程被系统断开，这里任何一次 Binder 调用都可能抛异常：
+        // 取不到就当作“目标 App 不在屏幕上”，别让异常一路冒到发送流程外面。
+        val active = runCatching { service.rootInActiveWindow }.getOrNull()
+        val others = runCatching { service.windows }.getOrNull().orEmpty()
+            .mapNotNull { window -> runCatching { window.root }.getOrNull() }
+        return pickTargetRoots(active, others, { it.packageName?.toString() }, targetPackage)
+            .map(::AccessibilityChatNode)
     }
+}
+
+/**
+ * 从活动窗口和其余窗口里挑出属于 [targetPackage] 的根节点：活动窗口在前，其余按原顺序在后，重复的去掉。
+ *
+ * **只**返回包名恰好等于 [targetPackage] 的节点，没有任何“退回别的 App”的路径。
+ */
+internal fun <T : Any> pickTargetRoots(
+    active: T?,
+    others: List<T>,
+    packageNameOf: (T) -> String?,
+    targetPackage: String
+): List<T> {
+    val roots = ArrayList<T>(2)
+    if (active != null && packageNameOf(active) == targetPackage) roots += active
+    for (root in others) {
+        if (packageNameOf(root) != targetPackage) continue
+        if (root in roots) continue
+        roots += root
+    }
+    return roots
 }
 
 /** 往系统剪贴板放文字 / 暂存夹里的图片。 */
@@ -92,9 +107,10 @@ internal class SystemChatClipboard(
     private val targetPackage: String
 ) : ChatClipboard {
 
-    override fun setText(text: String) {
-        val manager = context.getSystemService(ClipboardManager::class.java) ?: return
-        runCatching { manager.setPrimaryClip(ClipData.newPlainText("text", text)) }
+    override fun setText(text: String): Boolean {
+        val manager = context.getSystemService(ClipboardManager::class.java) ?: return false
+        suppressOwnWriteEvent()
+        return runCatching { manager.setPrimaryClip(ClipData.newPlainText("text", text)) }.isSuccess
     }
 
     override fun setImage(fileName: String): Boolean {
@@ -104,6 +120,17 @@ internal class SystemChatClipboard(
         val clip = ClipData(ClipDescription("Image", arrayOf("image/png")), ClipData.Item(uri))
         // 必须授权目标 App 读取这个 content:// URI，否则微信粘贴时读不到图片。
         ClipboardWriter.grantClipReadToPackage(context, clip, targetPackage)
+        suppressOwnWriteEvent()
         return runCatching { manager.setPrimaryClip(clip) }.isSuccess
+    }
+
+    /**
+     * 告诉剪贴板监听：接下来这次剪贴板变化是我们自己写的，别当成新内容入历史。
+     *
+     * 不只是不想留下一条多余的历史：非标准监听模式下，监听服务看到剪贴板变化会临时弹一个可聚焦的探针窗口
+     * 去读内容，而微信只有拿着窗口焦点才能读剪贴板——这个时间窗正好和发送流程里紧接着的“粘贴”撞上。
+     */
+    private fun suppressOwnWriteEvent() {
+        runCatching { ClipboardMonitorController.peek()?.config?.ignoreOwnClipboardWrite() }
     }
 }

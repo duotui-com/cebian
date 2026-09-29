@@ -86,7 +86,7 @@
     <string name="stash_send_fail_not_in_wechat">Switch to a WeChat chat first</string>
     <string name="stash_send_fail_tree_empty">Cannot read the WeChat screen (empty accessibility tree); try turning on “Select to Speak” in the accessibility settings and retry</string>
     <string name="stash_send_fail_input_not_found">WeChat input box not found — open a chat first</string>
-    <string name="stash_send_fail_send_button">The text is in the input box but the Send button was not found — tap Send manually</string>
+    <string name="stash_send_fail_send_button">The Send button was not found — tap Send manually</string>
     <string name="stash_send_fail_image">The image file is missing or cannot be put on the clipboard</string>
     <string name="stash_send_fail_unexpected">Something went wrong while sending — try again</string>
     <string name="stash_send_fail_partial">Earlier content was sent, but a later part failed</string>

@@ -23,6 +23,7 @@ internal class FakeChatNode(
     var accessibilityFocus: FakeChatNode? = null
 
     var setTextResult = true
+    var pasteResult = true
     var clickResult = true
 
     /** 动作流水，如 `focus`、`setText:你好`、`paste`、`click`。 */
@@ -60,7 +61,7 @@ internal class FakeChatNode(
     override fun paste(): Boolean {
         actions += "paste"
         onPaste?.invoke()
-        return true
+        return pasteResult
     }
 
     override fun click(): Boolean {
@@ -84,10 +85,12 @@ internal class FakeChatWindow(private val roots: () -> List<ChatNode>) : ChatWin
 
 internal class FakeChatClipboard : ChatClipboard {
     val events = mutableListOf<String>()
+    var textResult = true
     var imageResult = true
 
-    override fun setText(text: String) {
+    override fun setText(text: String): Boolean {
         events += "text:$text"
+        return textResult
     }
 
     override fun setImage(fileName: String): Boolean {

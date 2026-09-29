@@ -13,7 +13,7 @@ class WechatNodeFinderTest {
 
     @Test
     fun selectSendButton_noCandidates_isNull() {
-        assertNull(selectSendButton(emptyList(), 0, 2000))
+        assertNull(selectSendButton(emptyList()))
     }
 
     @Test
@@ -21,50 +21,45 @@ class WechatNodeFinderTest {
         // “确定”只是兜底：哪怕它更靠下，只要有“发送”就选“发送”。
         val candidates = listOf(candidate(1000, primary = true), candidate(1900, primary = false))
 
-        assertEquals(0, selectSendButton(candidates, 0, 2000))
+        assertEquals(0, selectSendButton(candidates))
     }
 
     @Test
     fun selectSendButton_usesFallbackWhenNothingElse() {
         val candidates = listOf(candidate(500, primary = false), candidate(1800, primary = false))
 
-        assertEquals(1, selectSendButton(candidates, 0, 2000))
+        assertEquals(1, selectSendButton(candidates))
     }
 
     @Test
-    fun selectSendButton_prefersLowerHalfOverChatBubbleAbove() {
-        // 聊天气泡里的“发送”在上半屏，输入区的按钮在下半屏。
+    fun selectSendButton_fallbackNotAllowed_ignoresFallbackCandidates() {
+        val onlyFallback = listOf(candidate(500, primary = false), candidate(1800, primary = false))
+        val mixed = listOf(candidate(1000, primary = true), candidate(1900, primary = false))
+
+        assertNull(selectSendButton(onlyFallback, allowFallback = false))
+        assertEquals(0, selectSendButton(mixed, allowFallback = false))
+    }
+
+    @Test
+    fun selectSendButton_picksTheLowest_soChatBubbleAboveTheInputAreaLoses() {
+        // 聊天气泡里的“发送”在上面，输入区的按钮在最下面。
         val candidates = listOf(candidate(400), candidate(1850))
 
-        assertEquals(1, selectSendButton(candidates, 0, 2000))
+        assertEquals(1, selectSendButton(candidates))
     }
 
     @Test
-    fun selectSendButton_amongLowerHalfPicksTheLowest() {
+    fun selectSendButton_amongSeveralPicksTheLowest() {
         val candidates = listOf(candidate(1200), candidate(1850), candidate(1500))
 
-        assertEquals(1, selectSendButton(candidates, 0, 2000))
-    }
-
-    @Test
-    fun selectSendButton_allInUpperHalf_stillPicksTheLowest() {
-        val candidates = listOf(candidate(200), candidate(900), candidate(600))
-
-        assertEquals(1, selectSendButton(candidates, 0, 2000))
+        assertEquals(1, selectSendButton(candidates))
     }
 
     @Test
     fun selectSendButton_ties_pickFirstTraversed() {
         val candidates = listOf(candidate(1500), candidate(1500))
 
-        assertEquals(0, selectSendButton(candidates, 0, 2000))
-    }
-
-    @Test
-    fun selectSendButton_unknownWindowBounds_skipsHalfFilterButStillPicksLowest() {
-        val candidates = listOf(candidate(100), candidate(300))
-
-        assertEquals(1, selectSendButton(candidates, 0, 0))
+        assertEquals(0, selectSendButton(candidates))
     }
 
     // ───────────────────────── findSendButton（假节点树）─────────────────────────
@@ -152,11 +147,101 @@ class WechatNodeFinderTest {
     @Test
     fun findSendButton_customLabelsCanExtendTheMatching() {
         val root = chatRoot()
-        val button = root.add(FakeChatNode(text = "Send", isClickable = true, top = 900, bottom = 980))
-        val english = StashSendLabels(sendTexts = listOf("发送", "Send"))
+        val button = root.add(FakeChatNode(text = "Enviar", isClickable = true, top = 900, bottom = 980))
+        val spanish = StashSendLabels(sendTexts = listOf("发送", "Enviar"))
 
         assertNull(WechatNodeFinder.findSendButton(root))
-        assertSame(button, WechatNodeFinder.findSendButton(root, english))
+        assertSame(button, WechatNodeFinder.findSendButton(root, spanish))
+    }
+
+    // ───────────────────────── 多窗口 / 兜底开关 ─────────────────────────
+
+    @Test
+    fun findSendButton_fallbackNotAllowed_skipsConfirmText() {
+        val root = chatRoot()
+        root.add(FakeChatNode(text = "确定", isClickable = true, top = 900, bottom = 980))
+
+        assertNull(WechatNodeFinder.findSendButton(root, allowFallback = false))
+        assertEquals("确定", (WechatNodeFinder.findSendButton(root, allowFallback = true) as FakeChatNode).text)
+    }
+
+    @Test
+    fun findSendButtonInAny_primaryInLaterWindowBeatsFallbackInEarlierWindow() {
+        val dialog = chatRoot()
+        val ok = dialog.add(FakeChatNode(text = "确定", isClickable = true, top = 1100, bottom = 1180))
+        val main = chatRoot()
+        val send = main.add(FakeChatNode(text = "发送", isClickable = true, top = 900, bottom = 980))
+
+        val target = WechatNodeFinder.findSendButtonInAny(listOf(dialog, main))
+
+        assertSame(send, target)
+        assertEquals(false, target === ok)
+    }
+
+    @Test
+    fun findSendButtonInAny_comparesCandidatesAcrossWindowsByHeight() {
+        val upper = chatRoot()
+        upper.add(FakeChatNode(text = "发送", isClickable = true, top = 300, bottom = 380))
+        val lower = chatRoot()
+        val lowest = lower.add(FakeChatNode(text = "发送", isClickable = true, top = 900, bottom = 980))
+
+        assertSame(lowest, WechatNodeFinder.findSendButtonInAny(listOf(upper, lower)))
+    }
+
+    @Test
+    fun findSendButtonInAny_noRoots_isNull() {
+        assertNull(WechatNodeFinder.findSendButtonInAny(emptyList()))
+    }
+
+    @Test
+    fun findEditTextInAny_strongCandidateInLaterWindowBeatsWeakOneInEarlierWindow() {
+        // 活动窗口是个弹窗，里面有个已聚焦的按钮（弱候选）；主窗口里才是真正的 EditText。
+        val popup = chatRoot()
+        val weak = popup.add(FakeChatNode(className = "android.widget.Button", isFocused = true, isFocusable = true))
+        val main = chatRoot()
+        val real = main.add(FakeChatNode(className = "android.widget.EditText", isEditable = true))
+
+        val found = WechatNodeFinder.findEditTextInAny(listOf(popup, main))
+
+        assertSame(real, found)
+        assertEquals(false, found === weak)
+    }
+
+    @Test
+    fun findEditTextInAny_onlyWeakCandidates_takesTheFirstWindowsOne() {
+        val first = chatRoot()
+        val weakA = first.add(FakeChatNode(hintText = "搜索", isEnabled = true))
+        val second = chatRoot()
+        second.add(FakeChatNode(hintText = "输入消息", isEnabled = true))
+
+        assertSame(weakA, WechatNodeFinder.findEditTextInAny(listOf(first, second)))
+    }
+
+    @Test
+    fun findEditTextInAny_inputFocusInAnyWindowIsStrong() {
+        val popup = chatRoot()
+        popup.add(FakeChatNode(hintText = "搜索", isEnabled = true))
+        val main = chatRoot()
+        val focused = main.add(FakeChatNode(className = "android.widget.EditText", isEditable = true, isFocused = true))
+        main.inputFocus = focused
+
+        assertSame(focused, WechatNodeFinder.findEditTextInAny(listOf(popup, main)))
+    }
+
+    @Test
+    fun findEditTextInAny_noRoots_isNull() {
+        assertNull(WechatNodeFinder.findEditTextInAny(emptyList()))
+    }
+
+    @Test
+    fun findEditCandidates_separatesStrongFromWeak() {
+        val hintOnly = chatRoot().also { it.add(FakeChatNode(hintText = "搜索", isEnabled = true)) }
+        val editable = chatRoot().also { it.add(FakeChatNode(isEditable = true)) }
+
+        assertNull(WechatNodeFinder.findEditCandidates(hintOnly).strong)
+        assertEquals(true, WechatNodeFinder.findEditCandidates(hintOnly).weak != null)
+        assertEquals(true, WechatNodeFinder.findEditCandidates(editable).strong != null)
+        assertNull(WechatNodeFinder.findEditCandidates(null).best)
     }
 
     // ───────────────────────── findEditText（假节点树）─────────────────────────
@@ -258,5 +343,18 @@ class WechatNodeFinderTest {
         assertEquals(SendLabelKind.FALLBACK, labels.classify("确定", ""))
         assertEquals(SendLabelKind.NONE, labels.classify("已发送", ""))
         assertEquals(SendLabelKind.NONE, labels.classify("", ""))
+    }
+
+    @Test
+    fun classify_knowsTheCommonSendLabelsOfOtherLanguages() {
+        val labels = StashSendLabels.Default
+
+        assertEquals(SendLabelKind.PRIMARY, labels.classify("Send", ""))
+        assertEquals(SendLabelKind.PRIMARY, labels.classify("送信", ""))
+        assertEquals(SendLabelKind.PRIMARY, labels.classify("傳送", ""))
+        assertEquals(SendLabelKind.PRIMARY, labels.classify("發送(2)", ""))
+        assertEquals(SendLabelKind.FALLBACK, labels.classify("確定", ""))
+        // 只认整个文案，不认包含关系。
+        assertEquals(SendLabelKind.NONE, labels.classify("Sender", ""))
     }
 }

@@ -4,6 +4,7 @@ import com.slideindex.app.clipboard.ClipboardBlockKind
 import com.slideindex.app.clipboard.ClipboardContentBlock
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** 一键发送失败的原因。 */
 enum class StashSendFailure {
@@ -19,7 +20,7 @@ enum class StashSendFailure {
     /** 找不到输入框。 */
     INPUT_NOT_FOUND,
 
-    /** 内容已经填进输入框，但找不到或点不了“发送”按钮。 */
+    /** 找不到或点不了“发送”按钮（内容多半已经填进输入框，但不保证）。 */
     SEND_BUTTON_NOT_FOUND,
 
     /** 图片文件丢失，或放不上剪贴板。 */
@@ -34,10 +35,6 @@ sealed interface StashSendResult {
     /** [blocksSent] 是失败之前已经成功发出去的内容块数。 */
     data class Failed(val failure: StashSendFailure, val blocksSent: Int) : StashSendResult
 }
-
-/** 失败时是否降级为“复制到剪贴板”。发送按钮没找到时内容已经在输入框里，不必再复制。 */
-internal val StashSendFailure.fallsBackToCopy: Boolean
-    get() = this != StashSendFailure.SEND_BUTTON_NOT_FOUND
 
 /** 逐块发送的内容：文字块与图片块按条目内的顺序，丢掉空白块。 */
 internal fun StashEntry.sendableBlocks(): List<ClipboardContentBlock> =
@@ -96,23 +93,29 @@ internal object StashBlockSender {
  *
  * 已知坑：部分机型 / 微信版本下 `rootInActiveWindow` 只有 1 个节点（空无障碍树），此时找不到输入框，
  * 本实现只做检测并返回 [StashSendFailure.TREE_EMPTY]，不做坐标手势兜底。
+ *
+ * [log] 是真机调参用的调试日志（命中了哪个输入框、SET_TEXT / 粘贴 / 点击的结果……），纯 JVM 单测里默认丢弃。
  */
 internal class WechatChatSender(
     private val window: ChatWindow,
     private val clipboard: ChatClipboard,
-    private val labels: StashSendLabels = StashSendLabels.Default
+    private val labels: StashSendLabels = StashSendLabels.Default,
+    private val log: (String) -> Unit = {}
 ) : ChatSendDriver {
 
     override suspend fun sendText(text: String): StashSendFailure? {
         delay(StashSendTiming.SETTLE_BEFORE_FIND_INPUT_MS)
         val input = awaitInputNode() ?: return diagnoseMissingInput()
-        input.focus()
+        val focused = input.focus()
         delay(StashSendTiming.TEXT_AFTER_FOCUS_MS)
         // 首选 ACTION_SET_TEXT；被拒绝时退化为写剪贴板 + 粘贴。
-        if (!input.setText(text)) {
-            clipboard.setText(text)
+        val setDirectly = input.setText(text)
+        log("sendText: focus=$focused setText=$setDirectly")
+        if (!setDirectly) {
+            // 剪贴板没写进去就不能粘贴：那会把用户之前复制的别的内容（验证码、口令……）贴进聊天框并发出去。
+            if (!clipboard.setText(text)) return StashSendFailure.UNEXPECTED
             delay(StashSendTiming.TEXT_AFTER_CLIPBOARD_MS)
-            input.paste()
+            log("sendText: paste=${input.paste()}")
         }
         delay(StashSendTiming.TEXT_BEFORE_SEND_BUTTON_MS)
         return if (clickSendButton()) null else StashSendFailure.SEND_BUTTON_NOT_FOUND
@@ -123,45 +126,63 @@ internal class WechatChatSender(
         if (!clipboard.setImage(fileName)) return StashSendFailure.IMAGE_UNAVAILABLE
         delay(StashSendTiming.SETTLE_BEFORE_FIND_INPUT_MS)
         val input = awaitInputNode() ?: return diagnoseMissingInput()
-        input.focus()
+        val focused = input.focus()
         delay(StashSendTiming.IMAGE_AFTER_FOCUS_MS)
-        input.paste()
+        log("sendImage: focus=$focused paste=${input.paste()}")
         // 粘贴图片后微信会弹出带“发送”的确认条。
         delay(StashSendTiming.IMAGE_BEFORE_SEND_BUTTON_MS)
         return if (clickSendButton()) null else StashSendFailure.SEND_BUTTON_NOT_FOUND
     }
 
-    /** 每 100ms 找一次输入框，最多等 1.5s。 */
+    /**
+     * 每 100ms 找一次输入框，最多等 1.5s。
+     *
+     * 限时用协程的挂起计时而不是“试 15 次”：微信的节点树很大时，单次遍历本身就可能要几百毫秒，
+     * 按次数算会把总等待拖到好几秒。
+     */
     private suspend fun awaitInputNode(): ChatNode? {
-        val attempts = (StashSendTiming.FIND_INPUT_TIMEOUT_MS / StashSendTiming.FIND_INPUT_POLL_MS).toInt()
-        repeat(attempts) {
-            for (root in window.targetRoots()) {
-                WechatNodeFinder.findEditText(root)?.let { return it }
+        val found = withTimeoutOrNull(StashSendTiming.FIND_INPUT_TIMEOUT_MS) {
+            var node: ChatNode? = null
+            while (node == null) {
+                node = WechatNodeFinder.findEditTextInAny(window.targetRoots())
+                if (node == null) delay(StashSendTiming.FIND_INPUT_POLL_MS)
             }
-            delay(StashSendTiming.FIND_INPUT_POLL_MS)
+            node
         }
-        return null
+        log("awaitInputNode: ${found?.let { "found ${it.className} editable=${it.isEditable}" } ?: "not found"}")
+        return found
     }
 
     private fun diagnoseMissingInput(): StashSendFailure {
-        val root = window.targetRoots().firstOrNull() ?: return StashSendFailure.TARGET_NOT_FOREGROUND
-        return if (WechatNodeFinder.countNodes(root) <= 1) {
+        val roots = window.targetRoots()
+        if (roots.isEmpty()) return StashSendFailure.TARGET_NOT_FOREGROUND
+        // 每个窗口的树都只有根节点：微信没把界面暴露给无障碍。
+        return if (roots.all { WechatNodeFinder.countNodes(it) <= 1 }) {
             StashSendFailure.TREE_EMPTY
         } else {
             StashSendFailure.INPUT_NOT_FOUND
         }
     }
 
-    /** 找不到（或点不动）就隔一会儿重试，而不是只试一次。 */
+    /**
+     * 找不到（或点不动）就隔一会儿重试，而不是只试一次。
+     *
+     * “确定”只是兜底文案：前面几次只认“发送”，最后一次才考虑它。否则“发送”按钮只是还没来得及出现
+     * （“+”换成“发送”有个动画）时，屏幕上任何一个“确定”（比如客户上一条回复）都会被误点，
+     * 而且点得动就会被当成发送成功。
+     */
     private suspend fun clickSendButton(): Boolean {
-        repeat(StashSendTiming.SEND_BUTTON_ATTEMPTS) { attempt ->
-            for (root in window.targetRoots()) {
-                val button = WechatNodeFinder.findSendButton(root, labels)
-                if (button != null && button.click()) return true
-            }
-            if (attempt < StashSendTiming.SEND_BUTTON_ATTEMPTS - 1) {
-                delay(StashSendTiming.SEND_BUTTON_RETRY_MS)
-            }
+        val lastAttempt = StashSendTiming.SEND_BUTTON_RETRIES
+        for (attempt in 0..lastAttempt) {
+            val button = WechatNodeFinder.findSendButtonInAny(
+                roots = window.targetRoots(),
+                labels = labels,
+                allowFallback = attempt == lastAttempt
+            )
+            val clicked = button?.click() == true
+            log("clickSendButton: attempt=$attempt found=${button != null} clicked=$clicked")
+            if (clicked) return true
+            if (attempt < lastAttempt) delay(StashSendTiming.SEND_BUTTON_RETRY_MS)
         }
         return false
     }

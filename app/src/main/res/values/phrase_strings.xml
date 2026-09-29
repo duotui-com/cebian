@@ -86,7 +86,7 @@
     <string name="stash_send_fail_not_in_wechat">请先切到微信聊天界面再发送</string>
     <string name="stash_send_fail_tree_empty">读不到微信界面（无障碍树为空），可在系统无障碍设置里开启「随选朗读」后重试</string>
     <string name="stash_send_fail_input_not_found">没找到微信的输入框，请先打开一个聊天</string>
-    <string name="stash_send_fail_send_button">内容已填进输入框，但没找到「发送」按钮，请手动点发送</string>
+    <string name="stash_send_fail_send_button">没找到「发送」按钮，请手动点发送</string>
     <string name="stash_send_fail_image">图片文件丢失，或无法放到剪贴板</string>
     <string name="stash_send_fail_unexpected">发送时出错了，请重试</string>
     <string name="stash_send_fail_partial">前面的内容已发出，后面的发送失败了</string>
