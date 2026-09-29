@@ -324,8 +324,7 @@
     <string name="secure_settings_grant_success">تم التفويض عبر Shizuku</string>
     <string name="secure_settings_grant_failed">فشل التفويض، يرجى تنفيذه يدويًا عبر ADB</string>
     <string name="secure_settings_adb_dialog_title">شرح تفويض ADB</string>
-    <string name="secure_settings_adb_dialog_message">يرجى الاتصال بالحاسوب عبر USB أو التصحيح اللاسلكي، وتنفيذ الأمر التالي في الطرفية (يجب إعادة التنفيذ بعد إعادة تثبيت التطبيق):
-%1$s</string>
+    <string name="secure_settings_adb_dialog_message">يرجى الاتصال بالحاسوب عبر USB أو التصحيح اللاسلكي، وتنفيذ الأمر التالي في الطرفية (يجب إعادة التنفيذ بعد إعادة تثبيت التطبيق): %1$s</string>
     <string name="secure_settings_adb_copy">نسخ الأمر</string>
     <string name="secure_settings_adb_copied">تم النسخ إلى الحافظة</string>
     <string name="accessibility_recover_reopen_app_hint">إيماءة الحافة غير متصلة، يرجى إغلاق التطبيق بالكامل ثم إعادة فتحه</string>
@@ -1238,9 +1237,7 @@
     <string name="fv_app_switcher_axis_vertical">المحور العمودي (أعلى/أسفل)</string>
     <string name="fv_app_switcher_axis_horizontal">المحور الأفقي (يسار/يمين)</string>
     <string name="fv_app_switcher_link_merge_title">اختيار طريقة المزامنة</string>
-    <string name="fv_app_switcher_link_merge_message">عند تفعيل %1$s، يرجى اختيار المحور الذي سيتم اعتماده:
-· اعتماد %3$s
-· استخدام %2$s للكتابة فوق %3$s</string>
+    <string name="fv_app_switcher_link_merge_message">عند تفعيل %1$s، يرجى اختيار المحور الذي سيتم اعتماده: · اعتماد %3$s · استخدام %2$s للكتابة فوق %3$s</string>
     <string name="fv_app_switcher_link_merge_appearance_kind">مزامنة المظهر</string>
     <string name="fv_app_switcher_link_merge_slot_kind">مزامنة الفتحات</string>
     <string name="fv_app_switcher_link_merge_use_other">اعتماد المحور الآخر</string>
@@ -1500,8 +1497,7 @@
     <string name="diagnostic_report_export_failed">فشل تصدير تقرير التشخيص، يرجى المحاولة لاحقاً</string>
     <string name="diagnostic_report_share_chooser_title">مشاركة سجل التشخيص</string>
     <string name="diagnostic_report_share_subject">سجل تشخيص XGesture</string>
-    <string name="diagnostic_report_truncation_suffix">
-…(تم اقتطاع المحتوى لطوله)…</string>
+    <string name="diagnostic_report_truncation_suffix">…(تم اقتطاع المحتوى لطوله)…</string>
     <string name="native_engine_packs_title">محركات وقت التشغيل</string>
     <string name="native_engine_packs_subtitle">المكتبات الأصلية لـ OCR، الترجمة بدون إنترنت، وتقطيع الكلمات، يتم تنزيلها حسب الطلب</string>
     <string name="native_engine_packs_section">حزم المحركات</string>
@@ -2091,8 +2087,7 @@
     <string name="notification_history_permission_grant">الذهاب للتفعيل</string>
     <string name="notification_history_reopen_failed_reason">تعذر إعادة الفتح: %1$s</string>
     <string name="notification_history_recycled_title">تم استرداد محتوى الإشعار</string>
-    <string name="notification_history_recycled_message">تم استرداد ارتباط ذاكرة هذا الإشعار بواسطة نظام Android، ولا يمكن الانتقال.
-كبديل، يمكنك فتح التطبيق.</string>
+    <string name="notification_history_recycled_message">تم استرداد ارتباط ذاكرة هذا الإشعار بواسطة نظام Android، ولا يمكن الانتقال. كبديل، يمكنك فتح التطبيق.</string>
     <string name="notification_history_open_app">فتح %1$s</string>
     <string name="notification_filter_hide">إخفاء</string>
     <string name="notification_filter_hidden_badge">مخفي</string>
@@ -2624,8 +2619,7 @@
     <string name="onboarding_back">رجوع</string>
     <string name="onboarding_enter_app">دخول التطبيق</string>
     <string name="onboarding_disclaimer_title">إخلاء المسؤولية</string>
-    <string name="onboarding_disclaimer_body">يُستخدم هذا التطبيق ووحداته الوظيفية حصريًا لتحسين كفاءة استخدام الجهاز الشخصي، ولا يُستخدم للتحايل على القوانين أو أنظمة التحكم أو تنفيذ عمليات غير مصرح بها.
-يرجى استخدامه بعد فهم آلية عمله، وأنت المسؤول الوحيد عن النتائج المترتبة على تفعيله أو تعديله أو إعداده.</string>
+    <string name="onboarding_disclaimer_body">يُستخدم هذا التطبيق ووحداته الوظيفية حصريًا لتحسين كفاءة استخدام الجهاز الشخصي، ولا يُستخدم للتحايل على القوانين أو أنظمة التحكم أو تنفيذ عمليات غير مصرح بها. يرجى استخدامه بعد فهم آلية عمله، وأنت المسؤول الوحيد عن النتائج المترتبة على تفعيله أو تعديله أو إعداده.</string>
     <string name="onboarding_disclaimer_agree">لقد قرأت ووافقت على البيان أعلاه</string>
     <string name="onboarding_core_permissions_title">الأذونات الأساسية</string>
     <string name="onboarding_core_permissions_body">يتطلب تطبيق XGesture الأذونات التالية لتمكين التعرف على إيماءات الحافة، وأشرطة التشغيل العائمة، وخدمة الخلفية المستمرة. يرجى منح هذه الأذونات من إعدادات النظام.</string>
@@ -3017,9 +3011,7 @@
     <string name="clipboard_history_capacity_unlimited">غير محدود</string>
     <string name="clipboard_read_logs_shizuku_grant">التفويض عبر Shizuku</string>
     <string name="clipboard_read_logs_shizuku_reminder_title">تلميح التفويض</string>
-    <string name="clipboard_read_logs_shizuku_reminder_message">سيتم منح إذن قراءة السجلات عبر Shizuku.
-• قد ينهار التطبيق أثناء عملية التفويض، وهذا أمر طبيعي، أعد فتحه فقط.
-• إذا ظهر نافذة إذن «قراءة السجلات» للنظام، يرجى النقر على «سماح».</string>
+    <string name="clipboard_read_logs_shizuku_reminder_message">سيتم منح إذن قراءة السجلات عبر Shizuku. • قد ينهار التطبيق أثناء عملية التفويض، وهذا أمر طبيعي، أعد فتحه فقط. • إذا ظهر نافذة إذن «قراءة السجلات» للنظام، يرجى النقر على «سماح».</string>
     <string name="clipboard_read_logs_shizuku_reminder_continue">متابعة التفويض</string>
     <string name="clipboard_entry_type_text">نص</string>
     <string name="clipboard_entry_type_uri">رابط/ملف</string>
