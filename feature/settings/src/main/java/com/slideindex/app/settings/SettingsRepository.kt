@@ -783,6 +783,12 @@ class SettingsRepository @Inject constructor(
     suspend fun setSearchEngines(engines: List<SearchEngineConfig>) =
         overlay.setSearchEngines(engines)
 
+    suspend fun setLauncherShortcutMenuOrder(ids: List<String>) =
+        overlay.setLauncherShortcutMenuOrder(ids)
+
+    suspend fun setLauncherShortcutMenuDisabled(ids: Set<String>) =
+        overlay.setLauncherShortcutMenuDisabled(ids)
+
     suspend fun setSearchEngineGridColumns(value: Int) =
         overlay.setSearchEngineGridColumns(value)
 

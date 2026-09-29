@@ -2753,6 +2753,10 @@
     <string name="shortcut_shell_panel">シェルパネル</string>
     <string name="shortcut_stash_panel">ストッシュを開く</string>
     <string name="shortcut_clipboard_panel">クリップボードを開く</string>
+    <string name="shortcut_search_panel">検索パネル</string>
+    <string name="launcher_shortcut_menu_entry_title">ランチャー長押しメニュー</string>
+    <string name="launcher_shortcut_menu_entry_desc">アイコンを長押ししたときに表示するショートカットを管理します</string>
+    <string name="launcher_shortcut_menu_hint">長押ししてドラッグすると並べ替えできます。オフにした項目は長押しメニューに表示されません。</string>
     <string name="shortcut_panel_open_failed">パネルを開けませんでした。Cebian が有効か確認してください。</string>
     <string name="about_section_title">このアプリについて</string>
     <string name="about_release_notes_title">リリースノート</string>

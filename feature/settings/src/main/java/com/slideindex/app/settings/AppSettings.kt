@@ -204,6 +204,8 @@ data class AppSettings(
     val holographicLauncher get() = launcher.holographicLauncher
     val shellCommands get() = launcher.shellCommands
     val activityShortcuts get() = launcher.activityShortcuts
+    val launcherShortcutMenuOrder get() = launcher.launcherShortcutMenuOrder
+    val launcherShortcutMenuDisabled get() = launcher.launcherShortcutMenuDisabled
 
     val floatingPointerSensitivityFraction get() = floatingPointer.floatingPointerSensitivityFraction
     val floatingPointerJoystickDiameterPx get() = floatingPointer.floatingPointerJoystickDiameterPx

@@ -22,6 +22,7 @@ import com.slideindex.app.ui.ExternalInvocationHelpScreen
 import com.slideindex.app.ui.FreezerAppsPickerScreen
 import com.slideindex.app.ui.FreezerHomeScreen
 import com.slideindex.app.ui.LicenseTextScreen
+import com.slideindex.app.ui.LauncherShortcutMenuScreen
 import com.slideindex.app.ui.MissingGesturePermissionsScreen
 import com.slideindex.app.ui.PrivacyPolicyScreen
 import com.slideindex.app.ui.SettingsBackupScreen
@@ -78,7 +79,20 @@ fun NavEntryBuilder.extensionHubNavEntries(ctx: MainNavContext) {
 
     hiltEntry<AppNavKey.ExtensionExternalInvocations> {
         ExternalInvocationHelpScreen(
+            onOpenLauncherShortcutMenu = { ctx.navigate(AppNavKey.ExtensionLauncherShortcutMenu) },
             onBack = { ctx.navigateBackTo(AppNavKey.ExtensionHub) },
+        )
+    }
+
+    hiltEntry<AppNavKey.ExtensionLauncherShortcutMenu> {
+        val viewModel: ExtensionSettingsViewModel = hiltViewModel()
+        val settings by viewModel.settings.collectAsStateWithLifecycle()
+        LauncherShortcutMenuScreen(
+            launcherShortcutOrder = settings.launcherShortcutMenuOrder,
+            launcherShortcutDisabled = settings.launcherShortcutMenuDisabled,
+            onLauncherShortcutOrderChange = viewModel::setLauncherShortcutMenuOrder,
+            onLauncherShortcutDisabledChange = viewModel::setLauncherShortcutMenuDisabled,
+            onBack = { ctx.navigateBackTo(AppNavKey.ExtensionExternalInvocations) },
         )
     }
 

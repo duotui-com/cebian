@@ -2773,6 +2773,10 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="shortcut_shell_panel">Shell panel</string>
     <string name="shortcut_stash_panel">Open stash</string>
     <string name="shortcut_clipboard_panel">Open clipboard</string>
+    <string name="shortcut_search_panel">Search panel</string>
+    <string name="launcher_shortcut_menu_entry_title">Launcher long-press menu</string>
+    <string name="launcher_shortcut_menu_entry_desc">Manage the shortcuts shown when you long-press the app icon</string>
+    <string name="launcher_shortcut_menu_hint">Long-press and drag to reorder. Turned-off items are hidden from the long-press menu.</string>
     <string name="shortcut_panel_open_failed">Could not open panel. Make sure Cebian is enabled.</string>
     <string name="about_section_title">About</string>
     <string name="about_release_notes_title">Release notes</string>

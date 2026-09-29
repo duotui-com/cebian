@@ -28,6 +28,7 @@ import com.slideindex.app.clipboard.monitor.ClipboardMonitorStartup
 import com.slideindex.app.di.AppDependencies
 import com.slideindex.app.freezer.FreezerLaunchState
 import com.slideindex.app.freezer.FreezerTab
+import com.slideindex.app.launcher.LauncherShortcutsApplier
 import com.slideindex.app.notification.NotificationHistoryLaunchState
 import com.slideindex.app.overlay.FloatBallPickResultPanel
 import com.slideindex.app.overlay.WidgetPickerOverlayWindow
@@ -37,13 +38,10 @@ import com.slideindex.app.service.OverlayServiceController
 import com.slideindex.app.service.QuickLauncherAddTrampoline
 import com.slideindex.app.service.ShellCommandEditorTrampoline
 import com.slideindex.app.service.ShellCommandPanelTrampoline
-import com.slideindex.app.service.ShellCommandPanelTrampolineActivity
 import com.slideindex.app.service.ShellCommandResultTrampoline
 import com.slideindex.app.service.WidgetBindTrampolineActivity
 import com.slideindex.app.service.WidgetPickerTrampoline
 import com.slideindex.app.service.StashClipboardTrampolineActivity
-import com.slideindex.app.service.ToggleGestureTrampolineActivity
-import com.slideindex.app.overlay.StashPanelInitialTab
 import com.slideindex.app.ui.navigation.MainNavHost
 import com.slideindex.app.ui.navigation.NavPermissionStates
 import com.slideindex.app.update.UpdateAppForeground
@@ -57,9 +55,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
-import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -212,53 +208,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun setupDynamicShortcuts() {
-        val toggleGestureShortcut = ShortcutInfoCompat.Builder(this, "toggle_gesture")
-            .setShortLabel(getString(R.string.shortcut_toggle_gesture))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher)) // fallback icon
-            .setIntent(Intent(this, ToggleGestureTrampolineActivity::class.java).setAction("com.slideindex.app.action.TOGGLE_GESTURE"))
-            .build()
-
-        val notificationHubShortcut = ShortcutInfoCompat.Builder(this, "notification_hub")
-            .setShortLabel(getString(R.string.shortcut_notification_hub))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(Intent(this, MainActivity::class.java).setAction(ACTION_OPEN_NOTIFICATION_HISTORY))
-            .build()
-
-        val shellPanelShortcut = ShortcutInfoCompat.Builder(this, "shell_panel")
-            .setShortLabel(getString(R.string.shortcut_shell_panel))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(ShellCommandPanelTrampolineActivity.createIntent(this).setAction("com.slideindex.app.action.OPEN_SHELL_PANEL"))
-            .build()
-
-        val stashPanelShortcut = ShortcutInfoCompat.Builder(
+        // 条目集合与顺序由「外部调用 → 桌面图标长按菜单」设置决定，见 LauncherShortcutsApplier。
+        val settings = deps.settingsRepository.readSnapshot()
+        LauncherShortcutsApplier.sync(
             this,
-            StashClipboardTrampolineActivity.SHORTCUT_ID_STASH
-        )
-            .setShortLabel(getString(R.string.shortcut_stash_panel))
-            .setLongLabel(getString(R.string.gesture_action_stash_panel))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(StashClipboardTrampolineActivity.createIntent(this, StashPanelInitialTab.Stash))
-            .build()
-
-        val clipboardPanelShortcut = ShortcutInfoCompat.Builder(
-            this,
-            StashClipboardTrampolineActivity.SHORTCUT_ID_CLIPBOARD
-        )
-            .setShortLabel(getString(R.string.shortcut_clipboard_panel))
-            .setLongLabel(getString(R.string.gesture_action_clipboard_panel))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(StashClipboardTrampolineActivity.createIntent(this, StashPanelInitialTab.Clipboard))
-            .build()
-
-        ShortcutManagerCompat.setDynamicShortcuts(
-            this,
-            listOf(
-                toggleGestureShortcut,
-                notificationHubShortcut,
-                shellPanelShortcut,
-                stashPanelShortcut,
-                clipboardPanelShortcut
-            )
+            order = settings.launcherShortcutMenuOrder,
+            disabled = settings.launcherShortcutMenuDisabled,
         )
     }
 

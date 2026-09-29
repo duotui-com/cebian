@@ -1326,6 +1326,14 @@ class OverlaySettingsMutator @Inject constructor(
         it[SettingsPreferenceKeys.IMAGE_EDITOR_DELAY_DELETE_ENABLED] = enabled
     }
 
+    suspend fun setLauncherShortcutMenuOrder(ids: List<String>) = editor.edit {
+        it[SettingsPreferenceKeys.LAUNCHER_SHORTCUT_MENU_ORDER] = LauncherShortcutMenuCodec.encode(ids)
+    }
+
+    suspend fun setLauncherShortcutMenuDisabled(ids: Set<String>) = editor.edit {
+        it[SettingsPreferenceKeys.LAUNCHER_SHORTCUT_MENU_DISABLED] = ids
+    }
+
     suspend fun setSearchEngines(engines: List<SearchEngineConfig>) = editor.edit {
         it[SettingsPreferenceKeys.SEARCH_ENGINES_JSON] = SearchEngineStore.encode(engines)
         it[SettingsPreferenceKeys.SEARCH_ENGINES_INITIALIZED] = true

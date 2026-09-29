@@ -278,6 +278,7 @@ sealed interface AppNavKey : NavKey {
     @Serializable data object ExtensionHub : AppNavKey
     @Serializable data object AppCarouselSwitcherSettings : AppNavKey
     @Serializable data object ExtensionExternalInvocations : AppNavKey
+    @Serializable data object ExtensionLauncherShortcutMenu : AppNavKey
     @Serializable data object ExtensionAbout : AppNavKey
     @Serializable data object ExtensionDiagnosticLogs : AppNavKey
     @Serializable data class ExtensionDiagnosticLogDetail(val fileName: String) : AppNavKey

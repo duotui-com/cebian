@@ -7,6 +7,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -25,7 +26,10 @@ import com.slideindex.app.ui.settings.components.settingsLazyTipCard
 import com.slideindex.app.ui.settings.components.settingsLazySmallTitle
 
 @Composable
-fun ExternalInvocationHelpScreen(onBack: () -> Unit) {
+fun ExternalInvocationHelpScreen(
+    onOpenLauncherShortcutMenu: () -> Unit,
+    onBack: () -> Unit,
+) {
     val copiedMessage = stringResource(R.string.external_invocation_copied)
     val hintText = stringResource(R.string.external_invocation_hint)
     val queryHintText = stringResource(R.string.external_invocation_query_hint)
@@ -45,6 +49,25 @@ fun ExternalInvocationHelpScreen(onBack: () -> Unit) {
         settingsLazyTipCard(
             key = "external_invocation_query_hint",
             text = queryHintText
+        )
+
+        groupedCardItems(
+            keyPrefix = "external_invocation_launcher_shortcut",
+            items = listOf(
+                settingsCardScopeItem("launcher-shortcut-menu") {
+                    SettingNavigationRow(
+                        icon = { label ->
+                            Icon(
+                                Icons.AutoMirrored.Filled.Shortcut,
+                                contentDescription = label,
+                            )
+                        },
+                        title = stringResource(R.string.launcher_shortcut_menu_entry_title),
+                        subtitle = stringResource(R.string.launcher_shortcut_menu_entry_desc),
+                        onClick = onOpenLauncherShortcutMenu,
+                    )
+                },
+            ),
         )
 
         settingsLazySmallTitle(

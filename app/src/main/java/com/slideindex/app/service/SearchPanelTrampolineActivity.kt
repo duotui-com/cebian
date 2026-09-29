@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.lifecycle.lifecycleScope
 import com.slideindex.app.R
 import com.slideindex.app.di.AppDependencies
@@ -62,10 +63,19 @@ class SearchPanelTrampolineActivity : ComponentActivity() {
             searchQuery?.let { SearchPanelQueryBridge.rememberQuery(this@SearchPanelTrampolineActivity, it) }
 
             val shown = retryShowPanel()
-            if (!shown) {
+            if (shown) {
+                reportShortcutUsage()
+            } else {
                 toast(R.string.shortcut_panel_open_failed)
             }
             finishTransparent()
+        }
+    }
+
+    /** 面板条目可能被用户在「外部调用」里关掉，此时该 shortcutId 不存在，需容错。 */
+    private fun reportShortcutUsage() {
+        runCatching {
+            ShortcutManagerCompat.reportShortcutUsed(this, SHORTCUT_ID_SEARCH_PANEL)
         }
     }
 
@@ -93,6 +103,7 @@ class SearchPanelTrampolineActivity : ComponentActivity() {
 
     companion object {
         const val ACTION_OPEN_SEARCH_PANEL = "com.slideindex.app.action.OPEN_SEARCH_PANEL"
+        const val SHORTCUT_ID_SEARCH_PANEL = "search_panel"
 
         private const val SCHEME = "cebian"
         private const val HOST = "open"

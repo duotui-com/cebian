@@ -173,6 +173,10 @@ internal object SettingsPreferenceKeys {
     val HOLOGRAPHIC_DIM_PERCENT = intPreferencesKey("holographic_dim_percent")
     val SHELL_COMMANDS = stringSetPreferencesKey("shell_commands")
     val ACTIVITY_SHORTCUTS = stringSetPreferencesKey("activity_shortcuts")
+    /** 桌面图标长按菜单的展示顺序（shortcutId，以 [LauncherShortcutMenuCodec] 分隔符拼接）。 */
+    val LAUNCHER_SHORTCUT_MENU_ORDER = stringPreferencesKey("launcher_shortcut_menu_order")
+    /** 桌面图标长按菜单里被用户关闭的条目（shortcutId）。 */
+    val LAUNCHER_SHORTCUT_MENU_DISABLED = stringSetPreferencesKey("launcher_shortcut_menu_disabled")
     val KEYBOARD_TRIGGER_BEHAVIOR_PORTRAIT = stringPreferencesKey("keyboard_trigger_behavior_portrait")
     val KEYBOARD_TRIGGER_BEHAVIOR_LANDSCAPE = stringPreferencesKey("keyboard_trigger_behavior_landscape")
     val KEYBOARD_TRIGGER_NARROW_PERCENT_PORTRAIT = intPreferencesKey("keyboard_trigger_narrow_percent_portrait")

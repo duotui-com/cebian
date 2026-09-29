@@ -9,6 +9,7 @@ import com.slideindex.app.launcher.QuickLauncherItemCodec
 import com.slideindex.app.launcher.QuickLauncherItemType
 import com.slideindex.app.launcher.QuickLauncherPanel
 import com.slideindex.app.launcher.QuickLauncherPanelDefaults
+import com.slideindex.app.launcher.LauncherShortcutsApplier
 import com.slideindex.app.overlay.honeycombRuntimeItems
 import com.slideindex.app.settings.FloatingPointerEdgeSide
 import com.slideindex.app.settings.FloatingPointerTrailType
@@ -211,6 +212,24 @@ class ExtensionSettingsViewModel @Inject constructor(
 
     fun setActivityShortcuts(items: List<com.slideindex.app.activity.ActivityShortcut>) = launchSettingsWrite {
         settingsRepository.setActivityShortcuts(items)
+    }
+
+    fun setLauncherShortcutMenuOrder(ids: List<String>) = launchSettingsWrite {
+        val disabled = settingsRepository.readSnapshot().launcherShortcutMenuDisabled
+        settingsRepository.setLauncherShortcutMenuOrder(ids).also { result ->
+            if (result.isSuccess) {
+                LauncherShortcutsApplier.sync(appContext, ids, disabled)
+            }
+        }
+    }
+
+    fun setLauncherShortcutMenuDisabled(ids: Set<String>) = launchSettingsWrite {
+        val order = settingsRepository.readSnapshot().launcherShortcutMenuOrder
+        settingsRepository.setLauncherShortcutMenuDisabled(ids).also { result ->
+            if (result.isSuccess) {
+                LauncherShortcutsApplier.sync(appContext, order, ids)
+            }
+        }
     }
 
     fun setWidgetPanelPages(pages: List<WidgetPanelPage>) = launchSettingsWrite {

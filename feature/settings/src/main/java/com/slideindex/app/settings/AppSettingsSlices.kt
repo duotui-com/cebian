@@ -114,6 +114,10 @@ data class LauncherSettings(
     val holographicLauncher: HolographicLauncherSettings = HolographicLauncherSettings(),
     val shellCommands: List<com.slideindex.app.shell.ShellCommand> = emptyList(),
     val activityShortcuts: List<com.slideindex.app.activity.ActivityShortcut> = emptyList(),
+    /** 桌面图标长按菜单顺序；空表示用默认顺序。 */
+    val launcherShortcutMenuOrder: List<String> = emptyList(),
+    /** 桌面图标长按菜单里被关闭的条目。 */
+    val launcherShortcutMenuDisabled: Set<String> = emptySet(),
 )
 
 /** 边缘手势接力指针：指针、摇杆、轮盘与边缘动作。 */

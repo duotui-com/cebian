@@ -2715,6 +2715,10 @@
     <string name="shortcut_shell_panel">لوحة Shell</string>
     <string name="shortcut_stash_panel">فتح التخزين المؤقت</string>
     <string name="shortcut_clipboard_panel">فتح الحافظة</string>
+    <string name="shortcut_search_panel">لوحة البحث</string>
+    <string name="launcher_shortcut_menu_entry_title">قائمة الضغط المطوّل في المشغّل</string>
+    <string name="launcher_shortcut_menu_entry_desc">إدارة الاختصارات التي تظهر عند الضغط المطوّل على أيقونة التطبيق</string>
+    <string name="launcher_shortcut_menu_hint">اضغط مطوّلاً واسحب لإعادة الترتيب، ولا تظهر العناصر المعطّلة في قائمة الضغط المطوّل.</string>
     <string name="shortcut_panel_open_failed">لا يمكن فتح اللوحة، يرجى التأكد من تفعيل الشريط الجانبي</string>
     <string name="about_section_title">حول</string>
     <string name="about_release_notes_title">ملاحظات الإصدار</string>

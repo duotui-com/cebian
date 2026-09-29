@@ -256,6 +256,11 @@ internal object SettingsSnapshotReader {
             activityShortcuts = ActivityShortcutCodec.decodeAll(
                 prefs[SettingsPreferenceKeys.ACTIVITY_SHORTCUTS] ?: emptySet(),
             ),
+            launcherShortcutMenuOrder = LauncherShortcutMenuCodec.decode(
+                prefs[SettingsPreferenceKeys.LAUNCHER_SHORTCUT_MENU_ORDER],
+            ),
+            launcherShortcutMenuDisabled =
+                prefs[SettingsPreferenceKeys.LAUNCHER_SHORTCUT_MENU_DISABLED] ?: emptySet(),
             ),
             themeColorArgb = prefs[SettingsPreferenceKeys.THEME_COLOR] ?: 0xFF6750A4.toInt(),
             themePaletteStyleId = prefs[SettingsPreferenceKeys.THEME_PALETTE_STYLE]
