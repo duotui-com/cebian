@@ -2,7 +2,7 @@
 
 All notable changes to XGesture are documented in this file.
 
-## [1.26.0] - 2026-09-29
+## [1.30.0] - 2026-09-30
 
 ### ⚠️ Breaking
 - **外部协议改名**：调起协议由 `cebian://` 换成 `xgesture://`，旧 scheme 不再注册、不再解析。用 Tasker / MacroDroid 等按 deeplink 唤起面板的自动化，需要把链接前缀改成 `xgesture://`；host、路径与 `?q=` 参数完全不变。走 Intent Action（`com.slideindex.app.action.*`）的自动化不受影响

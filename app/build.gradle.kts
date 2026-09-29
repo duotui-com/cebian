@@ -39,7 +39,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = 37
         versionCode = 65
-        versionName = "1.26.0"
+        versionName = "1.30.0"
 
         ndk {
             abiFilters += "arm64-v8a"
