@@ -119,12 +119,9 @@ class SlideIndexApp : Application(), androidx.work.Configuration.Provider {
         }
         if (AppProcess.isEngine) return
 
-        // OCR 推理改由 :engine 进程执行（onnxruntime/opencv 不再常驻调用方进程）；
-        // 传输未接或失败时 OcrInferenceService 会自动回退本地推理。
-        if (!AppProcess.isEngine) {
-            com.slideindex.app.ocr.OcrRemoteBridge.transport =
-                com.slideindex.app.engine.EngineOcrTransport(this)
-        }
+        // OCR 推理回到单进程：不再安装 binder 传输，引擎直接在调用方进程里推理
+        // （省掉 AIDL 对位图的 Parcel 拷贝）。EngineOcrTransport / EngineOcrService
+        // 保留但不再接管：以后若要重新拆进程，把 manifest 的 android:process 加回去即可。
 
         // 剪贴板监听状态镜像：监听进程发布，其它进程（设置页）读。
         com.slideindex.app.clipboard.monitor.ClipboardMonitorStatusPort.start(this)
