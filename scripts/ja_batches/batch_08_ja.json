@@ -29,7 +29,7 @@
   },
   {
     "name": "otp_auto_input_entry_desc",
-    "ja": "Cebian 経由でコードを自動入力"
+    "ja": "XGesture 経由でコードを自動入力"
   },
   {
     "name": "otp_auto_input_title",
@@ -81,23 +81,23 @@
   },
   {
     "name": "otp_auto_input_service_setup_title",
-    "ja": "Cebian を有効化"
+    "ja": "XGesture を有効化"
   },
   {
     "name": "otp_auto_input_service_setup_desc",
-    "ja": "エッジジェスチャと OTP 自動入力は Cebian サービスを共有します"
+    "ja": "エッジジェスチャと OTP 自動入力は XGesture サービスを共有します"
   },
   {
     "name": "otp_fill_method_pipeline_inject",
-    "ja": "入力順: LSPosed システムインジェクト → Cebian SET_TEXT"
+    "ja": "入力順: LSPosed システムインジェクト → XGesture SET_TEXT"
   },
   {
     "name": "otp_fill_method_pipeline_a11y_only",
-    "ja": "入力方法: Cebian SET_TEXT"
+    "ja": "入力方法: XGesture SET_TEXT"
   },
   {
     "name": "otp_fill_method_a11y_fallback_hint",
-    "ja": "インジェクト失敗または無効時のフォールバックは Cebian SET_TEXT"
+    "ja": "インジェクト失敗または無効時のフォールバックは XGesture SET_TEXT"
   },
   {
     "name": "otp_runtime_status_section",
@@ -109,15 +109,15 @@
   },
   {
     "name": "otp_runtime_status_need_accessibility",
-    "ja": "自動入力には Cebian アクセシビリティサービスの有効化が必要です"
+    "ja": "自動入力には XGesture アクセシビリティサービスの有効化が必要です"
   },
   {
     "name": "otp_runtime_status_inject_pipeline",
-    "ja": "自動入力オン: LSPosed システムインジェクト優先、フォールバックは Cebian ノード入力"
+    "ja": "自動入力オン: LSPosed システムインジェクト優先、フォールバックは XGesture ノード入力"
   },
   {
     "name": "otp_runtime_status_a11y_only",
-    "ja": "自動入力オン: Cebian ノード入力のみ"
+    "ja": "自動入力オン: XGesture ノード入力のみ"
   },
   {
     "name": "otp_runtime_status_sms_lsposed",
@@ -145,7 +145,7 @@
   },
   {
     "name": "otp_lsposed_inject_desc_short",
-    "ja": "システムレベルインジェクトを優先。フォールバックは Cebian ノード入力。システムフレームワークスコープが必要"
+    "ja": "システムレベルインジェクトを優先。フォールバックは XGesture ノード入力。システムフレームワークスコープが必要"
   },
   {
     "name": "otp_lsposed_sms_title",

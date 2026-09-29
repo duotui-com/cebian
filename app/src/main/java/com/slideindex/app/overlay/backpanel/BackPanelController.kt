@@ -169,7 +169,7 @@ class BackPanelController(
         fullyStretchedThreshold = min(width.toFloat(), params.swipeProgressThreshold)
     }
 
-    /** Bind ENTRY→ACTIVE to Cebian's short-swipe distance instead of AOSP's 16dp. */
+    /** Bind ENTRY→ACTIVE to XGesture's short-swipe distance instead of AOSP's 16dp. */
     fun setActivationThresholdPx(px: Float) {
         activationThresholdOverridePx = px.takeIf { it > 0f }
         applyActivationThresholdOverride()

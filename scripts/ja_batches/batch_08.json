@@ -36,7 +36,7 @@
   },
   {
     "name": "otp_auto_input_entry_desc",
-    "text": "Auto-fill codes via Cebian",
+    "text": "Auto-fill codes via XGesture",
     "source": "en"
   },
   {
@@ -101,27 +101,27 @@
   },
   {
     "name": "otp_auto_input_service_setup_title",
-    "text": "Enable Cebian",
+    "text": "Enable XGesture",
     "source": "en"
   },
   {
     "name": "otp_auto_input_service_setup_desc",
-    "text": "Edge gestures and OTP auto-fill share the Cebian service",
+    "text": "Edge gestures and OTP auto-fill share the XGesture service",
     "source": "en"
   },
   {
     "name": "otp_fill_method_pipeline_inject",
-    "text": "Fill order: LSPosed system inject → Cebian SET_TEXT",
+    "text": "Fill order: LSPosed system inject → XGesture SET_TEXT",
     "source": "en"
   },
   {
     "name": "otp_fill_method_pipeline_a11y_only",
-    "text": "Fill method: Cebian SET_TEXT",
+    "text": "Fill method: XGesture SET_TEXT",
     "source": "en"
   },
   {
     "name": "otp_fill_method_a11y_fallback_hint",
-    "text": "Cebian SET_TEXT is the fallback when inject fails or is disabled",
+    "text": "XGesture SET_TEXT is the fallback when inject fails or is disabled",
     "source": "en"
   },
   {
@@ -136,17 +136,17 @@
   },
   {
     "name": "otp_runtime_status_need_accessibility",
-    "text": "Enable the Cebian accessibility service to auto-fill",
+    "text": "Enable the XGesture accessibility service to auto-fill",
     "source": "en"
   },
   {
     "name": "otp_runtime_status_inject_pipeline",
-    "text": "Auto-fill on: LSPosed system inject first, then Cebian node fill as fallback",
+    "text": "Auto-fill on: LSPosed system inject first, then XGesture node fill as fallback",
     "source": "en"
   },
   {
     "name": "otp_runtime_status_a11y_only",
-    "text": "Auto-fill on: Cebian node fill only",
+    "text": "Auto-fill on: XGesture node fill only",
     "source": "en"
   },
   {
@@ -181,7 +181,7 @@
   },
   {
     "name": "otp_lsposed_inject_desc_short",
-    "text": "Prefer system-level inject; falls back to Cebian node fill. Requires system framework scope",
+    "text": "Prefer system-level inject; falls back to XGesture node fill. Requires system framework scope",
     "source": "en"
   },
   {

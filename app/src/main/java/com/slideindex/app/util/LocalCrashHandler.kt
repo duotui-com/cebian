@@ -243,7 +243,7 @@ object LocalCrashHandler {
         val crashReports = listCrashReports(context)
 
         return buildString {
-            appendLine("### Cebian 系统诊断与排错报告")
+            appendLine("### XGesture 系统诊断与排错报告")
             appendLine("- **生成时间**: $time")
             appendLine("- **应用版本**: $versionName ($versionCode)")
             appendLine("- **设备型号**: ${Build.MANUFACTURER} ${Build.MODEL} (${Build.DEVICE})")

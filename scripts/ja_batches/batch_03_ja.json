@@ -545,7 +545,7 @@
   },
   {
     "name": "gesture_action_floating_pointer_permission",
-    "ja": "Cebian が必要"
+    "ja": "XGesture が必要"
   },
   {
     "name": "gesture_action_pointer_gesture_recorder",
@@ -569,7 +569,7 @@
   },
   {
     "name": "gesture_action_pointer_gesture_record_permission",
-    "ja": "Cebian が必要"
+    "ja": "XGesture が必要"
   },
   {
     "name": "gesture_action_open_floating_pointer_radial_menu",
@@ -581,7 +581,7 @@
   },
   {
     "name": "gesture_action_open_floating_pointer_radial_menu_permission",
-    "ja": "Cebian が必要"
+    "ja": "XGesture が必要"
   },
   {
     "name": "float_ball_settings_title",

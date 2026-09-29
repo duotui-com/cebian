@@ -1,7 +1,7 @@
 [
   {
     "name": "app_name",
-    "ja": "Cebian"
+    "ja": "XGesture"
   },
   {
     "name": "main_settings_subtitle",
@@ -57,11 +57,11 @@
   },
   {
     "name": "external_invocation_hint",
-    "ja": "cebian:// リンクまたは Intent アクションで他アプリから Cebian の機能を開けます。検索パネル、ストッシュ、クリップボードにはサイドバーとアクセシビリティサービスが必要です。"
+    "ja": "xgesture:// リンクまたは Intent アクションで他アプリから XGesture の機能を開けます。検索パネル、ストッシュ、クリップボードにはサイドバーとアクセシビリティサービスが必要です。"
   },
   {
     "name": "external_invocation_query_hint",
-    "ja": "オプションの q で検索クエリを事前入力できます。例: cebian://open/search-panel?q=weather"
+    "ja": "オプションの q で検索クエリを事前入力できます。例: xgesture://open/search-panel?q=weather"
   },
   {
     "name": "external_invocation_deeplink_section",

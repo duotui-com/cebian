@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">边栏</string>
+    <string name="app_name">X手势</string>
     <string name="main_nav_home">首页</string>
     <string name="main_nav_shake">晃动</string>
     <string name="main_nav_notification">消息</string>
@@ -270,7 +270,7 @@
     <string name="message_theme_weipop_skin_22">晴雨彩虹</string>
     <string name="message_theme_weipop_skin_23">金鱼少年</string>
     <string name="permissions_pending_title">待完成授权</string>
-    <string name="service_notification_title">边栏运行中</string>
+    <string name="service_notification_title">X手势运行中</string>
     <string name="service_notification_text">边缘手势服务运行中，点击打开设置</string>
     <string name="permission_overlay_title">悬浮窗权限</string>
     <string name="permission_notification_title">通知权限</string>
@@ -319,8 +319,8 @@
     <string name="app_keep_alive_entry_summary_recents">已隐藏多任务</string>
     <string name="app_keep_alive_entry_summary_all">电池白名单，多任务隐藏</string>
     <string name="secure_settings_title">辅助功能防被杀</string>
-    <string name="secure_settings_desc">边栏被系统关闭时自动尝试恢复（需 WRITE_SECURE_SETTINGS 权限）</string>
-    <string name="secure_settings_enabled_summary">边栏防被杀已开</string>
+    <string name="secure_settings_desc">X手势被系统关闭时自动尝试恢复（需 WRITE_SECURE_SETTINGS 权限）</string>
+    <string name="secure_settings_enabled_summary">X手势防被杀已开</string>
     <string name="secure_settings_grant_success">已通过 Shizuku 授权</string>
     <string name="secure_settings_grant_failed">授权失败，请使用 ADB 手动执行</string>
     <string name="secure_settings_adb_dialog_title">ADB 授权说明</string>
@@ -329,7 +329,7 @@
     <string name="secure_settings_adb_copied">已复制到剪贴板</string>
     <string name="accessibility_recover_reopen_app_hint">边缘手势未连接，请完全关闭后重新打开本应用</string>
     <string name="accessibility_offline_notification_title">触钮已掉线</string>
-    <string name="accessibility_offline_notification_text">点这里重新开启「边栏」的无障碍服务</string>
+    <string name="accessibility_offline_notification_text">点这里重新开启「X手势」的无障碍服务</string>
     <string name="hide_from_recents_title">在最近任务列表中隐藏</string>
     <string name="hide_from_recents_desc">开启后，本应用设置界面不会出现在系统多任务界面</string>
     <string name="live_preview_hint">拖动滑块可实时预览；平时可在屏幕边缘试用手势</string>
@@ -628,7 +628,7 @@
     <string name="hidden_apps_entry_title">隐藏应用</string>
     <string name="hidden_apps_entry_desc">从应用索引列表中隐藏指定应用</string>
     <string name="hidden_apps_title">隐藏应用</string>
-    <string name="hidden_apps_desc">已隐藏的应用不会出现在边栏面板中，但仍可通过系统桌面等方式打开。</string>
+    <string name="hidden_apps_desc">已隐藏的应用不会出现在X手势面板中，但仍可通过系统桌面等方式打开。</string>
     <string name="hidden_apps_section_hidden">已隐藏</string>
     <string name="hidden_apps_section_in_index">列表显示</string>
     <string name="hidden_apps_section_add">添加隐藏</string>
@@ -716,11 +716,11 @@
     <string name="system_gesture_takeover_module_pill_unknown">未检测</string>
     <string name="system_gesture_takeover_module_tap_hint">点按检测 LSPosed 模块状态</string>
     <string name="system_gesture_takeover_tip" formatted="false">开启后，模块会在系统输入层先接管该边缘的触钮区域：区域内的系统手势（顶部下拉、左右返回、底部上滑回桌面）不再触发，触摸交由本应用处理；未绑定动作的触摸不会传给系统。这与触钮设置里的「拦截系统返回手势」、边角轮盘的「覆盖系统导航手势」不是同一功能。</string>
-    <string name="accessibility_service_name">#边栏👈</string>
-    <string name="accessibility_service_desc">开启后才能使用边缘手势与边栏面板，并执行返回、主屏幕、多任务等系统手势；未授权 Shizuku 时也可用于边缘单击穿透。</string>
-    <string name="permission_accessibility_title">边栏</string>
-    <string name="permission_accessibility_desc">开启边栏后才能使用边缘手势与边栏面板；也用于返回、主屏幕、多任务等系统操作；未授权 Shizuku 时单击穿透也需要此权限。</string>
-    <string name="permission_accessibility_grant">开启边栏</string>
+    <string name="accessibility_service_name">#X手势👈</string>
+    <string name="accessibility_service_desc">开启后才能使用边缘手势与X手势面板，并执行返回、主屏幕、多任务等系统手势；未授权 Shizuku 时也可用于边缘单击穿透。</string>
+    <string name="permission_accessibility_title">X手势</string>
+    <string name="permission_accessibility_desc">开启X手势后才能使用边缘手势与X手势面板；也用于返回、主屏幕、多任务等系统操作；未授权 Shizuku 时单击穿透也需要此权限。</string>
+    <string name="permission_accessibility_grant">开启X手势</string>
     <string name="side_gestures_entry_left">左侧触钮</string>
     <string name="side_gestures_entry_right">右侧触钮</string>
     <string name="side_gestures_entry_desc">配置滑动手势与点击</string>
@@ -844,7 +844,7 @@
     <string name="holographic_settings_haptic_medium">中</string>
     <string name="holographic_settings_haptic_strong">强</string>
     <string name="holographic_hidden_apps_entry_desc">从全息球中隐藏指定应用</string>
-    <string name="holographic_hidden_apps_desc">已隐藏的应用不会出现在全息球中，不影响边栏索引等其他列表。</string>
+    <string name="holographic_hidden_apps_desc">已隐藏的应用不会出现在全息球中，不影响X手势索引等其他列表。</string>
     <string name="gesture_action_task_switcher">任务切换器</string>
     <string name="gesture_action_back">返回键</string>
     <string name="gesture_action_home">主屏幕</string>
@@ -899,7 +899,7 @@
     <string name="gesture_action_open_link_desc">打开已保存的外部链接、Deeplink 或 Intent URI</string>
     <string name="gesture_open_link_url_field">链接</string>
     <string name="gesture_open_link_label_field">显示名称（可选）</string>
-    <string name="gesture_open_link_config_hint">支持 http(s)://、intent://、tel:、mailto: 及 cebian:// 等可打开 URI</string>
+    <string name="gesture_open_link_config_hint">支持 http(s)://、intent://、tel:、mailto: 及 xgesture:// 等可打开 URI</string>
     <string name="gesture_action_volume_panel">扩展面板</string>
     <string name="gesture_action_volume_panel_desc">弹出面板调节亮度、闹钟/通知/铃声/媒体音量</string>
     <string name="volume_panel_brightness">亮度</string>
@@ -1055,7 +1055,7 @@
     <string name="freezer_show_in_launcher_desc">确认系统对话框后，将添加可移除的桌面快捷方式（非应用图标）</string>
     <string name="freezer_pin_shortcut_failed">无法添加快捷方式，当前桌面可能不支持</string>
     <string name="freezer_pin_shortcut_unpin_hint">已关闭。请长按桌面「已冻结的应用」快捷方式并选择「移除」</string>
-    <string name="freezer_legacy_icon_cleanup">若仍有重复的「边栏」图标：重启桌面或重启手机后应自动消失；若仍在，长按选「卸载」不会卸载应用本体</string>
+    <string name="freezer_legacy_icon_cleanup">若仍有重复的「X手势」图标：重启桌面或重启手机后应自动消失；若仍在，长按选「卸载」不会卸载应用本体</string>
     <string name="expand_panel_shortcuts_title">快捷应用</string>
     <string name="expand_panel_shortcut_add">添加快捷方式</string>
     <string name="expand_panel_shortcut_pick">选择应用</string>
@@ -1090,37 +1090,37 @@
     <string name="gesture_shell_command_config_title">配置 Shell 命令</string>
     <string name="gesture_shell_command_config_hint">命令将绑定到当前手势，触发时后台执行。</string>
     <string name="gesture_action_quick_tools_overlay">快速工具（悬浮窗）</string>
-    <string name="gesture_action_quick_tools_overlay_permission">需要开启边栏</string>
+    <string name="gesture_action_quick_tools_overlay_permission">需要开启X手势</string>
     <string name="gesture_action_widget_popup_overlay">小组件弹出窗口</string>
-    <string name="gesture_action_widget_popup_overlay_permission">需要开启边栏</string>
+    <string name="gesture_action_widget_popup_overlay_permission">需要开启X手势</string>
     <string name="gesture_action_stash_panel">打开暂存夹</string>
-    <string name="gesture_action_stash_panel_permission">需要开启边栏</string>
+    <string name="gesture_action_stash_panel_permission">需要开启X手势</string>
     <string name="gesture_action_clipboard_panel">打开剪贴板</string>
-    <string name="gesture_action_clipboard_panel_permission">需要开启边栏</string>
+    <string name="gesture_action_clipboard_panel_permission">需要开启X手势</string>
     <string name="gesture_action_clipboard_float">剪贴板小窗</string>
-    <string name="gesture_action_clipboard_float_permission">需要开启边栏与悬浮窗权限</string>
+    <string name="gesture_action_clipboard_float_permission">需要开启X手势与悬浮窗权限</string>
     <string name="clipboard_float_style_title">浮窗列表样式</string>
     <string name="clipboard_float_style_single_line">单行极简（高密度）</string>
     <string name="clipboard_float_style_card">多行卡片</string>
     <string name="clipboard_float_style_toggle">切换列表样式</string>
     <string name="gesture_action_clipboard_pick">剪贴板取词</string>
     <string name="gesture_action_clipboard_pick_desc">读取系统剪贴板并打开取词分词面板</string>
-    <string name="gesture_action_clipboard_pick_permission">需要开启边栏</string>
+    <string name="gesture_action_clipboard_pick_permission">需要开启X手势</string>
     <string name="gesture_action_clipboard_paste">粘贴</string>
     <string name="gesture_action_clipboard_paste_desc">将剪贴历史最新一条粘贴到输入框；多个输入框时点选目标</string>
     <string name="clipboard_paste_pick_content_desc">点选要粘贴的输入框</string>
     <string name="gesture_action_clipboard_paste_permission">需要开启无障碍服务</string>
     <string name="gesture_action_floating_pointer">悬浮指针</string>
-    <string name="gesture_action_floating_pointer_permission">需要开启边栏</string>
+    <string name="gesture_action_floating_pointer_permission">需要开启X手势</string>
     <string name="gesture_action_pointer_gesture_recorder">指针手势录制</string>
     <string name="gesture_action_pointer_gesture_recorder_desc">按住后滑动，以指针为起点回放为 Swipe</string>
     <string name="gesture_action_pointer_realtime_gesture">指针实时手势</string>
     <string name="gesture_action_pointer_realtime_gesture_desc">按住后滑动，以指针为起点实时模拟触摸</string>
     <string name="gesture_action_require_min_sdk_36">所需的最低 Android 版本为 Android 16（SDK 36）</string>
-    <string name="gesture_action_pointer_gesture_record_permission">需要开启边栏</string>
+    <string name="gesture_action_pointer_gesture_record_permission">需要开启X手势</string>
     <string name="gesture_action_open_floating_pointer_radial_menu">打开功能环</string>
     <string name="gesture_action_open_floating_pointer_radial_menu_desc">长按摇杆时打开摇杆功能环</string>
-    <string name="gesture_action_open_floating_pointer_radial_menu_permission">需要开启边栏</string>
+    <string name="gesture_action_open_floating_pointer_radial_menu_permission">需要开启X手势</string>
     <string name="gesture_action_toggle_dnd">勿扰模式开关</string>
     <string name="gesture_action_toggle_dnd_failed">无法切换勿扰模式</string>
     <string name="gesture_action_timed_dnd">定时勿扰</string>
@@ -1193,7 +1193,7 @@
     <string name="gesture_hint_style_wave">波浪</string>
     <string name="gesture_hint_style_wave_desc">边缘波形会随手势拉伸</string>
     <string name="gesture_hint_style_capsule">胶囊</string>
-    <string name="gesture_hint_style_capsule_desc">圆角胶囊跟随边栏展开</string>
+    <string name="gesture_hint_style_capsule_desc">圆角胶囊跟随X手势展开</string>
     <string name="gesture_hint_style_bubble">圆泡</string>
     <string name="gesture_hint_style_bubble_desc">圆泡会从边缘向内弹出</string>
     <string name="gesture_hint_style_android">系统箭头</string>
@@ -1470,8 +1470,8 @@
     <string name="float_ball_regional_cancel_slop">截图原点取消容差</string>
     <string name="float_ball_text_copied">已复制文字到剪贴板</string>
     <string name="float_ball_image_copied">已复制图片到剪贴板</string>
-    <string name="share_image_ocr_target_label">边栏 OCR 取词</string>
-    <string name="share_image_ocr_service_required">请先开启边栏无障碍服务</string>
+    <string name="share_image_ocr_target_label">X手势 OCR 取词</string>
+    <string name="share_image_ocr_service_required">请先开启X手势无障碍服务</string>
     <string name="share_image_ocr_model_required">请先在取词设置中下载并选用 OCR 模型</string>
     <string name="share_image_ocr_image_load_failed">无法读取分享的图片</string>
     <string name="share_image_ocr_background_action">后台处理</string>
@@ -1528,7 +1528,7 @@
     <string name="diagnostic_report_copied_truncated">分享不可用，已复制截断版至剪贴板</string>
     <string name="diagnostic_report_export_failed">诊断报告导出失败，请稍后重试</string>
     <string name="diagnostic_report_share_chooser_title">分享诊断日志</string>
-    <string name="diagnostic_report_share_subject">边栏诊断日志</string>
+    <string name="diagnostic_report_share_subject">X手势诊断日志</string>
     <string name="diagnostic_report_truncation_suffix">\n\n…(内容过长已截断)…</string>
     <string name="native_engine_packs_title">运行时引擎</string>
     <string name="native_engine_packs_subtitle">OCR、离线翻译与取词分词的原生库，按需下载</string>
@@ -1686,7 +1686,7 @@
     <string name="float_ball_gesture_side_swipe_distance">侧滑短滑距离（屏宽%）</string>
     <string name="float_ball_gesture_up_swipe_distance">上滑短滑距离（屏高%）</string>
     <string name="float_ball_gesture_long_press_section">长按</string>
-    <string name="preview_unavailable_hint">预览不可用：请确认「边栏」无障碍服务已开启</string>
+    <string name="preview_unavailable_hint">预览不可用：请确认「X手势」无障碍服务已开启</string>
     <string name="float_ball_gesture_long_press_ms">长按触发时长</string>
     <string name="float_ball_gesture_long_press_ms_value">%1$d ms</string>
     <string name="float_ball_gesture_swipe_up_short">上滑（短）</string>
@@ -1825,7 +1825,7 @@
     <string name="search_engine_import_replace">替换</string>
     <string name="search_engine_import_failed">导入失败：%1$s</string>
     <string name="search_engine_query_empty">请先选择或输入搜索内容</string>
-    <string name="search_engine_accessibility_required">使用此功能需要开启边栏无障碍服务</string>
+    <string name="search_engine_accessibility_required">使用此功能需要开启X手势无障碍服务</string>
     <string name="search_engine_add_title">添加搜索引擎</string>
     <string name="search_engine_add_subtitle">配置自定义文字搜索引擎</string>
     <string name="search_engine_edit_title">编辑搜索引擎</string>
@@ -2085,7 +2085,7 @@
     <string name="floating_pointer_radial_slot_top_left">左上</string>
     <string name="gesture_action_pointer_swipe">滑动</string>
     <string name="gesture_action_pointer_swipe_desc">在指针位置模拟一次滑动</string>
-    <string name="gesture_action_pointer_swipe_permission">需要开启边栏</string>
+    <string name="gesture_action_pointer_swipe_permission">需要开启X手势</string>
     <string name="pointer_swipe_config_title">操作配置</string>
     <string name="pointer_swipe_config_desc">从当前指针位置出发，按设定方向与距离模拟滑动手势。</string>
     <string name="pointer_swipe_direction_title">切换方向</string>
@@ -2258,8 +2258,8 @@
     <string name="external_invocation_entry_title">外部调用</string>
     <string name="external_invocation_entry_desc">Deeplink 与 Intent Action，供 Tasker 等搭配使用</string>
     <string name="external_invocation_title">外部调用</string>
-    <string name="external_invocation_hint">通过 cebian:// 链接或 Intent Action 从其他应用唤起边栏功能。搜索面板、收纳夹等需已开启边栏与无障碍服务。</string>
-    <string name="external_invocation_query_hint">可选参数 q 用于预填搜索词，例如 cebian://open/search-panel?q=天气。</string>
+    <string name="external_invocation_hint">通过 xgesture:// 链接或 Intent Action 从其他应用唤起X手势功能。搜索面板、收纳夹等需已开启X手势与无障碍服务。</string>
+    <string name="external_invocation_query_hint">可选参数 q 用于预填搜索词，例如 xgesture://open/search-panel?q=天气。</string>
     <string name="external_invocation_deeplink_section">Deeplink（推荐）</string>
     <string name="external_invocation_action_section">Intent Action（高级）</string>
     <string name="external_invocation_action_hint">点击条目复制 adb 命令。部分 Action 需指定组件；Shell 面板仅支持应用内快捷方式。</string>
@@ -2499,7 +2499,7 @@
     <string name="otp_test_result_success">提取成功：%1$s</string>
     <string name="otp_test_result_failed">未提取到验证码</string>
     <string name="otp_auto_input_entry_title">自动输入</string>
-    <string name="otp_auto_input_entry_desc">通过边栏自动填入验证码</string>
+    <string name="otp_auto_input_entry_desc">通过X手势自动填入验证码</string>
     <string name="otp_auto_input_title">自动输入</string>
     <string name="otp_auto_input_desc">收到验证码后自动填入当前输入框</string>
     <string name="otp_auto_input_enabled_title">自动输入验证码</string>
@@ -2513,7 +2513,7 @@
     <string name="otp_auto_input_interval_title">逐字间隔</string>
     <string name="otp_auto_input_interval_value">%1$d 毫秒</string>
     <string name="otp_auto_input_service_setup_title">无障碍自动填充状态</string>
-    <string name="otp_auto_input_service_setup_desc">自动填充验证码依赖边栏的无障碍服务；未开启时点这里去开启</string>
+    <string name="otp_auto_input_service_setup_desc">自动填充验证码依赖X手势的无障碍服务；未开启时点这里去开启</string>
     <string name="otp_rules_builtin_section">内置规则</string>
     <string name="otp_rules_more">更多</string>
     <string name="otp_rules_official_not_bundled">未内置</string>
@@ -2529,21 +2529,21 @@
     <string name="otp_advanced_section">高级</string>
     <string name="otp_keywords_fallback_entry_title">兜底识别词表</string>
     <string name="otp_keywords_fallback_entry_desc">规则都没命中时用它判断是不是验证码；一般不用改</string>
-    <string name="otp_fill_method_pipeline_inject">填充顺序：LSPosed 系统注入 → 边栏 SET_TEXT</string>
-    <string name="otp_fill_method_pipeline_a11y_only">填充方式：边栏 SET_TEXT</string>
-    <string name="otp_fill_method_a11y_fallback_hint">边栏 SET_TEXT 为后备方案，注入失败或关闭时自动尝试</string>
+    <string name="otp_fill_method_pipeline_inject">填充顺序：LSPosed 系统注入 → X手势 SET_TEXT</string>
+    <string name="otp_fill_method_pipeline_a11y_only">填充方式：X手势 SET_TEXT</string>
+    <string name="otp_fill_method_a11y_fallback_hint">X手势 SET_TEXT 为后备方案，注入失败或关闭时自动尝试</string>
     <string name="otp_runtime_status_section">运行状态</string>
     <string name="otp_runtime_status_disabled">自动填充未开启</string>
-    <string name="otp_runtime_status_need_accessibility">需开启边栏无障碍服务后才能自动填充</string>
-    <string name="otp_runtime_status_inject_pipeline">自动填充已开启：LSPosed 系统注入优先，失败时回退到边栏节点填充</string>
-    <string name="otp_runtime_status_a11y_only">自动填充已开启：仅使用边栏节点填充</string>
+    <string name="otp_runtime_status_need_accessibility">需开启X手势无障碍服务后才能自动填充</string>
+    <string name="otp_runtime_status_inject_pipeline">自动填充已开启：LSPosed 系统注入优先，失败时回退到X手势节点填充</string>
+    <string name="otp_runtime_status_a11y_only">自动填充已开启：仅使用X手势节点填充</string>
     <string name="otp_runtime_status_sms_lsposed">验证码来源：已启用 LSPosed 短信拦截（同时仍可从通知提取）</string>
     <string name="otp_auto_fill_section">自动填充</string>
     <string name="otp_lsposed_enhancements_section">LSPosed 增强</string>
     <string name="otp_lsposed_enhancements_desc">以下为可选增强，不影响「自动填充」总开关；系统注入开启时作为优先填充路径。</string>
     <string name="otp_diagnostics_section">诊断</string>
     <string name="otp_lsposed_inject_title">LSPosed 系统注入</string>
-    <string name="otp_lsposed_inject_desc_short">优先通过系统注入填入；失败时自动回退边栏节点填充。需勾选系统框架相关作用域</string>
+    <string name="otp_lsposed_inject_desc_short">优先通过系统注入填入；失败时自动回退X手势节点填充。需勾选系统框架相关作用域</string>
     <string name="otp_lsposed_sms_title">LSPosed 短信拦截</string>
     <string name="otp_lsposed_sms_desc_short">从电话进程拦截短信，需勾选电话服务；魅族建议同时勾选电话和短信存储</string>
     <string name="otp_lsposed_probe_title">检测 LSPosed 系统注入</string>
@@ -2554,7 +2554,7 @@
     <string name="otp_lsposed_probe_timeout">超时：LSPosed 未在 system_server 注册注入接收器</string>
     <string name="otp_lsposed_probe_failed">系统注入检测失败：%1$s</string>
     <string name="otp_lsposed_probe_response">收到响应：%1$s / %2$s</string>
-    <string name="xposed_module_description">Cebian：OTP 自动填充（需勾选 android 作用域）</string>
+    <string name="xposed_module_description">XGesture：OTP 自动填充（需勾选 android 作用域）</string>
     <string name="otp_records_title">验证码记录</string>
     <string name="otp_records_entry_title">验证码记录</string>
     <string name="otp_records_entry_desc">查看已提取的验证码历史</string>
@@ -2654,7 +2654,7 @@
     <string name="settings_backup_sensitive_hint">包含验证码、通知历史、剪贴板、识图 OCR 历史、Shell 输出历史；仅保存在本地备份文件中。</string>
     <string name="settings_backup_export">导出设置</string>
     <string name="settings_backup_import">导入设置</string>
-    <string name="settings_backup_default_filename">cebian-backup-%1$d.zip</string>
+    <string name="settings_backup_default_filename">XGesture-backup-%1$d.zip</string>
     <string name="settings_backup_entry_title">设置备份</string>
     <string name="settings_backup_entry_desc">导出或导入 ZIP 备份文件（含云端 API Key 与 OCR 提示词）</string>
     <string name="settings_backup_export_success">设置导出成功</string>
@@ -2687,7 +2687,7 @@
 
     <!-- Onboarding -->
     <string name="onboarding_next">下一步</string>
-    <string name="onboarding_welcome_body">边栏通过边缘手势、摇一摇和通知增强，帮助你更高效地使用手机。接下来需要授予几项系统权限。</string>
+    <string name="onboarding_welcome_body">X手势通过边缘手势、摇一摇和通知增强，帮助你更高效地使用手机。接下来需要授予几项系统权限。</string>
     <string name="onboarding_overlay_title">悬浮窗权限</string>
     <string name="onboarding_grant_overlay">授予悬浮窗权限</string>
     <string name="onboarding_accessibility_title">无障碍服务</string>
@@ -2697,7 +2697,7 @@
     <string name="onboarding_disclaimer_body">本应用及相关模块功能仅供个人设备管理与效率提升使用，不用于规避法律法规、访问控制或未经授权的系统操作。\n\n请在知悉相关功能原理的前提下使用，并对启用、修改及配置所产生的结果负责。</string>
     <string name="onboarding_disclaimer_agree">我已阅读并同意以上声明</string>
     <string name="onboarding_core_permissions_title">核心权限</string>
-    <string name="onboarding_core_permissions_body">边栏需要以下权限以提供边缘手势识别、悬浮触发条及后台常驻服务。请在系统设置中授予相应权限。</string>
+    <string name="onboarding_core_permissions_body">X手势需要以下权限以提供边缘手势识别、悬浮触发条及后台常驻服务。请在系统设置中授予相应权限。</string>
     <string name="onboarding_permission_overlay_short">用于显示边缘触发条与悬浮操作面板</string>
     <string name="onboarding_permission_accessibility_short">用于识别边缘手势并执行全局快捷操作</string>
     <string name="onboarding_permission_notification_title">通知与常驻服务</string>
@@ -2716,7 +2716,7 @@
     <string name="privacy_policy_subtitle">数据如何处理、是否上传</string>
     <string name="privacy_policy_entry_title">隐私政策</string>
     <string name="privacy_policy_entry_desc">本地数据处理说明与权限用途</string>
-    <string name="privacy_policy_body">边栏（Cebian）以本地处理为基本原则。
+    <string name="privacy_policy_body">X手势（XGesture）以本地处理为基本原则。
 
 • 通知与验证码：仅在设备本地读取、过滤、提取与展示；默认不上传云端。
 • OTP 记录与通知历史：保存在应用私有目录，默认不纳入系统备份；可在设置备份中可选导出。
@@ -2741,7 +2741,7 @@
     <string name="otp_autofill_stats_last_time">时间</string>
     <string name="otp_autofill_stats_last_strategy">策略</string>
     <string name="otp_autofill_stats_last_reason">原因</string>
-    <string name="otp_autofill_stats_help_pipeline">填充顺序：若开启 LSPosed 系统注入，会优先尝试系统级按键注入；失败或未开启时，由边栏无障碍服务查找输入框并写入。</string>
+    <string name="otp_autofill_stats_help_pipeline">填充顺序：若开启 LSPosed 系统注入，会优先尝试系统级按键注入；失败或未开启时，由X手势无障碍服务查找输入框并写入。</string>
     <string name="otp_autofill_stats_help_strategies">策略含义：系统注入 = LSPosed Hook；焦点/最佳输入框/分格输入 = 无障碍节点填充。</string>
     <string name="otp_autofill_stats_help_failures">常见失败：超时 = 等待填充结果过久；未找到输入框 = 当前界面没有可编辑控件；未命中策略 = 广播未得到任何填充响应。</string>
     <string name="otp_autofill_strategy_system_inject">LSPosed 系统注入</string>
@@ -2792,7 +2792,7 @@
     <string name="shell_panel_history_clear_confirm_message">将删除全部已保存的命令输出记录，此操作无法撤销。</string>
     <string name="shell_panel_history_empty">暂无执行记录</string>
     <string name="shell_panel_history_exit_code">退出码 %1$d</string>
-    <string name="tile_gesture_switch">边栏</string>
+    <string name="tile_gesture_switch">X手势</string>
     <string name="shortcut_toggle_gesture">开关手势</string>
     <string name="shortcut_notification_hub">通知滤盒</string>
     <string name="shortcut_shell_panel">Shell 面板</string>
@@ -2802,7 +2802,7 @@
     <string name="launcher_shortcut_menu_entry_title">桌面图标长按菜单</string>
     <string name="launcher_shortcut_menu_entry_desc">管理长按图标后显示的快捷方式</string>
     <string name="launcher_shortcut_menu_hint">长按并拖动可调整顺序；关闭的条目不会出现在长按菜单里。</string>
-    <string name="shortcut_panel_open_failed">无法打开面板，请确认边栏已开启</string>
+    <string name="shortcut_panel_open_failed">无法打开面板，请确认X手势已开启</string>
     <string name="about_section_title">关于</string>
     <string name="about_release_notes_title">更新说明</string>
     <string name="about_check_update_title">检查更新</string>
@@ -2849,16 +2849,16 @@
     <string name="update_notification_failed_content">点击重试</string>
     <string name="update_notification_permission_title">开启通知权限</string>
     <string name="update_notification_permission_rationale">开启通知后，可在后台发现新版本或下载完成时收到提醒。</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/cebian</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
     <string name="about_star_github_title">GitHub 源码仓库 ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/cebian · 点亮 Star 支持作者</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · 点亮 Star 支持作者</string>
     <string name="about_feedback_issues_title">问题反馈与需求建议</string>
     <string name="about_feedback_issues_desc">在 GitHub 提交 Bug 反馈、新功能想法或分享配置</string>
     <string name="about_help_translate_title">参与翻译</string>
     <string name="about_help_translate_desc">帮助我们翻译此应用</string>
     <string name="about_weblate_url">https://hosted.weblate.org/engage/cebian/</string>
     <string name="about_telegram_chat_title">Telegram 讨论群</string>
-    <string name="about_telegram_chat_desc">Cebian · 边栏</string>
+    <string name="about_telegram_chat_desc">XGesture · X手势</string>
     <string name="about_telegram_chat_url">https://t.me/+NtcG5HPiKXVmNTU1</string>
     <string name="about_telegram_releases_title">Telegram Releases</string>
     <string name="about_telegram_releases_desc">@cebian_channel · 发版与公告</string>
@@ -3079,7 +3079,7 @@
     <string name="clipboard_monitoring_mode_lsposed">LSPosed · 系统白名单</string>
     <string name="clipboard_monitoring_mode_lsposed_desc">通过 LSPosed 模块把白名单应用伪装成默认输入法，后台直接读剪贴板（不抢焦点）；需要模块生效且作用域包含系统框架</string>
     <string name="clipboard_lsposed_whitelist">LSPosed 白名单</string>
-    <string name="clipboard_lsposed_whitelist_page_desc">名单里的应用会被系统当成默认输入法放行，可在后台直接读剪贴板、不需要抢焦点。注意：白名单由系统层面放行，对所有监听模式都生效（切到标准监听等模式后同样有效）；移除「边栏」自身则会失去该放行。</string>
+    <string name="clipboard_lsposed_whitelist_page_desc">名单里的应用会被系统当成默认输入法放行，可在后台直接读剪贴板、不需要抢焦点。注意：白名单由系统层面放行，对所有监听模式都生效（切到标准监听等模式后同样有效）；移除「X手势」自身则会失去该放行。</string>
     <string name="clipboard_lsposed_whitelist_section">已加入白名单</string>
     <string name="clipboard_lsposed_whitelist_empty">白名单为空，本模式不会生效</string>
     <string name="clipboard_lsposed_whitelist_remove">移除</string>
@@ -3143,7 +3143,7 @@
     <string name="clipboard_monitoring_channel_lsposed_desc">由模块 hook 系统剪贴板服务，零常驻、免焦点；需要模块作用域包含系统框架</string>
     <string name="clipboard_monitoring_channel_standard">标准公开监听 · 后台不可用</string>
     <string name="clipboard_monitoring_channel_standard_desc">仅前台可读：在别的应用复制不会进历史</string>
-    <string name="clipboard_monitoring_standard_warning">注意：这一档不是后台监听。只有边栏处于前台（持有焦点）时才会记录；想后台也能记，请把它加入 LSPosed 白名单，或改用其它通道。</string>
+    <string name="clipboard_monitoring_standard_warning">注意：这一档不是后台监听。只有X手势处于前台（持有焦点）时才会记录；想后台也能记，请把它加入 LSPosed 白名单，或改用其它通道。</string>
     <string name="clipboard_monitoring_capture_hidden_api">系统隐藏 API</string>
     <string name="clipboard_monitoring_capture_hidden_api_desc">注册系统底层隐藏监听器，事件更及时</string>
     <string name="clipboard_monitoring_capture_logcat">系统日志读取</string>
@@ -3215,7 +3215,7 @@
     <string name="clipboard_float_appearance_section">外观与交互</string>
     <string name="clipboard_float_enabled_title">键盘弹出时显示小窗</string>
     <string name="clipboard_float_enabled_desc">键盘弹出时在输入区上方显示剪贴板小窗；支持拖动与改尺寸，单击条目粘贴。</string>
-    <string name="clipboard_float_a11y_hint">需要开启边栏无障碍服务，才能检测键盘并粘贴到输入框。</string>
+    <string name="clipboard_float_a11y_hint">需要开启X手势无障碍服务，才能检测键盘并粘贴到输入框。</string>
     <string name="clipboard_float_show_chip_title">先显示入口按钮</string>
     <string name="clipboard_float_show_chip_desc">开启后先显示小按钮，点击再展开；关闭则键盘弹出时直接展开小窗。</string>
     <string name="clipboard_float_pin_title">记住大窗与入口按钮位置</string>

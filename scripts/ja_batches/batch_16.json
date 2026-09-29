@@ -461,7 +461,7 @@
   },
   {
     "name": "clipboard_float_a11y_hint",
-    "text": "Cebian accessibility must be enabled to detect the keyboard and paste into fields.",
+    "text": "XGesture accessibility must be enabled to detect the keyboard and paste into fields.",
     "source": "en"
   },
   {

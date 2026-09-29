@@ -3,8 +3,8 @@ package com.slideindex.app.otp
 /**
  * 验证码记录分类（对齐上游 XposedSmsCode 的四类记录开关）。
  *
- * 边栏目前只产生 [CODE] / [PLAIN_SMS] / [APP_NOTIFY] / [TEST] 四类；
- * 上游的「来电通知」分类需要通话通知抓取能力，边栏没有，暂不提供。
+ * X手势目前只产生 [CODE] / [PLAIN_SMS] / [APP_NOTIFY] / [TEST] 四类；
+ * 上游的「来电通知」分类需要通话通知抓取能力，X手势没有，暂不提供。
  */
 enum class OtpRecordCategory(val storageKey: String) {
     CODE("code"),

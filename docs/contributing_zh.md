@@ -1,6 +1,6 @@
-# 参与贡献 Cebian（边栏）
+# 参与贡献 XGesture（X手势）
 
-感谢你愿意帮助改进 **边栏（Cebian）**！本文说明如何贡献翻译与代码。
+感谢你愿意帮助改进 **X手势（XGesture）**！本文说明如何贡献翻译与代码。
 
 **语言：** [English](../CONTRIBUTING.md) · **简体中文** · [日本語](contributing_ja.md)
 
@@ -30,7 +30,7 @@
 - **不要修改** string 的 `name` 属性，只改 `<string>` 内的正文。
 - **占位符必须保留**：`%1$s`、`%1$d`、`%2$s` 等，类型不能改错。
 - 保留原文中的 **HTML/XML 实体** 和 `\n`。
-- **品牌名一般不译**：Cebian、Shizuku、LSPosed、Miuix 等（若源文已本地化则跟随源文）。
+- **品牌名一般不译**：XGesture、Shizuku、LSPosed、Miuix 等（若源文已本地化则跟随源文）。
 - 界面文案宜简洁自然，避免生硬直译。
 
 ### 通过 Pull Request 翻译（备选）
@@ -51,7 +51,7 @@ app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再�
 
 ## 贡献代码
 
-1. Fork 并克隆：`git clone https://github.com/qpst4/cebian.git`
+1. Fork 并克隆：`git clone https://github.com/qpst4/xgesture.git`
 2. 从 `main` 创建功能分支。
 3. 改动尽量聚焦；风格与现有 Kotlin / Compose 一致。
 4. 本地执行：`.\gradlew.bat compileLiteDebugKotlin`（改 UI/字符串建议跑 `lintLiteDebug`）。
@@ -67,8 +67,8 @@ app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再�
 
 ## 社区
 
-- [GitHub Issues](https://github.com/qpst4/cebian/issues) — Bug 与功能建议
-- [GitHub Discussions](https://github.com/qpst4/cebian/discussions) — 讨论与提问
+- [GitHub Issues](https://github.com/qpst4/xgesture/issues) — Bug 与功能建议
+- [GitHub Discussions](https://github.com/qpst4/xgesture/discussions) — 讨论与提问
 - QQ 群：**1042783385**
 
 ---

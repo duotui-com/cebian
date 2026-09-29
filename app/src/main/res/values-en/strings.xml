@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Cebian</string>
+    <string name="app_name">XGesture</string>
     <!-- Bottom nav "Notifications" groups filter box + verification codes; "Messages" may fit better in some contexts -->
     <string name="main_nav_home">Home</string>
     <string name="main_nav_shake">Shake</string>
@@ -13,8 +13,8 @@
     <string name="external_invocation_entry_title">External invocation</string>
     <string name="external_invocation_entry_desc">Deeplinks and intent actions for Tasker and other apps</string>
     <string name="external_invocation_title">External invocation</string>
-    <string name="external_invocation_hint">Open Cebian features from other apps via cebian:// links or intent actions. Search panel, stash, and clipboard require the sidebar and accessibility service.</string>
-    <string name="external_invocation_query_hint">Optional q pre-fills a search query, e.g. cebian://open/search-panel?q=weather.</string>
+    <string name="external_invocation_hint">Open XGesture features from other apps via xgesture:// links or intent actions. Search panel, stash, and clipboard require the sidebar and accessibility service.</string>
+    <string name="external_invocation_query_hint">Optional q pre-fills a search query, e.g. xgesture://open/search-panel?q=weather.</string>
     <string name="external_invocation_deeplink_section">Deeplinks (recommended)</string>
     <string name="external_invocation_action_section">Intent actions (advanced)</string>
     <string name="external_invocation_action_hint">Tap an entry to copy an adb command. Some actions require an explicit component. Shell panel is app-internal only.</string>
@@ -301,7 +301,7 @@
     <string name="permissions_pending_title">Permissions pending</string>
     <string name="search_clear">Clear search</string>
     <string name="search_actions_hint">Search actions…</string>
-    <string name="service_notification_title">Cebian is running</string>
+    <string name="service_notification_title">XGesture is running</string>
     <string name="service_notification_text">Edge gesture service is running. Tap to open settings.</string>
     <string name="permission_usage_desc_excluded_apps">Recommended for accurate foreground detection. Find \"%1$s\" in the list and allow access. If the switch stays greyed out, update to the latest version or check whether the system restricts this permission. Some features still work with accessibility enabled.</string>
     <string name="gesture_switch">Gesture switch</string>
@@ -343,9 +343,9 @@
     <string name="app_keep_alive_entry_summary_battery">Battery whitelisted</string>
     <string name="app_keep_alive_entry_summary_recents">Hidden from recents</string>
     <string name="app_keep_alive_entry_summary_all">Battery whitelist, hidden recents</string>
-    <string name="secure_settings_title">Cebian keep-alive</string>
-    <string name="secure_settings_desc">Automatically restore Cebian if the system disables it (requires WRITE_SECURE_SETTINGS)</string>
-    <string name="secure_settings_enabled_summary">Cebian keep-alive on</string>
+    <string name="secure_settings_title">XGesture keep-alive</string>
+    <string name="secure_settings_desc">Automatically restore XGesture if the system disables it (requires WRITE_SECURE_SETTINGS)</string>
+    <string name="secure_settings_enabled_summary">XGesture keep-alive on</string>
     <string name="secure_settings_grant_success">Granted via Shizuku</string>
     <string name="secure_settings_grant_failed">Grant failed. Please run the ADB command manually.</string>
     <string name="secure_settings_adb_dialog_title">ADB grant instructions</string>
@@ -358,12 +358,12 @@
     <string name="gesture_action_switch_input_method">Switch input method</string>
     <string name="hide_from_recents_title">Hide from recents</string>
     <string name="hide_from_recents_desc">When enabled, this app\'s settings screen won\'t appear in the system recents list</string>
-    <string name="permission_accessibility_title">Cebian</string>
+    <string name="permission_accessibility_title">XGesture</string>
     <string name="permission_accessibility_desc">Required for edge gestures and sidebar panels; also used for Back, Home, Recents, and tap passthrough without Shizuku.</string>
-    <string name="permission_accessibility_grant">Enable Cebian</string>
+    <string name="permission_accessibility_grant">Enable XGesture</string>
     <string name="settings_section_service">Service</string>
     <string name="hidden_apps_entry_desc">Hide apps from the app index list</string>
-    <string name="hidden_apps_desc">Hidden apps won\'t appear in Cebian panels, but can still be opened from the home screen and elsewhere.</string>
+    <string name="hidden_apps_desc">Hidden apps won\'t appear in XGesture panels, but can still be opened from the home screen and elsewhere.</string>
     <string name="excluded_apps_entry_title">Per-app disable</string>
     <string name="excluded_apps_title">Per-app disable</string>
     <string name="excluded_apps_desc">Tap an app to adjust what is hidden. Use Add app below to pick an app and choose scopes.</string>
@@ -376,11 +376,11 @@
     <string name="excluded_apps_scope_float_ball_short">Float ball</string>
     <string name="excluded_apps_scope_none">Nothing disabled</string>
     <string name="excluded_apps_scope_dialog_hint">Choose what to hide in this app. Keep at least one option enabled.</string>
-    <string name="accessibility_service_name">#Cebian👈</string>
+    <string name="accessibility_service_name">#XGesture👈</string>
     <string name="accessibility_service_desc">Required for edge gestures and sidebar panels, plus Back, Home, Recents, and tap passthrough without Shizuku.</string>
     <string name="side_gestures_desc">Each gesture slot can be configured independently, including app index, volume/brightness sliders, quick launcher, and more.</string>
     <string name="gesture_action_open_index">App index</string>
-    <string name="gesture_hint_style_capsule_desc">Rounded capsule expands with Cebian</string>
+    <string name="gesture_hint_style_capsule_desc">Rounded capsule expands with XGesture</string>
     <string name="settings_section_features">Features</string>
     <string name="settings_section_feedback_appearance">Interaction &amp; appearance</string>
     <string name="gesture_angle_entry_title">Gesture angle</string>
@@ -562,16 +562,16 @@
     <string name="trigger_remove_side_confirm_title">Remove %1$s?</string>
     <string name="trigger_remove_side_confirm_message">This removes the trigger and its gesture config on this side only.</string>
     <string name="gesture_action_floating_pointer">Floating pointer</string>
-    <string name="gesture_action_floating_pointer_permission">Requires Cebian</string>
+    <string name="gesture_action_floating_pointer_permission">Requires XGesture</string>
     <string name="gesture_action_pointer_gesture_recorder">Pointer gesture recorder</string>
     <string name="gesture_action_pointer_gesture_recorder_desc">Hold and slide to replay as Swipe from the pointer</string>
     <string name="gesture_action_pointer_realtime_gesture">Pointer realtime gesture</string>
     <string name="gesture_action_pointer_realtime_gesture_desc">Hold and slide to simulate touch in realtime from the pointer</string>
     <string name="gesture_action_require_min_sdk_36">Minimum Android version required is Android 16 (SDK 36)</string>
-    <string name="gesture_action_pointer_gesture_record_permission">Requires Cebian</string>
+    <string name="gesture_action_pointer_gesture_record_permission">Requires XGesture</string>
     <string name="gesture_action_open_floating_pointer_radial_menu">Open action ring</string>
     <string name="gesture_action_open_floating_pointer_radial_menu_desc">Open the joystick action ring on long-press</string>
-    <string name="gesture_action_open_floating_pointer_radial_menu_permission">Requires Cebian</string>
+    <string name="gesture_action_open_floating_pointer_radial_menu_permission">Requires XGesture</string>
     <string name="float_ball_settings_title">Float ball</string>
     <string name="float_ball_entry_desc">On-screen float trigger, appearance, and gestures</string>
     <string name="pick_settings_page_hint">Pick panel, OCR, search engines, and pick feel</string>
@@ -729,7 +729,7 @@
     <string name="search_engine_import_replace">Replace</string>
     <string name="search_engine_import_failed">Import failed: %1$s</string>
     <string name="search_engine_query_empty">Select or enter text to search first</string>
-    <string name="search_engine_accessibility_required">Enable the Cebian accessibility service to use this feature</string>
+    <string name="search_engine_accessibility_required">Enable the XGesture accessibility service to use this feature</string>
     <string name="search_engine_add_title">Add search engine</string>
     <string name="search_engine_add_subtitle">Configure a custom text search engine</string>
     <string name="search_engine_edit_title">Edit search engine</string>
@@ -938,8 +938,8 @@
     <string name="float_ball_regional_cancel_slop">Screenshot cancel threshold</string>
     <string name="float_ball_text_copied">Text copied to clipboard</string>
     <string name="float_ball_image_copied">Image copied to clipboard</string>
-    <string name="share_image_ocr_target_label">Cebian OCR Pick</string>
-    <string name="share_image_ocr_service_required">Enable the Cebian accessibility service first</string>
+    <string name="share_image_ocr_target_label">XGesture OCR Pick</string>
+    <string name="share_image_ocr_service_required">Enable the XGesture accessibility service first</string>
     <string name="share_image_ocr_model_required">Download and select an OCR model in Pick settings first</string>
     <string name="share_image_ocr_image_load_failed">Could not read the shared image</string>
     <string name="share_image_ocr_background_action">Run in background</string>
@@ -996,7 +996,7 @@
     <string name="diagnostic_report_copied_truncated">Share unavailable; truncated copy saved to clipboard</string>
     <string name="diagnostic_report_export_failed">Failed to export diagnostic report. Please try again.</string>
     <string name="diagnostic_report_share_chooser_title">Share diagnostic log</string>
-    <string name="diagnostic_report_share_subject">Cebian diagnostic log</string>
+    <string name="diagnostic_report_share_subject">XGesture diagnostic log</string>
     <string name="diagnostic_report_truncation_suffix">\n\n…(truncated)…</string>
     <string name="native_engine_packs_title">Runtime engines</string>
     <string name="native_engine_packs_subtitle">Native libraries for OCR, offline translate, and word segmentation</string>
@@ -1246,7 +1246,7 @@
     <string name="floating_pointer_radial_slot_top_left">Top left</string>
     <string name="gesture_action_pointer_swipe">Swipe</string>
     <string name="gesture_action_pointer_swipe_desc">Simulate a swipe at the pointer position</string>
-    <string name="gesture_action_pointer_swipe_permission">Requires Cebian</string>
+    <string name="gesture_action_pointer_swipe_permission">Requires XGesture</string>
     <string name="pointer_swipe_config_title">Operation settings</string>
     <string name="pointer_swipe_config_desc">Swipe from the current pointer position using the chosen direction and distance.</string>
     <string name="pointer_swipe_direction_title">Direction</string>
@@ -1536,7 +1536,7 @@
     <string name="otp_test_result_success">Extracted: %1$s</string>
     <string name="otp_test_result_failed">No code extracted</string>
     <string name="otp_auto_input_entry_title">Auto-input</string>
-    <string name="otp_auto_input_entry_desc">Auto-fill codes via Cebian</string>
+    <string name="otp_auto_input_entry_desc">Auto-fill codes via XGesture</string>
     <string name="otp_auto_input_title">Auto-input</string>
     <string name="otp_auto_input_desc">Automatically fill the code into the focused input field</string>
     <string name="otp_auto_input_enabled_title">Auto-input verification code</string>
@@ -1550,7 +1550,7 @@
     <string name="otp_auto_input_interval_title">Per-character interval</string>
     <string name="otp_auto_input_interval_value">%1$d ms</string>
     <string name="otp_auto_input_service_setup_title">Accessibility auto-fill status</string>
-    <string name="otp_auto_input_service_setup_desc">Auto-fill relies on the Cebian accessibility service; tap to enable it when off</string>
+    <string name="otp_auto_input_service_setup_desc">Auto-fill relies on the XGesture accessibility service; tap to enable it when off</string>
     <string name="otp_rules_builtin_section">Built-in rules</string>
     <string name="otp_rules_more">More</string>
     <string name="otp_rules_official_not_bundled">Not bundled</string>
@@ -1566,21 +1566,21 @@
    <string name="otp_advanced_section">Advanced</string>
    <string name="otp_keywords_fallback_entry_title">Fallback keyword list</string>
    <string name="otp_keywords_fallback_entry_desc">Used when no rule matches; usually no need to change</string>
-    <string name="otp_fill_method_pipeline_inject">Fill order: LSPosed system inject → Cebian SET_TEXT</string>
-    <string name="otp_fill_method_pipeline_a11y_only">Fill method: Cebian SET_TEXT</string>
-    <string name="otp_fill_method_a11y_fallback_hint">Cebian SET_TEXT is the fallback when inject fails or is disabled</string>
+    <string name="otp_fill_method_pipeline_inject">Fill order: LSPosed system inject → XGesture SET_TEXT</string>
+    <string name="otp_fill_method_pipeline_a11y_only">Fill method: XGesture SET_TEXT</string>
+    <string name="otp_fill_method_a11y_fallback_hint">XGesture SET_TEXT is the fallback when inject fails or is disabled</string>
     <string name="otp_runtime_status_section">Runtime status</string>
     <string name="otp_runtime_status_disabled">Auto-fill is off</string>
-    <string name="otp_runtime_status_need_accessibility">Enable the Cebian accessibility service to auto-fill</string>
-    <string name="otp_runtime_status_inject_pipeline">Auto-fill on: LSPosed system inject first, then Cebian node fill as fallback</string>
-    <string name="otp_runtime_status_a11y_only">Auto-fill on: Cebian node fill only</string>
+    <string name="otp_runtime_status_need_accessibility">Enable the XGesture accessibility service to auto-fill</string>
+    <string name="otp_runtime_status_inject_pipeline">Auto-fill on: LSPosed system inject first, then XGesture node fill as fallback</string>
+    <string name="otp_runtime_status_a11y_only">Auto-fill on: XGesture node fill only</string>
     <string name="otp_runtime_status_sms_lsposed">Code source: LSPosed SMS capture enabled (notifications still work)</string>
     <string name="otp_auto_fill_section">Auto-fill</string>
     <string name="otp_lsposed_enhancements_section">LSPosed enhancements</string>
     <string name="otp_lsposed_enhancements_desc">Optional extras. They do not replace the main auto-fill switch. System inject is the preferred fill path when enabled.</string>
     <string name="otp_diagnostics_section">Diagnostics</string>
     <string name="otp_lsposed_inject_title">LSPosed system inject</string>
-    <string name="otp_lsposed_inject_desc_short">Prefer system-level inject; falls back to Cebian node fill. Requires system framework scope</string>
+    <string name="otp_lsposed_inject_desc_short">Prefer system-level inject; falls back to XGesture node fill. Requires system framework scope</string>
     <string name="otp_lsposed_sms_title">LSPosed SMS capture</string>
     <string name="otp_lsposed_sms_desc_short">Read SMS from the phone process; requires com.android.phone scope</string>
     <string name="otp_lsposed_probe_title">Test LSPosed system inject</string>
@@ -1756,7 +1756,7 @@
     <string name="freezer_show_in_launcher_desc">Confirm the system dialog to add a removable home-screen shortcut (not an app icon)</string>
     <string name="freezer_pin_shortcut_unpin_hint">Turned off. Long-press the Frozen apps shortcut on your home screen and choose Remove</string>
     <string name="freezer_pin_shortcut_failed">Could not add shortcut; your launcher may not support pinning</string>
-    <string name="freezer_legacy_icon_cleanup">Duplicate 边栏 icons from the old build should clear after restarting the launcher or phone; if one remains, Uninstall on it does not remove the app</string>
+    <string name="freezer_legacy_icon_cleanup">Duplicate X手势 icons from the old build should clear after restarting the launcher or phone; if one remains, Uninstall on it does not remove the app</string>
     <string name="expand_panel_shortcuts_title">Shortcuts</string>
     <string name="expand_panel_shortcut_add">Add shortcut</string>
     <string name="expand_panel_shortcut_pick">Pick app</string>
@@ -1766,7 +1766,7 @@
     <string name="expand_panel_slot_add_label">Add</string>
     <string name="freezer_shizuku_granted">Shizuku granted</string>
     <string name="freezer_shizuku_denied">Shizuku not granted</string>
-    <string name="xposed_module_description">Cebian: OTP autofill (enable android scope)</string>
+    <string name="xposed_module_description">XGesture: OTP autofill (enable android scope)</string>
     <string name="otp_records_title">Verification code records</string>
     <string name="otp_records_entry_title">Verification code records</string>
     <string name="otp_records_entry_desc">View extracted verification code history</string>
@@ -2173,22 +2173,22 @@
     <string name="gesture_shell_command_config_title">Configure shell command</string>
     <string name="gesture_shell_command_config_hint">The command is saved for this gesture and runs in the background when triggered.</string>
     <string name="gesture_action_quick_tools_overlay">Quick tools (overlay)</string>
-    <string name="gesture_action_quick_tools_overlay_permission">Requires Cebian enabled</string>
+    <string name="gesture_action_quick_tools_overlay_permission">Requires XGesture enabled</string>
     <string name="gesture_action_widget_popup_overlay">Widget popup</string>
-    <string name="gesture_action_widget_popup_overlay_permission">Requires Cebian enabled</string>
+    <string name="gesture_action_widget_popup_overlay_permission">Requires XGesture enabled</string>
     <string name="gesture_action_stash_panel">Open stash</string>
-    <string name="gesture_action_stash_panel_permission">Requires Cebian enabled</string>
+    <string name="gesture_action_stash_panel_permission">Requires XGesture enabled</string>
     <string name="gesture_action_clipboard_panel">Open clipboard</string>
-    <string name="gesture_action_clipboard_panel_permission">Requires Cebian enabled</string>
+    <string name="gesture_action_clipboard_panel_permission">Requires XGesture enabled</string>
     <string name="gesture_action_clipboard_float">Floating clipboard</string>
-    <string name="gesture_action_clipboard_float_permission">Requires Cebian enabled and overlay permission</string>
+    <string name="gesture_action_clipboard_float_permission">Requires XGesture enabled and overlay permission</string>
     <string name="clipboard_float_style_title">Floating List Style</string>
     <string name="clipboard_float_style_single_line">Compact Single-Line</string>
     <string name="clipboard_float_style_card">Multi-line Cards</string>
     <string name="clipboard_float_style_toggle">Toggle List Style</string>
     <string name="gesture_action_clipboard_pick">Clipboard pick</string>
     <string name="gesture_action_clipboard_pick_desc">Read the system clipboard and open the text pick panel</string>
-    <string name="gesture_action_clipboard_pick_permission">Requires Cebian enabled</string>
+    <string name="gesture_action_clipboard_pick_permission">Requires XGesture enabled</string>
     <string name="gesture_action_clipboard_paste">Paste</string>
     <string name="gesture_action_clipboard_paste_desc">Paste the latest clipboard history entry; tap a field when several inputs are shown</string>
     <string name="clipboard_paste_pick_content_desc">Tap the input field to paste into</string>
@@ -2222,7 +2222,7 @@
     <string name="side_gestures_behavior_section">Layout &amp; behavior</string>
     <string name="default_trigger_mode">Default trigger mode</string>
     <string name="default_trigger_mode_desc">Used when a gesture has no mode of its own</string>
-    <string name="trigger_mode_default_slot_desc">Follow Cebian default (%1$s)</string>
+    <string name="trigger_mode_default_slot_desc">Follow XGesture default (%1$s)</string>
     <string name="slot_pick_action">Choose action type</string>
     <string name="slot_pick_trigger_mode">Choose trigger mode</string>
     <string name="trigger_mode_default">Default</string>
@@ -2267,7 +2267,7 @@
     <string name="android_back_color_source_title">Capsule color</string>
     <string name="android_back_color_source_desc">Choose where the system-arrow capsule gets its colors</string>
     <string name="android_back_color_source_app">Follow app theme</string>
-    <string name="android_back_color_source_app_desc">Use Cebian’s current theme (custom and dynamic colors)</string>
+    <string name="android_back_color_source_app_desc">Use XGesture’s current theme (custom and dynamic colors)</string>
     <string name="android_back_color_source_system">Follow system</string>
     <string name="android_back_color_source_system_desc">Use wallpaper colors, closer to the system back indicator</string>
     <string name="animation_style_select_desc">Choose the edge gesture hint animation</string>
@@ -2639,7 +2639,7 @@
     <string name="settings_backup_sensitive_hint">Includes OTP records, notification history, clipboard, share-image OCR history, and shell output history. Stored only in your local backup file.</string>
     <string name="settings_backup_export">Export settings</string>
     <string name="settings_backup_import">Import settings</string>
-    <string name="settings_backup_default_filename">cebian-backup-%1$d.zip</string>
+    <string name="settings_backup_default_filename">XGesture-backup-%1$d.zip</string>
     <string name="settings_backup_entry_title">Settings backup</string>
     <string name="settings_backup_entry_desc">Export or import a ZIP backup file</string>
     <string name="settings_backup_export_success">Settings exported successfully</string>
@@ -2669,7 +2669,7 @@
     <string name="settings_domain_sensitive_notification_filter_prefs">Notification filter preferences</string>
     <string name="settings_domain_sensitive_otp_stats">OTP autofill stats</string>
     <string name="onboarding_next">Next</string>
-    <string name="onboarding_welcome_body">Cebian enhances your phone with edge gestures, shake actions, and notification tools. A few system permissions are required next.</string>
+    <string name="onboarding_welcome_body">XGesture enhances your phone with edge gestures, shake actions, and notification tools. A few system permissions are required next.</string>
     <string name="onboarding_overlay_title">Display over other apps</string>
     <string name="onboarding_grant_overlay">Grant overlay permission</string>
     <string name="onboarding_accessibility_title">Accessibility service</string>
@@ -2679,7 +2679,7 @@
     <string name="onboarding_disclaimer_body">This app and its modules are intended solely for personal device management and productivity enhancements, not for circumventing regulations, access controls, or unauthorized operations.\n\nPlease ensure you understand how these features work, and take responsibility for any rules, modifications, or settings enabled.</string>
     <string name="onboarding_disclaimer_agree">I have read and agree to the disclaimer</string>
     <string name="onboarding_core_permissions_title">Core Permissions</string>
-    <string name="onboarding_core_permissions_body">Cebian requires the following permissions to support edge gesture recognition, floating trigger bars, and reliable background operations. Please grant them in system settings.</string>
+    <string name="onboarding_core_permissions_body">XGesture requires the following permissions to support edge gesture recognition, floating trigger bars, and reliable background operations. Please grant them in system settings.</string>
     <string name="onboarding_permission_overlay_short">For displaying edge triggers and floating panels</string>
     <string name="onboarding_permission_accessibility_short">For detecting edge gestures and triggering system actions</string>
     <string name="onboarding_permission_notification_title">Notification &amp; Service</string>
@@ -2692,7 +2692,7 @@
     <string name="privacy_policy_subtitle">How data is handled and whether it is uploaded</string>
     <string name="privacy_policy_entry_title">Privacy policy</string>
     <string name="privacy_policy_entry_desc">Local data handling and permission purposes</string>
-    <string name="privacy_policy_body">Cebian is designed around on-device processing.
+    <string name="privacy_policy_body">XGesture is designed around on-device processing.
 
 • Notifications and OTP: read, filtered, extracted, and displayed locally only. Nothing is uploaded by default.
 • OTP records and notification history: stored in app-private storage and excluded from system backup by default; optional export in settings backup.
@@ -2716,7 +2716,7 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="otp_autofill_stats_last_time">Time</string>
     <string name="otp_autofill_stats_last_strategy">Strategy</string>
     <string name="otp_autofill_stats_last_reason">Reason</string>
-    <string name="otp_autofill_stats_help_pipeline">Fill order: when LSPosed system inject is enabled, it runs first. If it fails or is disabled, Cebian accessibility looks for an input field and writes the code.</string>
+    <string name="otp_autofill_stats_help_pipeline">Fill order: when LSPosed system inject is enabled, it runs first. If it fails or is disabled, XGesture accessibility looks for an input field and writes the code.</string>
     <string name="otp_autofill_stats_help_strategies">Strategies: system inject = LSPosed hook; focused/best/group nodes = accessibility node fill.</string>
     <string name="otp_autofill_stats_help_failures">Common failures: timeout = no fill result in time; no editable node = no input field found; no strategy = no receiver responded.</string>
     <string name="otp_autofill_strategy_system_inject">LSPosed system inject</string>
@@ -2767,7 +2767,7 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="shell_panel_history_clear_confirm_message">This deletes all saved command output records. This cannot be undone.</string>
     <string name="shell_panel_history_empty">No execution history yet</string>
     <string name="shell_panel_history_exit_code">Exit code %1$d</string>
-    <string name="tile_gesture_switch">Cebian</string>
+    <string name="tile_gesture_switch">XGesture</string>
     <string name="shortcut_toggle_gesture">Toggle gestures</string>
     <string name="shortcut_notification_hub">Notification filter</string>
     <string name="shortcut_shell_panel">Shell panel</string>
@@ -2777,7 +2777,7 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="launcher_shortcut_menu_entry_title">Launcher long-press menu</string>
     <string name="launcher_shortcut_menu_entry_desc">Manage the shortcuts shown when you long-press the app icon</string>
     <string name="launcher_shortcut_menu_hint">Long-press and drag to reorder. Turned-off items are hidden from the long-press menu.</string>
-    <string name="shortcut_panel_open_failed">Could not open panel. Make sure Cebian is enabled.</string>
+    <string name="shortcut_panel_open_failed">Could not open panel. Make sure XGesture is enabled.</string>
     <string name="about_section_title">About</string>
     <string name="about_release_notes_title">Release notes</string>
     <string name="about_check_update_title">Check for updates</string>
@@ -2824,16 +2824,16 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="update_notification_failed_content">Tap to retry</string>
     <string name="update_notification_permission_title">Enable notifications</string>
     <string name="update_notification_permission_rationale">Allow notifications to get alerts when a new version is found or download completes.</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/cebian</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
     <string name="about_star_github_title">GitHub Repository ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/cebian · Star to support development</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · Star to support development</string>
     <string name="about_feedback_issues_title">Issues &amp; Feature Requests</string>
     <string name="about_feedback_issues_desc">Report bugs, propose features, or share presets on GitHub</string>
     <string name="about_help_translate_title">Help translate</string>
     <string name="about_help_translate_desc">Help us translate this app</string>
     <string name="about_weblate_url">https://hosted.weblate.org/engage/cebian/</string>
     <string name="about_telegram_chat_title">Telegram chat</string>
-    <string name="about_telegram_chat_desc">Cebian · 边栏</string>
+    <string name="about_telegram_chat_desc">XGesture · X手势</string>
     <string name="about_telegram_chat_url">https://t.me/+NtcG5HPiKXVmNTU1</string>
     <string name="about_telegram_releases_title">Telegram Releases</string>
     <string name="about_telegram_releases_desc">@cebian_channel</string>
@@ -3116,7 +3116,7 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="clipboard_float_appearance_section">Appearance &amp; interaction</string>
     <string name="clipboard_float_enabled_title">Show window when keyboard opens</string>
     <string name="clipboard_float_enabled_desc">Shows a clipboard window above the input area when the keyboard opens. Drag, resize, and tap an entry to paste.</string>
-    <string name="clipboard_float_a11y_hint">Cebian accessibility must be enabled to detect the keyboard and paste into fields.</string>
+    <string name="clipboard_float_a11y_hint">XGesture accessibility must be enabled to detect the keyboard and paste into fields.</string>
     <string name="clipboard_float_show_chip_title">Show entry chip first</string>
     <string name="clipboard_float_show_chip_desc">When on, show a small chip first; tap to expand. When off, expand immediately when the keyboard opens.</string>
     <string name="clipboard_float_pin_title">Remember panel and chip position</string>

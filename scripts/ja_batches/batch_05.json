@@ -221,12 +221,12 @@
   },
   {
     "name": "share_image_ocr_target_label",
-    "text": "Cebian OCR Pick",
+    "text": "XGesture OCR Pick",
     "source": "en"
   },
   {
     "name": "share_image_ocr_service_required",
-    "text": "Enable the Cebian accessibility service first",
+    "text": "Enable the XGesture accessibility service first",
     "source": "en"
   },
   {
@@ -576,7 +576,7 @@
   },
   {
     "name": "diagnostic_report_share_subject",
-    "text": "Cebian diagnostic log",
+    "text": "XGesture diagnostic log",
     "source": "en"
   },
   {

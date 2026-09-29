@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">الشريط الجانبي</string>
+    <string name="app_name">XGesture</string>
     <string name="main_nav_home">الرئيسية</string>
     <string name="main_nav_shake">الهز</string>
     <string name="main_nav_notification">الرسائل</string>
@@ -270,7 +270,7 @@
     <string name="message_theme_weipop_skin_22">قوس قزح في المطر والشمس</string>
     <string name="message_theme_weipop_skin_23">صبي سمكة ذهبية</string>
     <string name="permissions_pending_title">في انتظار إكمال التفويض</string>
-    <string name="service_notification_title">الشريط الجانبي قيد التشغيل</string>
+    <string name="service_notification_title">XGesture قيد التشغيل</string>
     <string name="service_notification_text">خدمة إيماءات الحافة قيد التشغيل، انقر لفتح الإعدادات</string>
     <string name="permission_overlay_title">إذن النوافذ العائمة</string>
     <string name="permission_notification_title">إذن الإشعارات</string>
@@ -320,7 +320,7 @@
     <string name="app_keep_alive_entry_summary_all">القائمة البيضاء للبطارية، إخفاء في المهام المتعددة</string>
     <string name="secure_settings_title">حماية وظيفة إمكانية الوصول من الإغلاق</string>
     <string name="secure_settings_desc">في حالة إغلاق النظام للشريط الجانبي، سيتم محاولة استعادته تلقائيًا (يتطلب إذن WRITE_SECURE_SETTINGS)</string>
-    <string name="secure_settings_enabled_summary">حماية الشريط الجانبي من الإغلاق مفعلة</string>
+    <string name="secure_settings_enabled_summary">حماية XGesture من الإغلاق مفعلة</string>
     <string name="secure_settings_grant_success">تم التفويض عبر Shizuku</string>
     <string name="secure_settings_grant_failed">فشل التفويض، يرجى تنفيذه يدويًا عبر ADB</string>
     <string name="secure_settings_adb_dialog_title">شرح تفويض ADB</string>
@@ -629,7 +629,7 @@
     <string name="hidden_apps_entry_title">إخفاء التطبيقات</string>
     <string name="hidden_apps_entry_desc">إخفاء تطبيقات محددة من قائمة فهرس التطبيقات</string>
     <string name="hidden_apps_title">إخفاء التطبيقات</string>
-    <string name="hidden_apps_desc">لن تظهر التطبيقات المخفية في لوحة الشريط الجانبي، ولكن لا يزال يمكن فتحها عبر سطح المكتب للنظام، إلخ.</string>
+    <string name="hidden_apps_desc">لن تظهر التطبيقات المخفية في لوحة XGesture، ولكن لا يزال يمكن فتحها عبر سطح المكتب للنظام، إلخ.</string>
     <string name="hidden_apps_section_hidden">مخفي</string>
     <string name="hidden_apps_section_in_index">عرض القائمة</string>
     <string name="hidden_apps_section_add">إضافة إخفاء</string>
@@ -691,11 +691,11 @@
     <string name="system_back_gesture_width_right">العرض الأيمن</string>
     <string name="system_back_gesture_width_reset">استعادة الافتراضي</string>
     <string name="system_back_gesture_width_reset_desc">استعادة العرض الأيسر/الأيمن إلى 100%</string>
-    <string name="accessibility_service_name">#الشريط_الجانبي👈</string>
-    <string name="accessibility_service_desc">يجب تفعيله لاستخدام إيماءات الحافة ولوحة الشريط الجانبي، وتنفيذ إيماءات النظام مثل الرجوع، الشاشة الرئيسية، والمهام المتعددة؛ يمكن استخدامه أيضاً لتجاوز النقر عند الحافة دون تفويض Shizuku.</string>
-    <string name="permission_accessibility_title">الشريط الجانبي</string>
-    <string name="permission_accessibility_desc">يجب تفعيل الشريط الجانبي لاستخدام إيماءات الحافة ولوحة الشريط الجانبي؛ كما يُستخدم لتنفيذ إيماءات النظام مثل الرجوع، الشاشة الرئيسية، والمهام المتعددة؛ يمكن استخدامه أيضًا لتجاوز النقر عند الحافة دون تفويض Shizuku.</string>
-    <string name="permission_accessibility_grant">تفعيل الشريط الجانبي</string>
+    <string name="accessibility_service_name">#XGesture👈</string>
+    <string name="accessibility_service_desc">يجب تفعيله لاستخدام إيماءات الحافة ولوحة XGesture، وتنفيذ إيماءات النظام مثل الرجوع، الشاشة الرئيسية، والمهام المتعددة؛ يمكن استخدامه أيضاً لتجاوز النقر عند الحافة دون تفويض Shizuku.</string>
+    <string name="permission_accessibility_title">XGesture</string>
+    <string name="permission_accessibility_desc">يجب تفعيل XGesture لاستخدام إيماءات الحافة ولوحة XGesture؛ كما يُستخدم لتنفيذ إيماءات النظام مثل الرجوع، الشاشة الرئيسية، والمهام المتعددة؛ يمكن استخدامه أيضًا لتجاوز النقر عند الحافة دون تفويض Shizuku.</string>
+    <string name="permission_accessibility_grant">تفعيل XGesture</string>
     <string name="side_gestures_entry_left">مقابض اللمس اليسرى</string>
     <string name="side_gestures_entry_right">مقابض اللمس اليمنى</string>
     <string name="side_gestures_entry_desc">تهيئة إيماءات السحب والنقر</string>
@@ -819,7 +819,7 @@
     <string name="holographic_settings_haptic_medium">متوسط</string>
     <string name="holographic_settings_haptic_strong">قوي</string>
     <string name="holographic_hidden_apps_entry_desc">إخفاء تطبيقات محددة من الكرة المجسمة</string>
-    <string name="holographic_hidden_apps_desc">لن تظهر التطبيقات المخفية في الكرة المجسمة، لا تؤثر على قوائم أخرى مثل فهرس الشريط الجانبي.</string>
+    <string name="holographic_hidden_apps_desc">لن تظهر التطبيقات المخفية في الكرة المجسمة، لا تؤثر على قوائم أخرى مثل فهرس XGesture.</string>
     <string name="gesture_action_task_switcher">مبدل المهام</string>
     <string name="gesture_action_back">مفتاح الرجوع</string>
     <string name="gesture_action_home">الشاشة الرئيسية</string>
@@ -874,7 +874,7 @@
     <string name="gesture_action_open_link_desc">فتح الروابط الخارجية المحفوظة، Deeplink، أو Intent URI</string>
     <string name="gesture_open_link_url_field">الرابط</string>
     <string name="gesture_open_link_label_field">الاسم المعروض (اختياري)</string>
-    <string name="gesture_open_link_config_hint">يدعم http(s)://، intent://، tel:، mailto:، و cebian:// وغيرها من URI القابلة للفتح</string>
+    <string name="gesture_open_link_config_hint">يدعم http(s)://، intent://، tel:، mailto:، و xgesture:// وغيرها من URI القابلة للفتح</string>
     <string name="gesture_action_volume_panel">لوحة موسعة</string>
     <string name="gesture_action_volume_panel_desc">عرض لوحة لضبط السطوع، صوت المنبه/الإشعارات/الرنين/الوسائط</string>
     <string name="volume_panel_brightness">السطوع</string>
@@ -1030,7 +1030,7 @@
     <string name="freezer_show_in_launcher_desc">بعد تأكيد مربع حوار النظام، سيتم إضافة اختصار سطح مكتب قابل للإزالة (ليس أيقونة تطبيق)</string>
     <string name="freezer_pin_shortcut_failed">تعذر إضافة الاختصار، قد لا يدعم سطح المكتب الحالي ذلك</string>
     <string name="freezer_pin_shortcut_unpin_hint">تم الإغلاق. يرجى الضغط مطولاً على اختصار «التطبيقات المجمدة» على سطح المكتب واختيار «إزالة»</string>
-    <string name="freezer_legacy_icon_cleanup">إذا كانت لا تزال هناك أيقونات «الشريط الجانبي» مكررة: يجب أن تختفي تلقائياً بعد إعادة تشغيل سطح المكتب أو الهاتف؛ إذا كانت لا تزال موجودة، اضغط مطولاً واختر «إلغاء التثبيت» لن يؤدي إلى إلغاء تثبيت التطبيق نفسه</string>
+    <string name="freezer_legacy_icon_cleanup">إذا كانت لا تزال هناك أيقونات «XGesture» مكررة: يجب أن تختفي تلقائياً بعد إعادة تشغيل سطح المكتب أو الهاتف؛ إذا كانت لا تزال موجودة، اضغط مطولاً واختر «إلغاء التثبيت» لن يؤدي إلى إلغاء تثبيت التطبيق نفسه</string>
     <string name="expand_panel_shortcuts_title">تطبيقات الاختصارات</string>
     <string name="expand_panel_shortcut_add">إضافة اختصار</string>
     <string name="expand_panel_shortcut_pick">اختيار تطبيق</string>
@@ -1065,37 +1065,37 @@
     <string name="gesture_shell_command_config_title">تكوين أمر Shell</string>
     <string name="gesture_shell_command_config_hint">سيتم ربط الأمر بالإيماءة الحالية، وسيتم تنفيذه في الخلفية عند التشغيل.</string>
     <string name="gesture_action_quick_tools_overlay">الأدوات السريعة (نافذة عائمة)</string>
-    <string name="gesture_action_quick_tools_overlay_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_quick_tools_overlay_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_widget_popup_overlay">نافذة منبثقة للأدوات المصغرة</string>
-    <string name="gesture_action_widget_popup_overlay_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_widget_popup_overlay_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_stash_panel">فتح التخزين المؤقت</string>
-    <string name="gesture_action_stash_panel_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_stash_panel_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_clipboard_panel">فتح الحافظة</string>
-    <string name="gesture_action_clipboard_panel_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_clipboard_panel_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_clipboard_float">نافذة الحافظة الصغيرة</string>
-    <string name="gesture_action_clipboard_float_permission">يتطلب تفعيل الشريط الجانبي وإذن النافذة العائمة</string>
+    <string name="gesture_action_clipboard_float_permission">يتطلب تفعيل XGesture وإذن النافذة العائمة</string>
     <string name="clipboard_float_style_title">نمط قائمة النافذة العائمة</string>
     <string name="clipboard_float_style_single_line">سطر واحد بسيط (كثافة عالية)</string>
     <string name="clipboard_float_style_card">بطاقات متعددة الأسطر</string>
     <string name="clipboard_float_style_toggle">تبديل نمط القائمة</string>
     <string name="gesture_action_clipboard_pick">التقاط النص من الحافظة</string>
     <string name="gesture_action_clipboard_pick_desc">قراءة الحافظة النظامية وفتح لوحة تقطيع الكلمات والتقاط النص</string>
-    <string name="gesture_action_clipboard_pick_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_clipboard_pick_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_clipboard_paste">لصق</string>
     <string name="gesture_action_clipboard_paste_desc">لصق أحدث عنصر في سجل الحافظة في مربع الإدخال؛ تحديد الهدف عند وجود عدة مربعات إدخال</string>
     <string name="clipboard_paste_pick_content_desc">انقر لتحديد مربع الإدخال المراد لصقه</string>
     <string name="gesture_action_clipboard_paste_permission">يتطلب تفعيل خدمة إمكانية الوصول</string>
     <string name="gesture_action_floating_pointer">المؤشر العائم</string>
-    <string name="gesture_action_floating_pointer_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_floating_pointer_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_pointer_gesture_recorder">تسجيل إيماءة المؤشر</string>
     <string name="gesture_action_pointer_gesture_recorder_desc">اضغط واسحب، ليتم تشغيلها كسحب بدءاً من المؤشر</string>
     <string name="gesture_action_pointer_realtime_gesture">إيماءة المؤشر في الوقت الفعلي</string>
     <string name="gesture_action_pointer_realtime_gesture_desc">اضغط واسحب، لمحاكاة اللمس في الوقت الفعلي بدءاً من المؤشر</string>
     <string name="gesture_action_require_min_sdk_36">يتطلب Android 16 (SDK 36) كحد أدنى</string>
-    <string name="gesture_action_pointer_gesture_record_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_pointer_gesture_record_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_open_floating_pointer_radial_menu">فتح حلقة الوظائف</string>
     <string name="gesture_action_open_floating_pointer_radial_menu_desc">فتح حلقة وظائف عصا التحكم عند الضغط المطول</string>
-    <string name="gesture_action_open_floating_pointer_radial_menu_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_open_floating_pointer_radial_menu_permission">يتطلب تفعيل XGesture</string>
     <string name="gesture_action_toggle_dnd">تبديل وضع عدم الإزعاج</string>
     <string name="gesture_action_toggle_dnd_failed">تعذر تبديل وضع عدم الإزعاج</string>
     <string name="gesture_action_timed_dnd">عدم إزعاج مؤقت</string>
@@ -1168,7 +1168,7 @@
     <string name="gesture_hint_style_wave">موجة</string>
     <string name="gesture_hint_style_wave_desc">ستتمدد موجة الحافة مع الإيماءة</string>
     <string name="gesture_hint_style_capsule">كبسولة</string>
-    <string name="gesture_hint_style_capsule_desc">كبسولة بزوايا مستديرة تتبع توسع الشريط الجانبي</string>
+    <string name="gesture_hint_style_capsule_desc">كبسولة بزوايا مستديرة تتبع توسع XGesture</string>
     <string name="gesture_hint_style_bubble">فقاعة دائرية</string>
     <string name="gesture_hint_style_bubble_desc">ستنبثق الفقاعة الدائرية من الحافة للداخل</string>
     <string name="gesture_hint_style_android">سهم النظام</string>
@@ -1176,7 +1176,7 @@
     <string name="android_back_color_source_title">لون الكبسولة</string>
     <string name="android_back_color_source_desc">اختر مصدر ألوان كبسولة سهم النظام</string>
     <string name="android_back_color_source_app">اتباع مظهر التطبيق</string>
-    <string name="android_back_color_source_app_desc">استخدم مظهر Cebian الحالي (الألوان المخصصة والديناميكية)</string>
+    <string name="android_back_color_source_app_desc">استخدم مظهر XGesture الحالي (الألوان المخصصة والديناميكية)</string>
     <string name="android_back_color_source_system">اتباع النظام</string>
     <string name="android_back_color_source_system_desc">استخدم ألوان الخلفية لتقترب من شريط الرجوع في النظام</string>
     <string name="animation_style_select_desc">اختر نمط الرسوم المتحركة لتلميح إيماءة الحافة</string>
@@ -1441,8 +1441,8 @@
     <string name="float_ball_regional_cancel_slop">تسامح إلغاء نقطة بداية لقطة الشاشة</string>
     <string name="float_ball_text_copied">تم نسخ النص إلى الحافظة</string>
     <string name="float_ball_image_copied">تم نسخ الصورة إلى الحافظة</string>
-    <string name="share_image_ocr_target_label">التقاط نص OCR عبر الشريط الجانبي</string>
-    <string name="share_image_ocr_service_required">يرجى تفعيل خدمة إمكانية الوصول في الشريط الجانبي أولاً</string>
+    <string name="share_image_ocr_target_label">التقاط نص OCR عبر XGesture</string>
+    <string name="share_image_ocr_service_required">يرجى تفعيل خدمة إمكانية الوصول في XGesture أولاً</string>
     <string name="share_image_ocr_model_required">يرجى تنزيل واختيار نموذج OCR أولاً في إعدادات التقاط النص</string>
     <string name="share_image_ocr_image_load_failed">لا يمكن قراءة الصورة المشتركة</string>
     <string name="share_image_ocr_background_action">المعالجة في الخلفية</string>
@@ -1499,7 +1499,7 @@
     <string name="diagnostic_report_copied_truncated">المشاركة غير متاحة، تم نسخ نسخة مقطوعة إلى الحافظة</string>
     <string name="diagnostic_report_export_failed">فشل تصدير تقرير التشخيص، يرجى المحاولة لاحقاً</string>
     <string name="diagnostic_report_share_chooser_title">مشاركة سجل التشخيص</string>
-    <string name="diagnostic_report_share_subject">سجل تشخيص الشريط الجانبي</string>
+    <string name="diagnostic_report_share_subject">سجل تشخيص XGesture</string>
     <string name="diagnostic_report_truncation_suffix">
 …(تم اقتطاع المحتوى لطوله)…</string>
     <string name="native_engine_packs_title">محركات وقت التشغيل</string>
@@ -1791,7 +1791,7 @@
     <string name="search_engine_import_replace">استبدال</string>
     <string name="search_engine_import_failed">فشل الاستيراد: %1$s</string>
     <string name="search_engine_query_empty">يرجى اختيار أو إدخال محتوى البحث أولاً</string>
-    <string name="search_engine_accessibility_required">يتطلب هذا الميزة تفعيل خدمة إمكانية الوصول في الشريط الجانبي</string>
+    <string name="search_engine_accessibility_required">يتطلب هذا الميزة تفعيل خدمة إمكانية الوصول في XGesture</string>
     <string name="search_engine_add_title">إضافة محرك بحث</string>
     <string name="search_engine_add_subtitle">تكوين محرك بحث نصي مخصص</string>
     <string name="search_engine_edit_title">تحرير محرك البحث</string>
@@ -2051,7 +2051,7 @@
     <string name="floating_pointer_radial_slot_top_left">أعلى اليسار</string>
     <string name="gesture_action_pointer_swipe">سحب</string>
     <string name="gesture_action_pointer_swipe_desc">محاكاة سحب واحد في موضع المؤشر</string>
-    <string name="gesture_action_pointer_swipe_permission">يتطلب تفعيل الشريط الجانبي</string>
+    <string name="gesture_action_pointer_swipe_permission">يتطلب تفعيل XGesture</string>
     <string name="pointer_swipe_config_title">إعداد الإجراء</string>
     <string name="pointer_swipe_config_desc">من موضع المؤشر الحالي، قم بمحاكاة إيماءة السحب باتجاه المسافة المحددة.</string>
     <string name="pointer_swipe_direction_title">تغيير الاتجاه</string>
@@ -2225,8 +2225,8 @@
     <string name="external_invocation_entry_title">الاستدعاء الخارجي</string>
     <string name="external_invocation_entry_desc">Deeplink و Intent Action، للاستخدام مع Tasker وغيرها</string>
     <string name="external_invocation_title">الاستدعاء الخارجي</string>
-    <string name="external_invocation_hint">استدعاء ميزات الشريط الجانبي من تطبيقات أخرى عبر روابط cebian:// أو Intent Action. تتطلب لوحات البحث، التخزين المؤقت، وغيرها تفعيل الشريط الجانبي وخدمة إمكانية الوصول.</string>
-    <string name="external_invocation_query_hint">المعامل الاختياري q لملء كلمة البحث مسبقاً، مثال: cebian://open/search-panel?q=weather.</string>
+    <string name="external_invocation_hint">استدعاء ميزات XGesture من تطبيقات أخرى عبر روابط xgesture:// أو Intent Action. تتطلب لوحات البحث، التخزين المؤقت، وغيرها تفعيل XGesture وخدمة إمكانية الوصول.</string>
+    <string name="external_invocation_query_hint">المعامل الاختياري q لملء كلمة البحث مسبقاً، مثال: xgesture://open/search-panel?q=weather.</string>
     <string name="external_invocation_deeplink_section">Deeplink (موصى به)</string>
     <string name="external_invocation_action_section">إجراء Intent (متقدم)</string>
     <string name="external_invocation_action_hint">انقر على عنصر لنسخ أمر adb. تتطلب بعض الإجراءات تحديد المكون؛ لوحة Shell تدعم فقط الاختصارات داخل التطبيق.</string>
@@ -2435,7 +2435,7 @@
     <string name="otp_test_result_success">تم الاستخراج بنجاح: %1$s</string>
     <string name="otp_test_result_failed">لم يتم استخراج رمز التحقق</string>
     <string name="otp_auto_input_entry_title">الإدخال التلقائي</string>
-    <string name="otp_auto_input_entry_desc">إدخال رموز التحقق تلقائيًا عبر الشريط الجانبي</string>
+    <string name="otp_auto_input_entry_desc">إدخال رموز التحقق تلقائيًا عبر XGesture</string>
     <string name="otp_auto_input_title">الإدخال التلقائي</string>
     <string name="otp_auto_input_desc">بعد استلام رمز التحقق، سيتم ملؤه تلقائيًا في مربع الإدخال الحالي</string>
     <string name="otp_auto_input_enabled_title">إدخال رمز التحقق تلقائيًا</string>
@@ -2449,7 +2449,7 @@
     <string name="otp_auto_input_interval_title">الفاصل الزمني بين الأحرف</string>
     <string name="otp_auto_input_interval_value">%1$d مللي ثانية</string>
     <string name="otp_auto_input_service_setup_title">حالة الملء التلقائي لإمكانية الوصول</string>
-    <string name="otp_auto_input_service_setup_desc">يعتمد الملء التلقائي على خدمة إمكانية الوصول في Cebian؛ اضغط للتفعيل عند إيقافها</string>
+    <string name="otp_auto_input_service_setup_desc">يعتمد الملء التلقائي على خدمة إمكانية الوصول في XGesture؛ اضغط للتفعيل عند إيقافها</string>
     <string name="otp_rules_builtin_section">قواعد مدمجة</string>
     <string name="otp_rules_more">المزيد</string>
     <string name="otp_rules_official_not_bundled">غير مضمّنة</string>
@@ -2465,21 +2465,21 @@
     <string name="otp_advanced_section">متقدم</string>
     <string name="otp_keywords_fallback_entry_title">قائمة الكلمات الاحتياطية</string>
     <string name="otp_keywords_fallback_entry_desc">تُستخدم عند عدم تطابق أي قاعدة؛ لا حاجة لتغييرها عادة</string>
-    <string name="otp_fill_method_pipeline_inject">ترتيب الملء: حقن النظام عبر LSPosed ← SET_TEXT عبر الشريط الجانبي</string>
-    <string name="otp_fill_method_pipeline_a11y_only">طريقة الملء: SET_TEXT عبر الشريط الجانبي</string>
-    <string name="otp_fill_method_a11y_fallback_hint">تُعد خدمة SET_TEXT الخاصة بالشريط الجانبي خيارًا احتياطيًا، ويتم تفعيلها تلقائيًا في حالة فشل الحقن أو تعطيله</string>
+    <string name="otp_fill_method_pipeline_inject">ترتيب الملء: حقن النظام عبر LSPosed ← SET_TEXT عبر XGesture</string>
+    <string name="otp_fill_method_pipeline_a11y_only">طريقة الملء: SET_TEXT عبر XGesture</string>
+    <string name="otp_fill_method_a11y_fallback_hint">تُعد خدمة SET_TEXT الخاصة بXGesture خيارًا احتياطيًا، ويتم تفعيلها تلقائيًا في حالة فشل الحقن أو تعطيله</string>
     <string name="otp_runtime_status_section">حالة التشغيل</string>
     <string name="otp_runtime_status_disabled">الإدخال التلقائي غير مفعل</string>
-    <string name="otp_runtime_status_need_accessibility">يجب تفعيل خدمة إمكانية الوصول في الشريط الجانبي لتمكين الإدخال التلقائي</string>
-    <string name="otp_runtime_status_inject_pipeline">الإدخال التلقائي مفعل: يُعطى الأولوية لحقن نظام LSPosed، ويرجع إلى ملء عقد الشريط الجانبي عند الفشل</string>
-    <string name="otp_runtime_status_a11y_only">الإدخال التلقائي مفعل: يستخدم فقط ملء عقد الشريط الجانبي</string>
+    <string name="otp_runtime_status_need_accessibility">يجب تفعيل خدمة إمكانية الوصول في XGesture لتمكين الإدخال التلقائي</string>
+    <string name="otp_runtime_status_inject_pipeline">الإدخال التلقائي مفعل: يُعطى الأولوية لحقن نظام LSPosed، ويرجع إلى ملء عقد XGesture عند الفشل</string>
+    <string name="otp_runtime_status_a11y_only">الإدخال التلقائي مفعل: يستخدم فقط ملء عقد XGesture</string>
     <string name="otp_runtime_status_sms_lsposed">مصدر رموز التحقق: تم تفعيل اعتراض الرسائل القصيرة عبر LSPosed (لا يزال بالإمكان الاستخراج من الإشعارات)</string>
     <string name="otp_auto_fill_section">التعبئة التلقائية</string>
     <string name="otp_lsposed_enhancements_section">تحسينات LSPosed</string>
     <string name="otp_lsposed_enhancements_desc">ما يلي هي تحسينات اختيارية لا تؤثر على مفتاح «الإدخال التلقائي» العام؛ ويتم استخدام حقن النظام كمسار أولوي عند تفعيله.</string>
     <string name="otp_diagnostics_section">التشخيص</string>
     <string name="otp_lsposed_inject_title">حقن النظام عبر LSPosed</string>
-    <string name="otp_lsposed_inject_desc_short">يتم إعطاء الأولوية لحقن النظام؛ وفي حالة الفشل، يتم الرجوع تلقائيًا إلى ملء العقد عبر الشريط الجانبي. يتطلب تفعيل نطاقات إطار العمل النظامي.</string>
+    <string name="otp_lsposed_inject_desc_short">يتم إعطاء الأولوية لحقن النظام؛ وفي حالة الفشل، يتم الرجوع تلقائيًا إلى ملء العقد عبر XGesture. يتطلب تفعيل نطاقات إطار العمل النظامي.</string>
     <string name="otp_lsposed_sms_title">اعتراض الرسائل القصيرة عبر LSPosed</string>
     <string name="otp_lsposed_sms_desc_short">اعتراض الرسائل القصيرة من عملية الهاتف، يتطلب تفعيل خدمة الهاتف؛ يُوصى لأجهزة Meizu بتفعيل خدمة الهاتف وتخزين الرسائل معًا</string>
     <string name="otp_lsposed_probe_title">كشف حقن نظام LSPosed</string>
@@ -2490,7 +2490,7 @@
     <string name="otp_lsposed_probe_timeout">انتهت المهلة: لم يقم LSPosed بتسجيل مستقبل الحقن في system_server</string>
     <string name="otp_lsposed_probe_failed">فشل كشف حقن النظام: %1$s</string>
     <string name="otp_lsposed_probe_response">تم الاستلام: %1$s / %2$s</string>
-    <string name="xposed_module_description">Cebian: تعبئة رموز التحقق التلقائية (يتطلب تفعيل نطاق android)</string>
+    <string name="xposed_module_description">XGesture: تعبئة رموز التحقق التلقائية (يتطلب تفعيل نطاق android)</string>
     <string name="otp_records_title">سجلات رموز التحقق</string>
     <string name="otp_records_entry_title">سجلات رموز التحقق</string>
     <string name="otp_records_entry_desc">عرض سجل رموز التحقق المستخرجة سابقًا</string>
@@ -2586,7 +2586,7 @@
     <string name="settings_backup_sensitive_hint">تتضمن رموز التحقق، سجلات الإشعارات، الحافظة، سجلات OCR للصور، وسجلات مخرجات Shell؛ تُحفظ فقط في ملف النسخ الاحتياطي المحلي.</string>
     <string name="settings_backup_export">تصدير الإعدادات</string>
     <string name="settings_backup_import">استيراد الإعدادات</string>
-    <string name="settings_backup_default_filename">cebian-backup-%1$d.zip</string>
+    <string name="settings_backup_default_filename">XGesture-backup-%1$d.zip</string>
     <string name="settings_backup_entry_title">نسخ الإعدادات احتياطيًا</string>
     <string name="settings_backup_entry_desc">تصدير أو استيراد ملف نسخ احتياطي بصيغة ZIP</string>
     <string name="settings_backup_export_success">تم تصدير الإعدادات بنجاح</string>
@@ -2617,7 +2617,7 @@
     <string name="settings_domain_sensitive_notification_filter_prefs">تفضيلات تصفية الإشعارات</string>
     <string name="settings_domain_sensitive_otp_stats">إحصائيات تعبئة رموز التحقق تلقائيًا</string>
     <string name="onboarding_next">التالي</string>
-    <string name="onboarding_welcome_body">يساعدك الشريط الجانبي على استخدام هاتفك بكفاءة أعلى عبر إيماءات الحافة، وهز الجهاز، وتعزيز الإشعارات. سنحتاج الآن إلى منحك بعض أذونات النظام.</string>
+    <string name="onboarding_welcome_body">يساعدك XGesture على استخدام هاتفك بكفاءة أعلى عبر إيماءات الحافة، وهز الجهاز، وتعزيز الإشعارات. سنحتاج الآن إلى منحك بعض أذونات النظام.</string>
     <string name="onboarding_overlay_title">إذن النوافذ العائمة</string>
     <string name="onboarding_grant_overlay">منح إذن النوافذ العائمة</string>
     <string name="onboarding_accessibility_title">خدمة إمكانية الوصول</string>
@@ -2628,13 +2628,13 @@
 يرجى استخدامه بعد فهم آلية عمله، وأنت المسؤول الوحيد عن النتائج المترتبة على تفعيله أو تعديله أو إعداده.</string>
     <string name="onboarding_disclaimer_agree">لقد قرأت ووافقت على البيان أعلاه</string>
     <string name="onboarding_core_permissions_title">الأذونات الأساسية</string>
-    <string name="onboarding_core_permissions_body">يتطلب تطبيق الشريط الجانبي الأذونات التالية لتمكين التعرف على إيماءات الحافة، وأشرطة التشغيل العائمة، وخدمة الخلفية المستمرة. يرجى منح هذه الأذونات من إعدادات النظام.</string>
+    <string name="onboarding_core_permissions_body">يتطلب تطبيق XGesture الأذونات التالية لتمكين التعرف على إيماءات الحافة، وأشرطة التشغيل العائمة، وخدمة الخلفية المستمرة. يرجى منح هذه الأذونات من إعدادات النظام.</string>
     <string name="onboarding_permission_overlay_short">لعرض أشرطة التشغيل العائمة ولوحات التحكم</string>
     <string name="onboarding_permission_accessibility_short">للتعرف على إيماءات الحافة وتنفيذ إجراءات سريعة عالميًا</string>
     <string name="onboarding_permission_notification_title">الإشعارات وخدمة الخلفية</string>
     <string name="onboarding_permission_notification_short">للحفاظ على تشغيل الخدمة في الخلفية واستلام التنبيهات</string>
     <string name="onboarding_permission_app_list_title">قراءة قائمة التطبيقات</string>
-    <string name="onboarding_permission_app_list_short">لعرض وبحث التطبيقات في الشريط الجانبي ولوحة التشغيل السريع</string>
+    <string name="onboarding_permission_app_list_short">لعرض وبحث التطبيقات في XGesture ولوحة التشغيل السريع</string>
     <string name="onboarding_permission_status_ready">جاهز</string>
     <string name="onboarding_permission_status_grant">الذهاب للتفويض</string>
     <string name="shell_panel_restart_success">تمت إعادة تشغيل خدمة Shell (build=%1$d)</string>
@@ -2646,7 +2646,7 @@
     <string name="privacy_policy_subtitle">كيف تتم معالجة البيانات، وهل يتم رفعها</string>
     <string name="privacy_policy_entry_title">سياسة الخصوصية</string>
     <string name="privacy_policy_entry_desc">شرح معالجة البيانات المحلية وأغراض الأذونات</string>
-    <string name="privacy_policy_body">يُعتمد في تطبيق الشريط الجانبي (Cebian) على المعالجة المحلية كمبدأ أساسي. • الإشعارات ورموز التحقق: تُقرأ، تُرشّح، تُستخرج، وتُعرض محليًا على الجهاز فقط؛ ولا تُرسل افتراضيًا إلى السحابة. • سجلات OTP وسجلات الإشعارات: تُخزن في دليل خاص بالتطبيق، ولا تُضمّن افتراضيًا في النسخ الاحتياطية للنظام؛ ويمكن تصديرها اختياريًا من إعدادات النسخ الاحتياطي. • LSPosed / Shizuku: قدرات تحسين اختيارية، وتقرر أنت ما إذا كنت ستُفعّلها أم لا. • لن نجمع أي معلومات تُحدد هويتك الشخصية، ولن نُرسل هذه البيانات إلى خوادم المطور في الخلفية. خدمة الخلفية (Special Use): تُستخدم OverlayService للحفاظ على إيماءات الحافة والاستماع إلى هز الجهاز، مع subtype overlay_sidebar، ولا تُستخدم للإعلانات أو مهام خلفية غير مرتبطة. لأي استفسار، يرجى التواصل عبر GitHub Issues للمشروع.</string>
+    <string name="privacy_policy_body">يُعتمد في تطبيق XGesture (XGesture) على المعالجة المحلية كمبدأ أساسي. • الإشعارات ورموز التحقق: تُقرأ، تُرشّح، تُستخرج، وتُعرض محليًا على الجهاز فقط؛ ولا تُرسل افتراضيًا إلى السحابة. • سجلات OTP وسجلات الإشعارات: تُخزن في دليل خاص بالتطبيق، ولا تُضمّن افتراضيًا في النسخ الاحتياطية للنظام؛ ويمكن تصديرها اختياريًا من إعدادات النسخ الاحتياطي. • LSPosed / Shizuku: قدرات تحسين اختيارية، وتقرر أنت ما إذا كنت ستُفعّلها أم لا. • لن نجمع أي معلومات تُحدد هويتك الشخصية، ولن نُرسل هذه البيانات إلى خوادم المطور في الخلفية. خدمة الخلفية (Special Use): تُستخدم OverlayService للحفاظ على إيماءات الحافة والاستماع إلى هز الجهاز، مع subtype overlay_sidebar، ولا تُستخدم للإعلانات أو مهام خلفية غير مرتبطة. لأي استفسار، يرجى التواصل عبر GitHub Issues للمشروع.</string>
     <string name="otp_autofill_stats_title">إحصائيات التعبئة</string>
     <string name="otp_autofill_stats_screen_desc">عرض عدد محاولات التعبئة التلقائية، ومعدل النجاح، وسبب آخر فشل</string>
     <string name="otp_autofill_stats_entry_empty">لا توجد سجلات</string>
@@ -2661,7 +2661,7 @@
     <string name="otp_autofill_stats_last_time">الوقت</string>
     <string name="otp_autofill_stats_last_strategy">الاستراتيجية</string>
     <string name="otp_autofill_stats_last_reason">السبب</string>
-    <string name="otp_autofill_stats_help_pipeline">ترتيب الملء: إذا تم تفعيل حقن النظام عبر LSPosed، سيتم تجربته أولًا؛ وإذا فشل أو لم يتم تفعيله، ستستخدم خدمة إمكانية الوصول في الشريط الجانبي للعثور على مربع الإدخال وكتابته.</string>
+    <string name="otp_autofill_stats_help_pipeline">ترتيب الملء: إذا تم تفعيل حقن النظام عبر LSPosed، سيتم تجربته أولًا؛ وإذا فشل أو لم يتم تفعيله، ستستخدم خدمة إمكانية الوصول في XGesture للعثور على مربع الإدخال وكتابته.</string>
     <string name="otp_autofill_stats_help_strategies">معاني الاستراتيجيات: حقن النظام = LSPosed Hook؛ مربع الإدخال الأمثل/المُركَّز/المقسَّم = ملء عبر عقد إمكانية الوصول.</string>
     <string name="otp_autofill_stats_help_failures">أسباب الفشل الشائعة: انتهاء المهلة = انتظار طويل جدًا؛ لم يتم العثور على مربع إدخال = لا توجد عناصر قابلة للتحرير؛ لم يتم تطبيق استراتيجية = لم تستجب أي آلية للملء.</string>
     <string name="otp_autofill_strategy_system_inject">حقن النظام عبر LSPosed</string>
@@ -2709,7 +2709,7 @@
     <string name="shell_panel_history_clear_confirm_message">سيتم حذف جميع سجلات مخرجات الأوامر المحفوظة، ولا يمكن التراجع عن هذه العملية.</string>
     <string name="shell_panel_history_empty">لا توجد سجلات تنفيذ</string>
     <string name="shell_panel_history_exit_code">رمز الخروج %1$d</string>
-    <string name="tile_gesture_switch">الشريط الجانبي</string>
+    <string name="tile_gesture_switch">XGesture</string>
     <string name="shortcut_toggle_gesture">تبديل الإيماءة</string>
     <string name="shortcut_notification_hub">مرشح الإشعارات</string>
     <string name="shortcut_shell_panel">لوحة Shell</string>
@@ -2719,7 +2719,7 @@
     <string name="launcher_shortcut_menu_entry_title">قائمة الضغط المطوّل في المشغّل</string>
     <string name="launcher_shortcut_menu_entry_desc">إدارة الاختصارات التي تظهر عند الضغط المطوّل على أيقونة التطبيق</string>
     <string name="launcher_shortcut_menu_hint">اضغط مطوّلاً واسحب لإعادة الترتيب، ولا تظهر العناصر المعطّلة في قائمة الضغط المطوّل.</string>
-    <string name="shortcut_panel_open_failed">لا يمكن فتح اللوحة، يرجى التأكد من تفعيل الشريط الجانبي</string>
+    <string name="shortcut_panel_open_failed">لا يمكن فتح اللوحة، يرجى التأكد من تفعيل XGesture</string>
     <string name="about_section_title">حول</string>
     <string name="about_release_notes_title">ملاحظات الإصدار</string>
     <string name="about_check_update_title">التحقق من التحديثات</string>
@@ -2766,16 +2766,16 @@
     <string name="update_notification_failed_content">انقر لإعادة المحاولة</string>
     <string name="update_notification_permission_title">تفعيل إذن الإشعارات</string>
     <string name="update_notification_permission_rationale">بعد تفعيل الإشعارات، ستتلقى تذكيرًا عند اكتشاف إصدار جديد أو اكتمال التنزيل في الخلفية.</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/cebian</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
     <string name="about_star_github_title">مستودع الكود المصدري على GitHub ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/cebian · امنح نجمة لدعم المطور</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · امنح نجمة لدعم المطور</string>
     <string name="about_feedback_issues_title">ملاحظات المشاكل واقتراحات الميزات</string>
     <string name="about_feedback_issues_desc">الإبلاغ عن الأخطاء، أو اقتراح ميزات جديدة، أو مشاركة الإعدادات على GitHub</string>
     <string name="about_help_translate_title">المشاركة في الترجمة</string>
     <string name="about_help_translate_desc">ساعدنا في ترجمة هذا التطبيق</string>
     <string name="about_weblate_url">https://hosted.weblate.org/engage/cebian/</string>
     <string name="about_telegram_chat_title">مجموعة نقاش Telegram</string>
-    <string name="about_telegram_chat_desc">Cebian · الشريط الجانبي</string>
+    <string name="about_telegram_chat_desc">XGesture · XGesture</string>
     <string name="about_telegram_chat_url">https://t.me/+NtcG5HPiKXVmNTU1</string>
     <string name="about_telegram_releases_title">إصدارات Telegram</string>
     <string name="about_telegram_releases_desc">\@cebian_channel · الإصدارات والإعلانات</string>

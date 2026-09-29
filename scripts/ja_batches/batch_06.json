@@ -886,7 +886,7 @@
   },
   {
     "name": "gesture_action_pointer_swipe_permission",
-    "text": "Requires Cebian",
+    "text": "Requires XGesture",
     "source": "en"
   },
   {

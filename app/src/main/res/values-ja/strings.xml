@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Cebian</string>
+    <string name="app_name">XGesture</string>
     <string name="main_nav_home">ホーム</string>
     <string name="main_nav_shake">シェイク</string>
     <string name="main_nav_notification">メッセージ</string>
@@ -270,7 +270,7 @@
     <string name="message_theme_weipop_skin_22">晴れと雨</string>
     <string name="message_theme_weipop_skin_23">金魚少年</string>
     <string name="permissions_pending_title">権限が未設定です</string>
-    <string name="service_notification_title">Cebian 実行中</string>
+    <string name="service_notification_title">XGesture 実行中</string>
     <string name="service_notification_text">エッジジェスチャサービスが実行中です。タップして設定を開きます。</string>
     <string name="permission_overlay_title">他のアプリの上に表示</string>
     <string name="permission_notification_title">通知の権限</string>
@@ -318,9 +318,9 @@
     <string name="app_keep_alive_entry_summary_battery">バッテリーホワイトリスト済み</string>
     <string name="app_keep_alive_entry_summary_recents">最近使ったアプリから非表示</string>
     <string name="app_keep_alive_entry_summary_all">バッテリーホワイトリスト、最近使ったアプリ非表示</string>
-    <string name="secure_settings_title">Cebian 常駐</string>
-    <string name="secure_settings_desc">システムが Cebian を無効化した場合に自動復元（WRITE_SECURE_SETTINGS が必要）</string>
-    <string name="secure_settings_enabled_summary">Cebian 常駐オン</string>
+    <string name="secure_settings_title">XGesture 常駐</string>
+    <string name="secure_settings_desc">システムが XGesture を無効化した場合に自動復元（WRITE_SECURE_SETTINGS が必要）</string>
+    <string name="secure_settings_enabled_summary">XGesture 常駐オン</string>
     <string name="secure_settings_grant_success">Shizuku 経由で許可しました</string>
     <string name="secure_settings_grant_failed">許可に失敗しました。ADB コマンドを手動で実行してください。</string>
     <string name="secure_settings_adb_dialog_title">ADB 許可手順</string>
@@ -626,7 +626,7 @@
     <string name="hidden_apps_entry_title">非表示アプリ</string>
     <string name="hidden_apps_entry_desc">アプリインデックス一覧からアプリを非表示</string>
     <string name="hidden_apps_title">非表示アプリ</string>
-    <string name="hidden_apps_desc">非表示のアプリは Cebian パネルに表示されませんが、ホーム画面などからは開けます。</string>
+    <string name="hidden_apps_desc">非表示のアプリは XGesture パネルに表示されませんが、ホーム画面などからは開けます。</string>
     <string name="hidden_apps_section_hidden">非表示</string>
     <string name="hidden_apps_section_in_index">リストに表示</string>
     <string name="hidden_apps_section_add">非表示に追加</string>
@@ -714,11 +714,11 @@
     <string name="system_gesture_takeover_module_pill_unknown">未確認</string>
     <string name="system_gesture_takeover_module_tap_hint">タップして LSPosed モジュールの状態を確認</string>
     <string name="system_gesture_takeover_tip" formatted="false">有効にすると、モジュールがシステム入力層でその端のトリガー領域を先に引き継ぎます。領域内のシステムジェスチャ（上部の引き下げ・戻る・上スワイプでホーム）は発動せず、タッチは本アプリが処理します。アクション未設定のタッチはシステムに渡されません。トリガー設定の「システム戻るジェスチャを遮断」やコーナーホイールの「システムナビゲーションジェスチャを上書き」とは別機能です。</string>
-    <string name="accessibility_service_name">#Cebian👈</string>
+    <string name="accessibility_service_name">#XGesture👈</string>
     <string name="accessibility_service_desc">エッジジェスチャとサイドバーパネルに必要。Shizuku なしで戻る、ホーム、最近使ったアプリ、タップ透過にも使用します。</string>
-    <string name="permission_accessibility_title">Cebian</string>
+    <string name="permission_accessibility_title">XGesture</string>
     <string name="permission_accessibility_desc">エッジジェスチャとサイドバーパネルに必要。Shizuku なしで戻る、ホーム、最近使ったアプリ、タップ透過にも使用します。</string>
-    <string name="permission_accessibility_grant">Cebian を有効化</string>
+    <string name="permission_accessibility_grant">XGesture を有効化</string>
     <string name="side_gestures_entry_left">左ハンドル</string>
     <string name="side_gestures_entry_right">右ハンドル</string>
     <string name="side_gestures_entry_desc">スワイプジェスチャーとタップを設定</string>
@@ -1083,33 +1083,33 @@
     <string name="gesture_shell_command_config_title">Shell コマンドを設定</string>
     <string name="gesture_shell_command_config_hint">コマンドはこのジェスチャー用に保存され、トリガー時にバックグラウンドで実行されます。</string>
     <string name="gesture_action_quick_tools_overlay">クイックツール（オーバーレイ）</string>
-    <string name="gesture_action_quick_tools_overlay_permission">Cebian の有効化が必要です</string>
+    <string name="gesture_action_quick_tools_overlay_permission">XGesture の有効化が必要です</string>
     <string name="gesture_action_widget_popup_overlay">ウィジェットポップアップ</string>
-    <string name="gesture_action_widget_popup_overlay_permission">Cebian の有効化が必要です</string>
+    <string name="gesture_action_widget_popup_overlay_permission">XGesture の有効化が必要です</string>
     <string name="gesture_action_stash_panel">ストッシュを開く</string>
-    <string name="gesture_action_stash_panel_permission">Cebian の有効化が必要です</string>
+    <string name="gesture_action_stash_panel_permission">XGesture の有効化が必要です</string>
     <string name="gesture_action_clipboard_panel">クリップボードを開く</string>
-    <string name="gesture_action_clipboard_panel_permission">Cebian の有効化が必要です</string>
+    <string name="gesture_action_clipboard_panel_permission">XGesture の有効化が必要です</string>
     <string name="gesture_action_clipboard_float">フローティングクリップボード</string>
-    <string name="gesture_action_clipboard_float_permission">Cebian の有効化とオーバーレイ権限が必要です</string>
+    <string name="gesture_action_clipboard_float_permission">XGesture の有効化とオーバーレイ権限が必要です</string>
     <string name="clipboard_float_style_title">フローティングリストスタイル</string>
     <string name="clipboard_float_style_single_line">コンパクト 1 行</string>
     <string name="clipboard_float_style_card">複数行カード</string>
     <string name="clipboard_float_style_toggle">リストスタイルを切り替え</string>
     <string name="gesture_action_clipboard_pick">クリップボード選択</string>
     <string name="gesture_action_clipboard_pick_desc">システムクリップボードを読み取り、テキスト選択パネルを開きます</string>
-    <string name="gesture_action_clipboard_pick_permission">Cebian の有効化が必要です</string>
+    <string name="gesture_action_clipboard_pick_permission">XGesture の有効化が必要です</string>
     <string name="gesture_action_floating_pointer">フローティングポインター</string>
-    <string name="gesture_action_floating_pointer_permission">Cebian が必要</string>
+    <string name="gesture_action_floating_pointer_permission">XGesture が必要</string>
     <string name="gesture_action_pointer_gesture_recorder">ポインタージェスチャレコーダー</string>
     <string name="gesture_action_pointer_gesture_recorder_desc">長押ししてスライドし、ポインターからスワイプとして再生</string>
     <string name="gesture_action_pointer_realtime_gesture">ポインターリアルタイムジェスチャ</string>
     <string name="gesture_action_pointer_realtime_gesture_desc">長押ししてスライドし、ポインターからリアルタイムでタッチをシミュレート</string>
     <string name="gesture_action_require_min_sdk_36">必要な Android の最低バージョンは Android 16 (SDK 36) です</string>
-    <string name="gesture_action_pointer_gesture_record_permission">Cebian が必要</string>
+    <string name="gesture_action_pointer_gesture_record_permission">XGesture が必要</string>
     <string name="gesture_action_open_floating_pointer_radial_menu">アクションリングを開く</string>
     <string name="gesture_action_open_floating_pointer_radial_menu_desc">長押しでジョイスティックアクションリングを開く</string>
-    <string name="gesture_action_open_floating_pointer_radial_menu_permission">Cebian が必要</string>
+    <string name="gesture_action_open_floating_pointer_radial_menu_permission">XGesture が必要</string>
     <string name="gesture_action_toggle_dnd">サイレントモード（DND）の切り替え</string>
     <string name="gesture_action_toggle_dnd_failed">サイレントモード（DND）を切り替えできません</string>
     <string name="gesture_action_timed_dnd">時間指定 DND</string>
@@ -1144,7 +1144,7 @@
     <string name="side_gestures_behavior_section">レイアウトと動作</string>
     <string name="default_trigger_mode">デフォルトのトリガーモード</string>
     <string name="default_trigger_mode_desc">ジェスチャーに独自のモードがない場合に使用されます</string>
-    <string name="trigger_mode_default_slot_desc">Cebian デフォルトに従う（%1$s）</string>
+    <string name="trigger_mode_default_slot_desc">XGesture デフォルトに従う（%1$s）</string>
     <string name="slot_pick_action">操作タイプを選択</string>
     <string name="slot_pick_trigger_mode">トリガーモードを選択</string>
     <string name="trigger_mode_default">デフォルト</string>
@@ -1182,7 +1182,7 @@
     <string name="gesture_hint_style_wave">ウェーブ</string>
     <string name="gesture_hint_style_wave_desc">エッジのウェーブがジェスチャーに合わせて伸縮します</string>
     <string name="gesture_hint_style_capsule">カプセル</string>
-    <string name="gesture_hint_style_capsule_desc">Cebian とともに拡大する角丸カプセル</string>
+    <string name="gesture_hint_style_capsule_desc">XGesture とともに拡大する角丸カプセル</string>
     <string name="gesture_hint_style_bubble">バブル</string>
     <string name="gesture_hint_style_bubble_desc">端から内側にバブルがポップします</string>
     <string name="gesture_hint_style_android">システム</string>
@@ -1447,8 +1447,8 @@
     <string name="float_ball_regional_cancel_slop">スクリーンショットキャンセル閾値</string>
     <string name="float_ball_text_copied">テキストをクリップボードにコピーしました</string>
     <string name="float_ball_image_copied">画像をクリップボードにコピーしました</string>
-    <string name="share_image_ocr_target_label">Cebian OCR 選択</string>
-    <string name="share_image_ocr_service_required">先に Cebian アクセシビリティサービスを有効にしてください</string>
+    <string name="share_image_ocr_target_label">XGesture OCR 選択</string>
+    <string name="share_image_ocr_service_required">先に XGesture アクセシビリティサービスを有効にしてください</string>
     <string name="share_image_ocr_model_required">先に取詞設定で OCR モデルをダウンロードして選択してください</string>
     <string name="share_image_ocr_image_load_failed">共有された画像を読み取れませんでした</string>
     <string name="share_image_ocr_background_action">バックグラウンドで実行</string>
@@ -1505,7 +1505,7 @@
     <string name="diagnostic_report_copied_truncated">共有できません。切り詰めたコピーをクリップボードに保存しました</string>
     <string name="diagnostic_report_export_failed">診断レポートのエクスポートに失敗しました。再試行してください。</string>
     <string name="diagnostic_report_share_chooser_title">診断ログを共有</string>
-    <string name="diagnostic_report_share_subject">Cebian 診断ログ</string>
+    <string name="diagnostic_report_share_subject">XGesture 診断ログ</string>
     <string name="diagnostic_report_truncation_suffix">\n\n…(内容が長いため省略)…</string>
     <string name="native_engine_packs_title">ランタイムエンジン</string>
     <string name="native_engine_packs_subtitle">OCR、オフライン翻訳、分かち書き用ネイティブライブラリ</string>
@@ -1801,7 +1801,7 @@
     <string name="search_engine_import_replace">置換</string>
     <string name="search_engine_import_failed">インポート失敗: %1$s</string>
     <string name="search_engine_query_empty">先に検索するテキストを選択または入力してください</string>
-    <string name="search_engine_accessibility_required">この機能を使うには Cebian アクセシビリティサービスを有効にしてください</string>
+    <string name="search_engine_accessibility_required">この機能を使うには XGesture アクセシビリティサービスを有効にしてください</string>
     <string name="search_engine_add_title">検索エンジンを追加</string>
     <string name="search_engine_add_subtitle">カスタムテキスト検索エンジンを設定</string>
     <string name="search_engine_edit_title">検索エンジンを編集</string>
@@ -2061,7 +2061,7 @@
     <string name="floating_pointer_radial_slot_top_left">左上</string>
     <string name="gesture_action_pointer_swipe">スワイプ</string>
     <string name="gesture_action_pointer_swipe_desc">ポインター位置でスワイプをシミュレート</string>
-    <string name="gesture_action_pointer_swipe_permission">Cebian が必要です</string>
+    <string name="gesture_action_pointer_swipe_permission">XGesture が必要です</string>
     <string name="pointer_swipe_config_title">操作設定</string>
     <string name="pointer_swipe_config_desc">現在のポインター位置から、選択した方向と距離でスワイプします。</string>
     <string name="pointer_swipe_direction_title">方向</string>
@@ -2230,8 +2230,8 @@
     <string name="external_invocation_entry_title">外部呼び出し</string>
     <string name="external_invocation_entry_desc">Tasker など他アプリ向けのディープリンクと Intent アクション</string>
     <string name="external_invocation_title">外部呼び出し</string>
-    <string name="external_invocation_hint">cebian:// リンクまたは Intent アクションで他アプリから Cebian の機能を開けます。検索パネル、ストッシュ、クリップボードにはサイドバーとアクセシビリティサービスが必要です。</string>
-    <string name="external_invocation_query_hint">オプションの q で検索クエリを事前入力できます。例: cebian://open/search-panel?q=weather</string>
+    <string name="external_invocation_hint">xgesture:// リンクまたは Intent アクションで他アプリから XGesture の機能を開けます。検索パネル、ストッシュ、クリップボードにはサイドバーとアクセシビリティサービスが必要です。</string>
+    <string name="external_invocation_query_hint">オプションの q で検索クエリを事前入力できます。例: xgesture://open/search-panel?q=weather</string>
     <string name="external_invocation_deeplink_section">ディープリンク（推奨）</string>
     <string name="external_invocation_action_section">Intent アクション（上級者向け）</string>
     <string name="external_invocation_action_hint">項目をタップすると adb コマンドをコピーします。一部のアクションには明示的なコンポーネントが必要です。Shell パネルはアプリ内部専用です。</string>
@@ -2466,7 +2466,7 @@
     <string name="otp_test_result_success">抽出: %1$s</string>
     <string name="otp_test_result_failed">コードを抽出できませんでした</string>
     <string name="otp_auto_input_entry_title">自動入力</string>
-    <string name="otp_auto_input_entry_desc">Cebian 経由でコードを自動入力</string>
+    <string name="otp_auto_input_entry_desc">XGesture 経由でコードを自動入力</string>
     <string name="otp_auto_input_title">自動入力</string>
     <string name="otp_auto_input_desc">フォーカス中の入力欄にコードを自動入力</string>
     <string name="otp_auto_input_enabled_title">認証コードを自動入力</string>
@@ -2480,7 +2480,7 @@
     <string name="otp_auto_input_interval_title">文字ごとの間隔</string>
     <string name="otp_auto_input_interval_value">%1$d ミリ秒</string>
     <string name="otp_auto_input_service_setup_title">アクセシビリティ自動入力の状態</string>
-    <string name="otp_auto_input_service_setup_desc">自動入力は Cebian のアクセシビリティサービスに依存します。無効な場合はタップして有効化してください</string>
+    <string name="otp_auto_input_service_setup_desc">自動入力は XGesture のアクセシビリティサービスに依存します。無効な場合はタップして有効化してください</string>
     <string name="otp_rules_builtin_section">内蔵ルール</string>
     <string name="otp_rules_more">その他</string>
     <string name="otp_rules_official_not_bundled">未内蔵</string>
@@ -2496,21 +2496,21 @@
   <string name="otp_advanced_section">詳細</string>
   <string name="otp_keywords_fallback_entry_title">フォールバック語彙</string>
   <string name="otp_keywords_fallback_entry_desc">どのルールにも一致しない場合に使用。通常は変更不要</string>
-    <string name="otp_fill_method_pipeline_inject">入力順: LSPosed システムインジェクト → Cebian SET_TEXT</string>
-    <string name="otp_fill_method_pipeline_a11y_only">入力方法: Cebian SET_TEXT</string>
-    <string name="otp_fill_method_a11y_fallback_hint">インジェクト失敗または無効時のフォールバックは Cebian SET_TEXT</string>
+    <string name="otp_fill_method_pipeline_inject">入力順: LSPosed システムインジェクト → XGesture SET_TEXT</string>
+    <string name="otp_fill_method_pipeline_a11y_only">入力方法: XGesture SET_TEXT</string>
+    <string name="otp_fill_method_a11y_fallback_hint">インジェクト失敗または無効時のフォールバックは XGesture SET_TEXT</string>
     <string name="otp_runtime_status_section">ランタイム状態</string>
     <string name="otp_runtime_status_disabled">自動入力はオフです</string>
-    <string name="otp_runtime_status_need_accessibility">自動入力には Cebian アクセシビリティサービスの有効化が必要です</string>
-    <string name="otp_runtime_status_inject_pipeline">自動入力オン: LSPosed システムインジェクト優先、フォールバックは Cebian ノード入力</string>
-    <string name="otp_runtime_status_a11y_only">自動入力オン: Cebian ノード入力のみ</string>
+    <string name="otp_runtime_status_need_accessibility">自動入力には XGesture アクセシビリティサービスの有効化が必要です</string>
+    <string name="otp_runtime_status_inject_pipeline">自動入力オン: LSPosed システムインジェクト優先、フォールバックは XGesture ノード入力</string>
+    <string name="otp_runtime_status_a11y_only">自動入力オン: XGesture ノード入力のみ</string>
     <string name="otp_runtime_status_sms_lsposed">コードソース: LSPosed SMS キャプチャ有効（通知も引き続き動作）</string>
     <string name="otp_auto_fill_section">自動入力</string>
     <string name="otp_lsposed_enhancements_section">LSPosed 拡張</string>
     <string name="otp_lsposed_enhancements_desc">任意の追加機能。メインの自動入力スイッチの代わりにはなりません。有効時はシステムインジェクトが優先入力パスです。</string>
     <string name="otp_diagnostics_section">診断</string>
     <string name="otp_lsposed_inject_title">LSPosed システムインジェクト</string>
-    <string name="otp_lsposed_inject_desc_short">システムレベルインジェクトを優先。フォールバックは Cebian ノード入力。システムフレームワークスコープが必要</string>
+    <string name="otp_lsposed_inject_desc_short">システムレベルインジェクトを優先。フォールバックは XGesture ノード入力。システムフレームワークスコープが必要</string>
     <string name="otp_lsposed_sms_title">LSPosed SMS キャプチャ</string>
     <string name="otp_lsposed_sms_desc_short">電話プロセスから SMS を読み取り。com.android.phone スコープが必要</string>
     <string name="otp_lsposed_probe_title">LSPosed システムインジェクトをテスト</string>
@@ -2521,7 +2521,7 @@
     <string name="otp_lsposed_probe_timeout">タイムアウト: system_server にインジェクトレシーバーが登録されていません</string>
     <string name="otp_lsposed_probe_failed">システムインジェクトプローブ失敗: %1$s</string>
     <string name="otp_lsposed_probe_response">応答: %1$s / %2$s</string>
-    <string name="xposed_module_description">Cebian：OTP 自動入力（android スコープを有効化）</string>
+    <string name="xposed_module_description">XGesture：OTP 自動入力（android スコープを有効化）</string>
     <string name="otp_records_title">認証コード履歴</string>
     <string name="otp_records_entry_title">認証コード履歴</string>
     <string name="otp_records_entry_desc">抽出した認証コードの履歴を表示</string>
@@ -2617,7 +2617,7 @@
     <string name="settings_backup_sensitive_hint">OTP 記録、通知履歴、クリップボード、共有画像 OCR 履歴、シェル出力履歴を含みます。ローカルのバックアップファイルにのみ保存されます。</string>
     <string name="settings_backup_export">設定をエクスポート</string>
     <string name="settings_backup_import">設定をインポート</string>
-    <string name="settings_backup_default_filename">cebian-backup-%1$d.zip</string>
+    <string name="settings_backup_default_filename">XGesture-backup-%1$d.zip</string>
     <string name="settings_backup_entry_title">設定のバックアップ</string>
     <string name="settings_backup_entry_desc">ZIP バックアップファイルをエクスポート/インポート</string>
     <string name="settings_backup_export_success">設定をエクスポートしました</string>
@@ -2647,7 +2647,7 @@
     <string name="settings_domain_sensitive_notification_filter_prefs">通知フィルター設定</string>
     <string name="settings_domain_sensitive_otp_stats">OTP 自動入力統計</string>
     <string name="onboarding_next">次へ</string>
-    <string name="onboarding_welcome_body">Cebian はエッジジェスチャ、シェイクアクション、通知ツールでスマートフォンを拡張します。次にいくつかのシステム権限が必要です。</string>
+    <string name="onboarding_welcome_body">XGesture はエッジジェスチャ、シェイクアクション、通知ツールでスマートフォンを拡張します。次にいくつかのシステム権限が必要です。</string>
     <string name="onboarding_overlay_title">他のアプリの上に表示</string>
     <string name="onboarding_grant_overlay">オーバーレイ権限を付与</string>
     <string name="onboarding_accessibility_title">アクセシビリティサービス</string>
@@ -2657,7 +2657,7 @@
     <string name="onboarding_disclaimer_body">本アプリとそのモジュールは、個人端末の管理と生産性向上のみを目的としており、規制回避、アクセス制御の迂回、不正操作を目的としたものではありません。\n\n各機能の動作を理解したうえで、有効にしたルール、変更、設定についてはご自身の責任でご利用ください。</string>
     <string name="onboarding_disclaimer_agree">免責事項を読み、同意しました</string>
     <string name="onboarding_core_permissions_title">主要な権限</string>
-    <string name="onboarding_core_permissions_body">Cebian はエッジジェスチャ認識、フローティングトリガーバー、安定したバックグラウンド動作のために以下の権限が必要です。システム設定で付与してください。</string>
+    <string name="onboarding_core_permissions_body">XGesture はエッジジェスチャ認識、フローティングトリガーバー、安定したバックグラウンド動作のために以下の権限が必要です。システム設定で付与してください。</string>
     <string name="onboarding_permission_overlay_short">エッジトリガーとフローティングパネルの表示に使用</string>
     <string name="onboarding_permission_accessibility_short">エッジジェスチャの検出とシステム操作の実行に使用</string>
     <string name="onboarding_permission_notification_title">通知とサービス</string>
@@ -2675,7 +2675,7 @@
     <string name="privacy_policy_subtitle">データの取り扱いとアップロードの有無</string>
     <string name="privacy_policy_entry_title">プライバシーポリシー</string>
     <string name="privacy_policy_entry_desc">ローカルデータの取り扱いと権限の目的</string>
-    <string name="privacy_policy_body">Cebian は端末内処理を基本としています。
+    <string name="privacy_policy_body">XGesture は端末内処理を基本としています。
 
 • 通知と OTP: 読み取り、フィルタリング、抽出、表示はすべて端末内のみ。デフォルトではアップロードしません。
 • OTP 記録と通知履歴: アプリ専用ストレージに保存し、デフォルトではシステムバックアップから除外。設定バックアップで任意エクスポート可能。
@@ -2699,7 +2699,7 @@
     <string name="otp_autofill_stats_last_time">時刻</string>
     <string name="otp_autofill_stats_last_strategy">戦略</string>
     <string name="otp_autofill_stats_last_reason">理由</string>
-    <string name="otp_autofill_stats_help_pipeline">入力順序: LSPosed システムインジェクトが有効な場合、最初に実行されます。失敗または無効の場合、Cebian アクセシビリティが入力欄を探してコードを書き込みます。</string>
+    <string name="otp_autofill_stats_help_pipeline">入力順序: LSPosed システムインジェクトが有効な場合、最初に実行されます。失敗または無効の場合、XGesture アクセシビリティが入力欄を探してコードを書き込みます。</string>
     <string name="otp_autofill_stats_help_strategies">戦略: システムインジェクト = LSPosed フック; focused/best/group nodes = アクセシビリティノード入力。</string>
     <string name="otp_autofill_stats_help_failures">よくある失敗: timeout = 時間内に入力結果なし; no editable node = 入力欄が見つからない; no strategy = 受信側が応答しない。</string>
     <string name="otp_autofill_strategy_system_inject">LSPosed システムインジェクト</string>
@@ -2747,7 +2747,7 @@
     <string name="shell_panel_history_clear_confirm_message">保存済みのすべてのコマンド出力記録が削除されます。元に戻せません。</string>
     <string name="shell_panel_history_empty">実行履歴はまだありません</string>
     <string name="shell_panel_history_exit_code">終了コード %1$d</string>
-    <string name="tile_gesture_switch">Cebian</string>
+    <string name="tile_gesture_switch">XGesture</string>
     <string name="shortcut_toggle_gesture">ジェスチャーの切り替え</string>
     <string name="shortcut_notification_hub">通知フィルター</string>
     <string name="shortcut_shell_panel">シェルパネル</string>
@@ -2757,7 +2757,7 @@
     <string name="launcher_shortcut_menu_entry_title">ランチャー長押しメニュー</string>
     <string name="launcher_shortcut_menu_entry_desc">アイコンを長押ししたときに表示するショートカットを管理します</string>
     <string name="launcher_shortcut_menu_hint">長押ししてドラッグすると並べ替えできます。オフにした項目は長押しメニューに表示されません。</string>
-    <string name="shortcut_panel_open_failed">パネルを開けませんでした。Cebian が有効か確認してください。</string>
+    <string name="shortcut_panel_open_failed">パネルを開けませんでした。XGesture が有効か確認してください。</string>
     <string name="about_section_title">このアプリについて</string>
     <string name="about_release_notes_title">リリースノート</string>
     <string name="about_check_update_title">アップデートを確認</string>
@@ -2804,16 +2804,16 @@
     <string name="update_notification_failed_content">タップして再試行</string>
     <string name="update_notification_permission_title">通知を有効にする</string>
     <string name="update_notification_permission_rationale">新バージョンの検出やダウンロード完了時に通知を受け取るには、通知を許可してください。</string>
-    <string name="about_project_url_desc">https://github.com/qpst4/cebian</string>
+    <string name="about_project_url_desc">https://github.com/qpst4/xgesture</string>
     <string name="about_star_github_title">GitHub リポジトリ ⭐</string>
-    <string name="about_star_github_desc">https://github.com/qpst4/cebian · Star で開発を支援</string>
+    <string name="about_star_github_desc">https://github.com/qpst4/xgesture · Star で開発を支援</string>
     <string name="about_feedback_issues_title">Issues と機能リクエスト</string>
     <string name="about_feedback_issues_desc">GitHub でバグ報告、機能提案、プリセット共有</string>
     <string name="about_help_translate_title">翻訳に参加</string>
     <string name="about_help_translate_desc">このアプリの翻訳にご協力ください</string>
     <string name="about_weblate_url">https://hosted.weblate.org/engage/cebian/</string>
     <string name="about_telegram_chat_title">Telegram チャット</string>
-    <string name="about_telegram_chat_desc">Cebian · 边栏</string>
+    <string name="about_telegram_chat_desc">XGesture · X手势</string>
     <string name="about_telegram_chat_url">https://t.me/+NtcG5HPiKXVmNTU1</string>
     <string name="about_telegram_releases_title">Telegram Releases</string>
     <string name="about_telegram_releases_desc">@cebian_channel</string>
@@ -3084,7 +3084,7 @@
     <string name="clipboard_float_appearance_section">外観と操作</string>
     <string name="clipboard_float_enabled_title">キーボード表示時にウィンドウを表示</string>
     <string name="clipboard_float_enabled_desc">キーボード表示時、入力域の上にクリップボードウィンドウを表示。ドラッグ、リサイズ、項目タップで貼り付け。</string>
-    <string name="clipboard_float_a11y_hint">キーボード検出とフィールドへの貼り付けには Cebian アクセシビリティの有効化が必要です。</string>
+    <string name="clipboard_float_a11y_hint">キーボード検出とフィールドへの貼り付けには XGesture アクセシビリティの有効化が必要です。</string>
     <string name="clipboard_float_show_chip_title">先に項目チップを表示</string>
     <string name="clipboard_float_show_chip_desc">オン: 小さなチップを先に表示、タップで展開。オフ: キーボード表示時にすぐ展開。</string>
     <string name="clipboard_float_pin_title">パネルとチップの位置を記憶</string>
@@ -3541,7 +3541,7 @@ APatch で Shell の永久 Root 権限を取り消してください。</string>
     <string name="gesture_action_open_link_desc">保存済みの外部リンク、ディープリンク、または Intent URI を開く</string>
     <string name="gesture_open_link_url_field">リンク</string>
     <string name="gesture_open_link_label_field">表示名（任意）</string>
-    <string name="gesture_open_link_config_hint">http(s)://、intent://、tel:、mailto:、cebian:// などのURIを開く機能をサポートしています。</string>
+    <string name="gesture_open_link_config_hint">http(s)://、intent://、tel:、mailto:、xgesture:// などのURIを開く機能をサポートしています。</string>
     <string name="gesture_action_clipboard_paste">ペースト</string>
     <string name="gesture_action_clipboard_paste_desc">クリップボード履歴の最新の項目を入力欄に貼り付けます。複数の入力欄がある場合は、対象を選択してください。</string>
     <string name="clipboard_paste_pick_content_desc">貼り付け先の入力欄をタップしてください。</string>

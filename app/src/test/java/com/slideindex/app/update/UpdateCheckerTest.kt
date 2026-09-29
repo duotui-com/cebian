@@ -86,7 +86,7 @@ class UpdateCheckerTest {
         UpdateManifest(
             version = version,
             versionCode = 1,
-            apkUrl = "https://example.com/cebian-$version.apk",
+            apkUrl = "https://example.com/xgesture-$version.apk",
             apkSize = apkSize,
             notes = notes,
         )

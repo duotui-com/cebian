@@ -1,10 +1,10 @@
 # Weblate 初次配置（维护者）
 
-本文档说明如何在 [hosted.weblate.org](https://hosted.weblate.org) 为 **Cebian（边栏）** 开通社区翻译。贡献者无需阅读本文。
+本文档说明如何在 [hosted.weblate.org](https://hosted.weblate.org) 为 **XGesture（X手势）** 开通社区翻译。贡献者无需阅读本文。
 
 ## 前置条件
 
-- GitHub 仓库：`https://github.com/qpst4/cebian`
+- GitHub 仓库：`https://github.com/qpst4/xgesture`
 - 仓库根目录已包含 [`weblate.yml`](../weblate.yml)
 - 源语言为 **简体中文**（`app/src/main/res/values/strings.xml`）
 
@@ -15,9 +15,9 @@
 1. 使用 GitHub 登录 [hosted.weblate.org](https://hosted.weblate.org)
 2. **Manage** → **Create project**（开源项目可申请 Libre hosting）
 3. 项目信息建议：
-   - **Name**：Cebian
-   - **Slug**：`cebian`（与 `weblate.yml` 中 `project` 一致）
-   - **Website**：`https://github.com/qpst4/cebian`
+   - **Name**：XGesture
+   - **Slug**：`XGesture`（与 `weblate.yml` 中 `project` 一致）
+   - **Website**：`https://github.com/qpst4/xgesture`
    - **Source language**：Chinese (Simplified) / `zh_Hans`
 
 ### 2. 导入组件
@@ -25,7 +25,7 @@
 **方式 A（推荐）：从 weblate.yml 导入**
 
 1. 在项目中 **Add new translation component**
-2. Repository：`https://github.com/qpst4/cebian.git`，Branch：`main`
+2. Repository：`https://github.com/qpst4/xgesture.git`，Branch：`main`
 3. 若界面提供 **Import from weblate.yml**，选用根目录配置
 
 **方式 B：手动创建 App strings 组件**

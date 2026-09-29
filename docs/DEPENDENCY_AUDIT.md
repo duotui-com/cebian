@@ -1,4 +1,4 @@
-# Cebian 全量依赖审计 (2026-09-21)
+# XGesture 全量依赖审计 (2026-09-21)
 
 > 范围：Gradle 全模块解析依赖 + 版本目录 + 插件/工具链 + GitHub Actions + 原生引擎包。
 > 传递依赖来自 `lite/fullReleaseRuntimeClasspath` 等可解析配置的 **实际解析结果**。
@@ -56,9 +56,9 @@ CI 环境：`java-version: 25`，`python-version: 3.14.7`（release 工作流）
 ## 4. 原生引擎包（`native_engine_packs.json`）
 
 - catalog version: **3**
-- **ocr-engine** revision=5 url=`https://github.com/qpst4/cebian/releases/download/v1.9.23/ocr-engine-arm64-v5.zip`
-- **translate-engine** revision=- url=`https://github.com/qpst4/cebian/releases/download/v1.6.0/translate-engine-arm64-v1.zip`
-- **segmentation-engine** revision=- url=`https://github.com/qpst4/cebian/releases/download/v1.6.0/segmentation-engine-arm64-v1.zip`
+- **ocr-engine** revision=5 url=`https://github.com/qpst4/xgesture/releases/download/v1.9.23/ocr-engine-arm64-v5.zip`
+- **translate-engine** revision=- url=`https://github.com/qpst4/xgesture/releases/download/v1.6.0/translate-engine-arm64-v1.zip`
+- **segmentation-engine** revision=- url=`https://github.com/qpst4/xgesture/releases/download/v1.6.0/segmentation-engine-arm64-v1.zip`
 
 ## 5. Maven 坐标全量（直接 + 传递，按 group:artifact 去重）
 

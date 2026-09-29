@@ -1,7 +1,7 @@
 [
   {
     "name": "app_name",
-    "text": "Cebian",
+    "text": "XGesture",
     "source": "en"
   },
   {
@@ -71,12 +71,12 @@
   },
   {
     "name": "external_invocation_hint",
-    "text": "Open Cebian features from other apps via cebian:// links or intent actions. Search panel, stash, and clipboard require the sidebar and accessibility service.",
+    "text": "Open XGesture features from other apps via xgesture:// links or intent actions. Search panel, stash, and clipboard require the sidebar and accessibility service.",
     "source": "en"
   },
   {
     "name": "external_invocation_query_hint",
-    "text": "Optional q pre-fills a search query, e.g. cebian://open/search-panel?q=weather.",
+    "text": "Optional q pre-fills a search query, e.g. xgesture://open/search-panel?q=weather.",
     "source": "en"
   },
   {

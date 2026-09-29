@@ -156,7 +156,7 @@
   },
   {
     "name": "freezer_legacy_icon_cleanup",
-    "text": "Duplicate 边栏 icons from the old build should clear after restarting the launcher or phone; if one remains, Uninstall on it does not remove the app",
+    "text": "Duplicate X手势 icons from the old build should clear after restarting the launcher or phone; if one remains, Uninstall on it does not remove the app",
     "source": "en"
   },
   {
@@ -226,7 +226,7 @@
   },
   {
     "name": "xposed_module_description",
-    "text": "Cebian: OTP autofill (enable android scope)",
+    "text": "XGesture: OTP autofill (enable android scope)",
     "source": "en"
   },
   {

@@ -681,7 +681,7 @@
   },
   {
     "name": "gesture_action_floating_pointer_permission",
-    "text": "Requires Cebian",
+    "text": "Requires XGesture",
     "source": "en"
   },
   {
@@ -711,7 +711,7 @@
   },
   {
     "name": "gesture_action_pointer_gesture_record_permission",
-    "text": "Requires Cebian",
+    "text": "Requires XGesture",
     "source": "en"
   },
   {
@@ -726,7 +726,7 @@
   },
   {
     "name": "gesture_action_open_floating_pointer_radial_menu_permission",
-    "text": "Requires Cebian",
+    "text": "Requires XGesture",
     "source": "en"
   },
   {
