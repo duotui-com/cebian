@@ -397,6 +397,7 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_FREEZER_TAB = "extra_freezer_tab"
         const val NAV_ROUTE_EXTENSION_FREEZER = "extension_freezer"
         const val NAV_ROUTE_EXTENSION_FREEZER_APPS = "extension_freezer_apps"
+        const val NAV_ROUTE_EXTENSION_STASH_CATEGORIES = "extension_stash_categories"
         const val FREEZER_TAB_FROZEN = "frozen"
 
         private const val DEEP_LINK_SCHEME = "cebian"

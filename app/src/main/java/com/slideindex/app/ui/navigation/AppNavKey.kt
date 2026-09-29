@@ -495,6 +495,11 @@ sealed interface AppNavKey : NavKey {
         val initialKeyName: String = "",
         val initialIsLongPress: Boolean = false,
     ) : AppNavKey
+    // 暂存夹分类与话术管理
+    @Serializable data object StashCategories : AppNavKey
+    @Serializable data class StashCategoryEntries(val categoryId: String) : AppNavKey
+    /** [entryId] 为空表示往该分类里新增一条。 */
+    @Serializable data class StashPhraseEditor(val categoryId: String, val entryId: String = "") : AppNavKey
 }
 
 @Serializable

@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slideindex.app.clipboard.ClipboardEntry
 import com.slideindex.app.clipboard.ClipboardHistoryRepository
+import com.slideindex.app.stash.StashCategory
+import com.slideindex.app.stash.StashCategoryFilter
+import com.slideindex.app.stash.StashCategoryRepository
 import com.slideindex.app.stash.StashEntry
 import com.slideindex.app.stash.StashRepository
 import com.slideindex.app.stash.matchesQuery
@@ -33,6 +36,7 @@ class HistoryPanelViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val stashRepository: StashRepository?,
     private val clipboardRepository: ClipboardHistoryRepository?,
+    private val stashCategoryRepository: StashCategoryRepository? = null,
 ) : ViewModel() {
 
     val stashSearchQuery: StateFlow<String> =
@@ -50,12 +54,30 @@ class HistoryPanelViewModel(
 
     private val _debouncedStashSearchQuery = MutableStateFlow("")
 
+    val stashCategories: StateFlow<List<StashCategory>> =
+        stashCategoryRepository?.categories ?: MutableStateFlow(emptyList())
+
+    /** 选中的分类；选中的分类已被删除（比如在管理页里）时回到「全部」。 */
+    val stashCategoryFilter: StateFlow<StashCategoryFilter> = combine(
+        savedStateHandle.getStateFlow(KEY_STASH_CATEGORY, StashCategoryFilter.All.encode()),
+        stashCategories,
+    ) { encoded, categories ->
+        val filter = StashCategoryFilter.decode(encoded)
+        if (filter is StashCategoryFilter.Category && categories.none { it.id == filter.id }) {
+            StashCategoryFilter.All
+        } else {
+            filter
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, StashCategoryFilter.All)
+
     val filteredStashEntries: StateFlow<List<StashEntry>> = combine(
         stashEntries,
         _debouncedStashSearchQuery,
-    ) { entries, query ->
+        stashCategoryFilter,
+    ) { entries, query, categoryFilter ->
+        val inCategory = categoryFilter.apply(entries)
         val trimmed = query.trim()
-        if (trimmed.isEmpty()) entries else entries.filter { it.matchesQuery(trimmed) }
+        if (trimmed.isEmpty()) inCategory else inCategory.filter { it.matchesQuery(trimmed) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val clipboardEntryCount: StateFlow<Int> = clipboardRepository?.entryCount
@@ -119,6 +141,10 @@ class HistoryPanelViewModel(
 
     fun setClipboardSearchQuery(query: String) {
         savedStateHandle[KEY_CLIPBOARD_SEARCH] = query
+    }
+
+    fun setStashCategoryFilter(filter: StashCategoryFilter) {
+        savedStateHandle[KEY_STASH_CATEGORY] = filter.encode()
     }
 
     fun setSelectedTab(tab: HistoryPanelTab) {
@@ -282,6 +308,7 @@ class HistoryPanelViewModel(
 
     companion object {
         private const val KEY_STASH_SEARCH = "stash_search"
+        private const val KEY_STASH_CATEGORY = "stash_category"
         private const val KEY_CLIPBOARD_SEARCH = "clipboard_search"
         private const val KEY_EXPANDED_IDS = "expanded_entry_ids"
         private const val KEY_IMAGE_INDICES = "selected_image_indices"

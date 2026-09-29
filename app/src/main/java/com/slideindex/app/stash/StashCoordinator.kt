@@ -131,6 +131,14 @@ object StashCoordinator {
         }
     }
 
+    /** 在微信聊天界面里一键发送该条目；点发送后按偏好收起面板，发送流程不随面板销毁而取消。 */
+    fun sendStashEntry(context: Context, entry: StashEntry) {
+        if (StashAccess.sendPreferences?.collapsePanelAfterSend?.value != false) {
+            FloatBallStashPanel.dismiss()
+        }
+        StashSendHelper.send(context, entry)
+    }
+
     fun openStashPanel(context: Context) {
         FloatBallStashPanel.show(context)
     }

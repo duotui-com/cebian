@@ -30,11 +30,13 @@ fun NavEntryBuilder.stashClipboardNavEntries(ctx: MainNavContext) {
         StashClipboardSettingsScreen(
             settings = settings,
             clipboardEntryCount = clipboardEntryCount,
-            stashEntryCount = stashEntries.size,
+            // 「清空暂存夹」只清普通条目，这里的数量也只算普通条目。
+            stashEntryCount = stashEntries.count { it.categoryId == null },
             onBack = { ctx.navigateBackTo(AppNavKey.ExtensionHub) },
             onOpenClipboardHistory = { ctx.navigate(AppNavKey.ClipboardHistorySettings) },
             onOpenStashPanel = { ctx.navigate(AppNavKey.StashPanelSettings) },
             onOpenClipboardFloat = { ctx.navigate(AppNavKey.ClipboardFloatSettings) },
+            onOpenStashCategories = { ctx.navigate(AppNavKey.StashCategories) },
             onClearStash = viewModel::clearStash,
         )
         LaunchedEffect(permissions.overlayGranted) {

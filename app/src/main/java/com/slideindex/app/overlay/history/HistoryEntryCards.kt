@@ -2,14 +2,17 @@ package com.slideindex.app.overlay.history
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.TextFields
@@ -22,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.slideindex.app.R
 import com.slideindex.app.clipboard.ClipboardDragShareFallback
@@ -278,12 +282,15 @@ internal fun HistoryStashEntryCard(
     onPin: () -> Unit,
     onCopy: () -> Unit,
     onShare: () -> Unit,
+    onSend: () -> Unit,
     onToggleStar: () -> Unit,
     onDelete: () -> Unit,
+    categoryUi: StashCardCategoryUi,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
     val repo = StashAccess.repository
+    var showCategoryMenu by remember { mutableStateOf(false) }
     val previewWidthPx = historyPreviewWidthPx()
     val previewHeightPx = historyStashPreviewHeightPx()
     val richPreviewHeightPx = historyClipboardCardPreviewHeightPx()
@@ -321,6 +328,7 @@ internal fun HistoryStashEntryCard(
     val shareLabel = stringResource(R.string.float_ball_action_share)
     val saveImageLabel = stringResource(R.string.clipboard_action_save_image)
     val deleteLabel = stringResource(R.string.stash_action_delete)
+    val moveToCategoryLabel = stringResource(R.string.stash_category_move_to)
     val moreLabel = stringResource(R.string.notification_filter_more_menu)
     val onLongPressDrag: () -> Unit = {
         val clipData = HistoryEntryDragHelper.buildClipForStashEntry(context, entry, repo)
@@ -354,6 +362,16 @@ internal fun HistoryStashEntryCard(
         createdAtEpochMs = entry.createdAtEpochMs,
         starred = entry.starred,
         headerTrailing = {
+            categoryUi.categoryName?.let { categoryName ->
+                Text(
+                    text = categoryName,
+                    style = HistoryPanelTypography.meta(),
+                    color = MiuixTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(end = 4.dp),
+                )
+            }
             IconButton(
                 onClick = {
                     val imageIndex = when (entry.type) {
@@ -474,6 +492,11 @@ internal fun HistoryStashEntryCard(
                     }
                 },
             )
+            HistoryCardActionIcon(
+                icon = Icons.AutoMirrored.Filled.Send,
+                contentDescription = stringResource(R.string.stash_send_action),
+                onClick = onSend,
+            )
             Spacer(modifier = Modifier.weight(1f))
             HistoryCardOverflowMenu(
                 contentDescription = moreLabel,
@@ -483,6 +506,13 @@ internal fun HistoryStashEntryCard(
                             label = pinLabel,
                             icon = Icons.Default.PushPin,
                             onClick = onPin,
+                        ),
+                    )
+                    add(
+                        HistoryCardMenuAction(
+                            label = moveToCategoryLabel,
+                            icon = Icons.Outlined.Folder,
+                            onClick = { showCategoryMenu = true },
                         ),
                     )
                     if (entry.type == StashEntryType.RICH && !expanded && richHasImages && richSelectedBitmap != null) {
@@ -506,6 +536,14 @@ internal fun HistoryStashEntryCard(
                             onClick = onDelete,
                             iconTint = MiuixTheme.colorScheme.error,
                         ),
+                    )
+                },
+                // 「移入分类」的选择菜单锚在溢出菜单按钮的位置。
+                anchoredContent = {
+                    StashCategoryPickerMenu(
+                        expanded = showCategoryMenu,
+                        onDismiss = { showCategoryMenu = false },
+                        ui = categoryUi,
                     )
                 },
             )

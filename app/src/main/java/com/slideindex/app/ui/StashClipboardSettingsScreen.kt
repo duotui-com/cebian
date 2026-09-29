@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -65,6 +66,7 @@ fun StashClipboardSettingsScreen(
     onOpenClipboardHistory: () -> Unit,
     onOpenStashPanel: () -> Unit,
     onOpenClipboardFloat: () -> Unit,
+    onOpenStashCategories: () -> Unit,
     onClearStash: () -> Unit,
 ) {
     var showClearStashDialog by remember { mutableStateOf(false) }
@@ -83,6 +85,14 @@ fun StashClipboardSettingsScreen(
         groupedCardItems(
             keyPrefix = "stash-clear",
             items = listOf(
+                settingsCardScopeItem("stash-categories") {
+                    SettingNavigationRow(
+                        icon = { label -> Icon(Icons.Outlined.Folder, contentDescription = label) },
+                        title = stringResource(R.string.stash_category_manage_title),
+                        subtitle = stringResource(R.string.stash_category_manage_subtitle),
+                        onClick = onOpenStashCategories,
+                    )
+                },
                 settingsCardScopeItem("stash-clear-all") {
                     SettingLinkRow(
                         title = stringResource(R.string.stash_clear_all),
@@ -136,7 +146,7 @@ fun StashClipboardSettingsScreen(
         show = showClearStashDialog,
         onDismissRequest = { showClearStashDialog = false },
         title = stringResource(R.string.stash_clear_all_confirm_title),
-        message = stringResource(R.string.stash_clear_all_confirm_message),
+        message = stringResource(R.string.stash_category_clear_all_confirm_message),
         onConfirm = onClearStash,
     )
 }

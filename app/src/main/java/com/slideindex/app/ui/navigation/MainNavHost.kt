@@ -124,7 +124,8 @@ fun MainNavHost(
                 MainBottomNavDestination.Notification.name
             }
             initialNavRoute == MainActivity.NAV_ROUTE_EXTENSION_FREEZER ||
-                initialNavRoute == MainActivity.NAV_ROUTE_EXTENSION_FREEZER_APPS -> {
+                initialNavRoute == MainActivity.NAV_ROUTE_EXTENSION_FREEZER_APPS ||
+                initialNavRoute == MainActivity.NAV_ROUTE_EXTENSION_STASH_CATEGORIES -> {
                 MainBottomNavDestination.Extension.name
             }
             else -> MainBottomNavDestination.Home.name
@@ -149,6 +150,9 @@ fun MainNavHost(
         }
         MainActivity.NAV_ROUTE_EXTENSION_FREEZER -> {
             arrayOf(AppNavKey.ExtensionHub, AppNavKey.ExtensionFreezer)
+        }
+        MainActivity.NAV_ROUTE_EXTENSION_STASH_CATEGORIES -> {
+            arrayOf(AppNavKey.ExtensionHub, AppNavKey.StashClipboard, AppNavKey.StashCategories)
         }
         else -> arrayOf(AppNavKey.ExtensionHub)
     }
@@ -223,6 +227,19 @@ fun MainNavHost(
                     extensionBackStack.add(AppNavKey.ExtensionHub)
                     extensionBackStack.add(AppNavKey.ExtensionFreezer)
                     extensionBackStack.add(AppNavKey.ExtensionFreezerApps)
+                }
+                onNavRouteConsumed()
+            }
+            MainActivity.NAV_ROUTE_EXTENSION_STASH_CATEGORIES -> {
+                val extensionTab = MainBottomNavDestination.Extension.name
+                if (savedBottomNavTab != extensionTab) {
+                    savedBottomNavTab = extensionTab
+                }
+                if (extensionBackStack.lastOrNull() != AppNavKey.StashCategories) {
+                    extensionBackStack.clear()
+                    extensionBackStack.add(AppNavKey.ExtensionHub)
+                    extensionBackStack.add(AppNavKey.StashClipboard)
+                    extensionBackStack.add(AppNavKey.StashCategories)
                 }
                 onNavRouteConsumed()
             }
