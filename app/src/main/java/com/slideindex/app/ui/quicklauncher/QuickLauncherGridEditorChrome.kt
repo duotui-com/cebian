@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.CallSplit
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.DriveFileRenameOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -79,6 +82,51 @@ internal fun QuickLauncherPageSwitcher(
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = stringResource(R.string.quick_launcher_page_next),
+            )
+        }
+    }
+}
+
+@Composable
+internal fun QuickLauncherFolderHeader(
+    title: String,
+    onBack: () -> Unit,
+    onRename: () -> Unit,
+    onDissolve: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = stringResource(R.string.cd_navigate_back),
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = onRename) {
+            Icon(
+                Icons.Outlined.DriveFileRenameOutline,
+                contentDescription = stringResource(R.string.quick_launcher_folder_rename),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        IconButton(onClick = onDissolve) {
+            Icon(
+                Icons.AutoMirrored.Outlined.CallSplit,
+                contentDescription = stringResource(R.string.quick_launcher_folder_dissolve),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

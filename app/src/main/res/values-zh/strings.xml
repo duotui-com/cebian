@@ -2638,6 +2638,9 @@
     <string name="quick_launcher_create_folder">创建文件夹</string>
     <string name="quick_launcher_folder_name">文件夹名称</string>
     <string name="quick_launcher_folder_empty">文件夹为空，可在编辑模式下添加</string>
+    <string name="quick_launcher_folder_rename">重命名文件夹</string>
+    <string name="quick_launcher_folder_dissolve">解散文件夹</string>
+    <string name="quick_launcher_folder_dissolve_message">文件夹内的图标将移回面板。</string>
     <string name="quick_launcher_panel_switch">切换面板</string>
     <string name="adjust_volume_ring_label">铃</string>
     <string name="adjust_volume_notification_label">通</string>

@@ -301,29 +301,38 @@ sealed interface AppNavKey : NavKey {
     @Serializable data object ExtensionThirdPartyNotices : AppNavKey
     @Serializable data class ExtensionLicenseText(val assetFileName: String) : AppNavKey
     @Serializable data object QuickLauncher : AppNavKey
-    @Serializable data class QuickLauncherAdd(val panelId: String) : AppNavKey
+    @Serializable data class QuickLauncherAdd(
+        val panelId: String,
+        /** 目标文件夹在面板根列表中的索引；-1 表示加到面板根。 */
+        val folderIndex: Int = -1,
+    ) : AppNavKey
     @Serializable data class QuickLauncherEdit(val panelId: String) : AppNavKey
     @Serializable data class QuickLauncherPickApp(
         val panelId: String,
         val fromCreateFolder: Boolean = false,
+        val folderIndex: Int = -1,
     ) : AppNavKey
     @Serializable data class QuickLauncherPickActivity(
         val panelId: String,
         val packageName: String,
         val fromCreateFolder: Boolean = false,
+        val folderIndex: Int = -1,
     ) : AppNavKey
     @Serializable data class QuickLauncherMyShortcuts(
         val panelId: String,
         val fromCreateFolder: Boolean = false,
+        val folderIndex: Int = -1,
     ) : AppNavKey
     @Serializable data class QuickLauncherPresetShortcuts(
         val panelId: String,
         val fromCreateFolder: Boolean = false,
+        val folderIndex: Int = -1,
     ) : AppNavKey
     @Serializable data class QuickLauncherShellCommand(
         val panelId: String,
         val initialCommand: String = "",
         val fromCreateFolder: Boolean = false,
+        val folderIndex: Int = -1,
     ) : AppNavKey
     @Serializable data class QuickLauncherSimulateKeyEvent(
         val panelId: String,
@@ -331,12 +340,14 @@ sealed interface AppNavKey : NavKey {
         val initialKeyName: String = "",
         val initialIsLongPress: Boolean = false,
         val fromCreateFolder: Boolean = false,
+        val folderIndex: Int = -1,
     ) : AppNavKey
     @Serializable data class QuickLauncherOpenLink(
         val panelId: String,
         val initialUrl: String = "",
         val initialLabel: String = "",
         val fromCreateFolder: Boolean = false,
+        val folderIndex: Int = -1,
     ) : AppNavKey
     @Serializable data class QuickLauncherCreateFolder(val panelId: String) : AppNavKey
 

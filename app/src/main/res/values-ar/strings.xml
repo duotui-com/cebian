@@ -2561,6 +2561,9 @@
     <string name="quick_launcher_create_folder">إنشاء مجلد</string>
     <string name="quick_launcher_folder_name">اسم المجلد</string>
     <string name="quick_launcher_folder_empty">المجلد فارغ، يمكنك الإضافة في وضع التحرير</string>
+    <string name="quick_launcher_folder_rename">إعادة تسمية المجلد</string>
+    <string name="quick_launcher_folder_dissolve">تفكيك المجلد</string>
+    <string name="quick_launcher_folder_dissolve_message">ستُنقل العناصر الموجودة في هذا المجلد إلى اللوحة.</string>
     <string name="quick_launcher_panel_switch">تبديل اللوحة</string>
     <string name="adjust_volume_ring_label">رنين</string>
     <string name="adjust_volume_notification_label">إشعار</string>

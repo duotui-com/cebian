@@ -35,7 +35,7 @@ import com.slideindex.app.ui.viewmodel.QuickLauncherEditorViewModel
 fun QuickLauncherEditorScreen(
     viewModel: QuickLauncherEditorViewModel,
     onBack: () -> Unit,
-    onAdd: (String) -> Unit,
+    onAdd: (panelId: String, folderIndex: Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     QuickLauncherEditorContent(
@@ -46,7 +46,7 @@ fun QuickLauncherEditorScreen(
         onDisplayChange = viewModel::setDisplaySettings,
         onItemsChange = viewModel::updateCurrentPanelItems,
         onInteractionActiveChange = viewModel::setGridInteractionActive,
-        onAdd = onAdd,
+        onAdd = { folderIndex -> onAdd(uiState.currentPanel.id, folderIndex) },
     )
 }
 
@@ -57,7 +57,7 @@ fun QuickLauncherEditorScreen(
     onBack: () -> Unit,
     onSavePanels: (List<QuickLauncherPanel>) -> Unit,
     onDisplayChange: (QuickLauncherDisplaySettings) -> Unit,
-    onAdd: (String) -> Unit,
+    onAdd: (panelId: String, folderIndex: Int) -> Unit,
 ) {
     val currentPanels = com.slideindex.app.launcher.QuickLauncherPanelDefaults.effectivePanels(settings.quickLauncherPanels)
     val uiState = QuickLauncherEditorUiState(
@@ -82,7 +82,7 @@ fun QuickLauncherEditorScreen(
             onSavePanels(updated)
         },
         onInteractionActiveChange = {},
-        onAdd = onAdd,
+        onAdd = { folderIndex -> onAdd(uiState.currentPanel.id, folderIndex) },
     )
 }
 
@@ -96,7 +96,7 @@ fun QuickLauncherEditorContent(
     onDisplayChange: (QuickLauncherDisplaySettings) -> Unit,
     onItemsChange: (List<QuickLauncherItem>) -> Unit,
     onInteractionActiveChange: (Boolean) -> Unit,
-    onAdd: (String) -> Unit,
+    onAdd: (folderIndex: Int) -> Unit,
 ) {
     val appearanceSectionTitle = stringResource(R.string.quick_launcher_appearance_section)
     val appearanceItems = quickLauncherAppearanceCardItems(
@@ -155,9 +155,7 @@ fun QuickLauncherEditorContent(
                                 items = uiState.currentPanelItems,
                                 appsByPackage = uiState.appsByPackage,
                                 onItemsChange = onItemsChange,
-                                onAdd = {
-                                    onAdd(uiState.currentPanel.id)
-                                },
+                                onAdd = onAdd,
                                 onInteractionActiveChange = onInteractionActiveChange,
                                 gridColumnsOverride = uiState.currentPanel.columnsPerPage,
                                 gridRowsOverride = uiState.currentPanel.rowsPerPage,

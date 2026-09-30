@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,13 +37,19 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.zIndex
+import com.slideindex.app.R
 import com.slideindex.app.data.AppInfo
 import com.slideindex.app.launcher.QuickLauncherGridLogic
+import com.slideindex.app.launcher.dissolveFolder
+import com.slideindex.app.launcher.renameFolder
+import com.slideindex.app.launcher.withFolderChildren
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -53,9 +60,14 @@ import com.slideindex.app.launcher.QuickLauncherItem
 import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.ui.quicklauncher.QuickLauncherDeleteButtonLayer
 import com.slideindex.app.ui.quicklauncher.QuickLauncherEditorToolbar
+import com.slideindex.app.ui.quicklauncher.QuickLauncherFolderHeader
 import com.slideindex.app.ui.quicklauncher.QuickLauncherGridCell
 import com.slideindex.app.ui.quicklauncher.QuickLauncherPageGrid
 import com.slideindex.app.ui.quicklauncher.QuickLauncherPageSwitcher
+import com.slideindex.app.ui.quicklauncher.quickLauncherGridLabel
+import com.slideindex.app.ui.miuix.MiuixConfirmDialog
+import com.slideindex.app.ui.miuix.MiuixFormDialog
+import com.slideindex.app.ui.miuix.MiuixLabeledTextField
 import com.slideindex.app.util.QuickLauncherIconResolver
 import kotlin.math.roundToInt
 
@@ -80,13 +92,18 @@ fun QuickLauncherGridEditor(
     items: List<QuickLauncherItem>,
     appsByPackage: Map<String, AppInfo>,
     onItemsChange: (List<QuickLauncherItem>) -> Unit,
-    onAdd: () -> Unit,
+    onAdd: (folderIndex: Int) -> Unit,
     onInteractionActiveChange: (Boolean) -> Unit = {},
     showPageSwitcher: Boolean = true,
     gridColumnsOverride: Int? = null,
     gridRowsOverride: Int? = null,
 ) {
     var editMode by remember { mutableStateOf(false) }
+    /** 正在编辑的文件夹在根列表中的索引；-1 表示面板根层级。 */
+    var openFolderIndex by rememberSaveable { mutableStateOf(-1) }
+    var renameDialogOpen by remember { mutableStateOf(false) }
+    var renameText by remember { mutableStateOf("") }
+    var dissolveDialogOpen by remember { mutableStateOf(false) }
     var dragFromGlobal by remember { mutableIntStateOf(-1) }
     var dragSlotGlobal by remember { mutableIntStateOf(-1) }
     var dragOffsetX by remember { mutableFloatStateOf(0f) }
@@ -100,6 +117,9 @@ fun QuickLauncherGridEditor(
     var lastAutoPageTurnMs by remember { mutableLongStateOf(0L) }
     var dragEdgePageZone by remember { mutableIntStateOf(0) }
     var dragEdgeAutoPageSeeded by remember { mutableStateOf(false) }
+    // 索引可能因为面板被改写而失效（解散文件夹、删除文件夹、切换面板），失效时回落到面板根。
+    val activeFolderIndex = openFolderIndex.takeIf { it in items.indices && items[it].isFolder } ?: -1
+    val levelItems = if (activeFolderIndex >= 0) items[activeFolderIndex].folderItems() else items
     val columns = (gridColumnsOverride ?: settings.quickLauncherColumnsPerPage).coerceIn(
         2,
         com.slideindex.app.overlay.layout.QuickLauncherPanelLayoutEngine.MAX_COLUMNS,
@@ -111,19 +131,64 @@ fun QuickLauncherGridEditor(
     val iconSizeDp = settings.quickLauncherDisplay.iconSizeDp
     val iconShape = settings.quickLauncherDisplay.iconShape
     val pageSize = QuickLauncherGridLogic.pageSize(columns, rows)
-    val pageCount = QuickLauncherGridLogic.pageCount(items.size, pageSize)
+    val pageCount = QuickLauncherGridLogic.pageCount(levelItems.size, pageSize)
     val density = LocalDensity.current
     val gridGapPx = with(density) { 8.dp.toPx() }
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val actionIconTintArgb = MaterialTheme.colorScheme.onSurface.toArgb()
+    val rootItemsState = rememberUpdatedState(items)
+
+    /** 把当前层级的改动写回面板：根层级直接写，文件夹层级回写到所属文件夹。 */
+    fun writeLevelItems(newLevelItems: List<QuickLauncherItem>) {
+        val index = activeFolderIndex
+        if (index < 0) {
+            onItemsChange(newLevelItems)
+            return
+        }
+        val root = rootItemsState.value
+        if (index !in root.indices || !root[index].isFolder) return
+        onItemsChange(root.withFolderChildren(index, newLevelItems))
+    }
+
+    fun resetDragState() {
+        dragFromGlobal = -1
+        dragSlotGlobal = -1
+        hoverSlotGlobal = -1
+        mergeTargetGlobal = -1
+        dragOffsetX = 0f
+        dragOffsetY = 0f
+        pageSwipeOffsetPx = 0f
+    }
+
+    fun enterFolder(index: Int) {
+        // 文件夹只有一层，已经在文件夹内时不再下钻。
+        if (activeFolderIndex >= 0) return
+        if (index !in items.indices || !items[index].isFolder) return
+        renameDialogOpen = false
+        dissolveDialogOpen = false
+        openFolderIndex = index
+        currentPage = 0
+        resetDragState()
+        haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
+    }
+
+    fun exitFolder() {
+        if (openFolderIndex < 0) return
+        renameDialogOpen = false
+        dissolveDialogOpen = false
+        openFolderIndex = -1
+        currentPage = 0
+        resetDragState()
+    }
+
     var iconBitmapCache by remember { mutableStateOf<Map<Int, android.graphics.Bitmap?>>(emptyMap()) }
-    LaunchedEffect(items, appsByPackage, actionIconTintArgb, settings.activityShortcuts, settings.shellCommands) {
+    LaunchedEffect(levelItems, appsByPackage, actionIconTintArgb, settings.activityShortcuts, settings.shellCommands) {
         iconBitmapCache = withContext(Dispatchers.IO) {
             // 受限并发：串行解析在 OEM 主题图标设备上要等一分钟，全并发又会把 CPU 打满。
             val permits = Semaphore(ICON_LOAD_CONCURRENCY)
             coroutineScope {
-                items.mapIndexed { index, item ->
+                levelItems.mapIndexed { index, item ->
                     async {
                         permits.withPermit {
                             index to QuickLauncherIconResolver.iconBitmap(
@@ -140,10 +205,16 @@ fun QuickLauncherGridEditor(
             }
         }
     }
-    val itemsState = rememberUpdatedState(items)
+    val itemsState = rememberUpdatedState(levelItems)
 
     LaunchedEffect(pageCount, columns, rows) {
         currentPage = currentPage.coerceIn(0, pageCount - 1)
+    }
+
+    LaunchedEffect(openFolderIndex, items) {
+        if (openFolderIndex >= 0 && (openFolderIndex !in items.indices || !items[openFolderIndex].isFolder)) {
+            exitFolder()
+        }
     }
 
     LaunchedEffect(editMode, dragFromGlobal) {
@@ -152,6 +223,11 @@ fun QuickLauncherGridEditor(
 
     LaunchedEffect(hoverSlotGlobal, hoverAnchorPointer, dragFromGlobal) {
         if (dragFromGlobal < 0 || hoverSlotGlobal < 0 || hoverSlotGlobal == dragFromGlobal) {
+            mergeTargetGlobal = -1
+            return@LaunchedEffect
+        }
+        // 文件夹不能再嵌套文件夹，文件夹内部禁用拖拽合并。
+        if (activeFolderIndex >= 0) {
             mergeTargetGlobal = -1
             return@LaunchedEffect
         }
@@ -168,6 +244,25 @@ fun QuickLauncherGridEditor(
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
+            if (activeFolderIndex >= 0) {
+                QuickLauncherFolderHeader(
+                    title = quickLauncherGridLabel(context, items[activeFolderIndex], appsByPackage),
+                    onBack = { exitFolder() },
+                    onRename = {
+                        renameText = items[activeFolderIndex].label
+                        renameDialogOpen = true
+                    },
+                    onDissolve = { dissolveDialogOpen = true },
+                )
+                if (levelItems.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.quick_launcher_folder_empty),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 2.dp),
+                    )
+                }
+            }
             if (showPageSwitcher) {
                 QuickLauncherPageSwitcher(
                     currentPage = currentPage,
@@ -213,7 +308,7 @@ fun QuickLauncherGridEditor(
                         val gridHeightDp = with(density) { gridTotalHeightPx.toDp() }
                         val cellHeightDp = with(density) { cellHeightPx.toDp() }
                         val currentPageState = rememberUpdatedState(currentPage)
-                        val itemsState = rememberUpdatedState(items)
+                        val itemsState = rememberUpdatedState(levelItems)
                         val pageSizeState = rememberUpdatedState(pageSize)
 
                         val hoverDeadzonePx = with(density) { HOVER_DEADZONE_DP.dp.toPx() }
@@ -308,7 +403,7 @@ fun QuickLauncherGridEditor(
                                     columns = columns,
                                     rows = rows,
                                     pageSize = pageSize,
-                                    items = items,
+                                    items = levelItems,
                                     appsByPackage = appsByPackage,
                                     iconBitmapCache = iconBitmapCache,
                                     actionIconTintArgb = actionIconTintArgb,
@@ -320,6 +415,11 @@ fun QuickLauncherGridEditor(
                                     iconShape = iconShape,
                                     cellHeightDp = cellHeightDp,
                                     shellCommands = settings.shellCommands,
+                                    onEnterFolder = if (!editMode && activeFolderIndex < 0) {
+                                        { index -> enterFolder(index) }
+                                    } else {
+                                        null
+                                    },
                                 )
                             }
 
@@ -336,7 +436,7 @@ fun QuickLauncherGridEditor(
                                         columns = columns,
                                         rows = rows,
                                         pageSize = pageSize,
-                                        items = items,
+                                        items = levelItems,
                                         appsByPackage = appsByPackage,
                                         iconBitmapCache = iconBitmapCache,
                                         actionIconTintArgb = actionIconTintArgb,
@@ -365,7 +465,7 @@ fun QuickLauncherGridEditor(
                                         columns = columns,
                                         rows = rows,
                                         pageSize = pageSize,
-                                        items = items,
+                                        items = levelItems,
                                         appsByPackage = appsByPackage,
                                         iconBitmapCache = iconBitmapCache,
                                         actionIconTintArgb = actionIconTintArgb,
@@ -474,7 +574,7 @@ fun QuickLauncherGridEditor(
                                                             target = mergeTargetGlobal,
                                                         )
                                                         if (newItems != currentItems) {
-                                                            onItemsChange(newItems)
+                                                            writeLevelItems(newItems)
                                                         }
                                                         haptic.performHapticFeedback(
                                                             HapticFeedbackType.GestureEnd,
@@ -487,7 +587,7 @@ fun QuickLauncherGridEditor(
                                                                 itemCount = currentItems.size,
                                                             )
                                                         if (dragFromGlobal != insertIndex) {
-                                                            onItemsChange(
+                                                            writeLevelItems(
                                                                 currentItems.moveIndex(
                                                                     dragFromGlobal,
                                                                     insertIndex,
@@ -522,7 +622,7 @@ fun QuickLauncherGridEditor(
                                     columns = columns,
                                     pageSize = pageSize,
                                     pageStartIndex = pageStartIndex,
-                                    items = items,
+                                    items = levelItems,
                                     dragFromGlobal = dragFromGlobal,
                                     dragSlotGlobal = dragSlotGlobal,
                                     stepX = stepX,
@@ -531,7 +631,7 @@ fun QuickLauncherGridEditor(
                                     density = density,
                                     zIndex = if (dragFromGlobal >= 0) 0.5f else 3f,
                                     onRemoveAt = { globalIndex ->
-                                        onItemsChange(
+                                        writeLevelItems(
                                             itemsState.value.filterIndexed { i, _ -> i != globalIndex },
                                         )
                                     },
@@ -539,7 +639,7 @@ fun QuickLauncherGridEditor(
                             }
 
                             if (editMode && dragFromGlobal >= 0) {
-                                val draggedItem = items.getOrNull(dragFromGlobal)
+                                val draggedItem = levelItems.getOrNull(dragFromGlobal)
                                 if (draggedItem != null) {
                                     val pointerX = dragStartInGrid.x + dragOffsetX
                                     val pointerY = dragStartInGrid.y + dragOffsetY
@@ -594,8 +694,44 @@ fun QuickLauncherGridEditor(
                 Spacer(modifier = Modifier.width(12.dp))
                 QuickLauncherEditorToolbar(
                     editMode = editMode,
-                    onAdd = onAdd,
-                    onToggleEdit = { editMode = !editMode },
+                    onAdd = { onAdd(activeFolderIndex) },
+                    onToggleEdit = {
+                        editMode = !editMode
+                        resetDragState()
+                    },
+                )
+            }
+
+            if (activeFolderIndex >= 0) {
+                MiuixFormDialog(
+                    show = renameDialogOpen,
+                    onDismissRequest = { renameDialogOpen = false },
+                    title = stringResource(R.string.quick_launcher_folder_rename),
+                    confirmText = stringResource(R.string.shell_panel_save),
+                    confirmEnabled = renameText.isNotBlank(),
+                    onConfirm = {
+                        onItemsChange(
+                            rootItemsState.value.renameFolder(activeFolderIndex, renameText.trim()),
+                        )
+                    },
+                ) {
+                    MiuixLabeledTextField(
+                        value = renameText,
+                        onValueChange = { renameText = it },
+                        label = stringResource(R.string.quick_launcher_folder_name),
+                    )
+                }
+
+                MiuixConfirmDialog(
+                    show = dissolveDialogOpen,
+                    onDismissRequest = { dissolveDialogOpen = false },
+                    title = stringResource(R.string.quick_launcher_folder_dissolve),
+                    message = stringResource(R.string.quick_launcher_folder_dissolve_message),
+                    confirmText = stringResource(R.string.quick_launcher_folder_dissolve),
+                    onConfirm = {
+                        onItemsChange(rootItemsState.value.dissolveFolder(activeFolderIndex))
+                        exitFolder()
+                    },
                 )
             }
         }

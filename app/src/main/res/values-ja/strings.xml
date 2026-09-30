@@ -2590,6 +2590,9 @@
     <string name="quick_launcher_create_folder">フォルダを作成</string>
     <string name="quick_launcher_folder_name">フォルダ名</string>
     <string name="quick_launcher_folder_empty">フォルダが空です。編集モードでアイテムを追加してください</string>
+    <string name="quick_launcher_folder_rename">フォルダ名を変更</string>
+    <string name="quick_launcher_folder_dissolve">フォルダを解除</string>
+    <string name="quick_launcher_folder_dissolve_message">フォルダ内のアイテムはパネルに戻ります。</string>
     <string name="quick_launcher_panel_switch">パネルを切り替え</string>
     <string name="adjust_volume_ring_label">着信</string>
     <string name="adjust_volume_notification_label">通知</string>
