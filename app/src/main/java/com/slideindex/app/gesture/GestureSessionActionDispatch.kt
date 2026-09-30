@@ -1,5 +1,6 @@
 package com.slideindex.app.gesture
 
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.launcher.QuickLauncherPanelDefaults
 import com.slideindex.app.di.OverlayDependencyAccess
 import com.slideindex.app.overlay.EdgeContinuedOverlayLaunchCoordinator
@@ -234,6 +235,10 @@ internal fun GestureSession.handleClassifiedGesture(
         is GestureAction.QuickLauncher -> {
             sessionContinuousPick.quickLauncher = false
             sessionCallbacks.hapticConfirmLaunch()
+            EdgeDiag.log(
+                "dispatch",
+                "handleClassifiedGesture → QuickLauncher（松手/即时路径直接开面板）panelId='${action.panelId}'"
+            )
             openQuickLauncherPanel(action)
         }
 

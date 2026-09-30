@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import com.slideindex.app.data.AppInfo
 import com.slideindex.app.data.AppRepository
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.gesture.ActionExecutor
 import com.slideindex.app.gesture.GestureAction
 import com.slideindex.app.gesture.CollapsedWindowBounds
@@ -331,8 +332,17 @@ class EdgeGestureOverlayView(
         onPresentationTouchRequirementChanged?.invoke()
     }
 
-    fun handleOverlayTouch(event: MotionEvent): Boolean =
-        touchDispatcher.handleTouch(event).also { interactionWatchdog.onInput() }
+    fun handleOverlayTouch(event: MotionEvent): Boolean {
+        val handled = touchDispatcher.handleTouch(event)
+        EdgeDiag.log(
+            "touch",
+            "handleOverlayTouch action=${MotionEvent.actionToString(event.actionMasked)} " +
+                "handled=$handled panelMode=${gestureSession.panelMode()} " +
+                "active=${gestureSession.isActive()} raw=(${event.rawX},${event.rawY})"
+        )
+        interactionWatchdog.onInput()
+        return handled
+    }
 
     /**
      * 处理由 LSPosed 模块在输入层接管并转发过来的触摸事件（屏幕原始坐标）。
@@ -348,6 +358,10 @@ class EdgeGestureOverlayView(
 
     /** 模块侧判定会话需要提前结束（多指、屏幕关闭等）时调用。 */
     fun cancelForwardedTouch() {
+        EdgeDiag.logStack(
+            "module",
+            "cancelForwardedTouch（LSPosed 接管会话结束/模块侧取消）→ 会 forceReset 并摘掉刚开的面板"
+        )
         edgeCaptureTouchActive = false
         forceRecoverInteractionState()
     }
@@ -355,6 +369,12 @@ class EdgeGestureOverlayView(
     fun handleCaptureStripTouch(event: MotionEvent, triggerIndex: Int): Boolean {
         val handle = settings.triggerHandles(side).getOrNull(triggerIndex) ?: return false
         val (localX, localY) = rawToLocal(event.rawX, event.rawY)
+        EdgeDiag.log(
+            "touch",
+            "handleCaptureStripTouch action=${MotionEvent.actionToString(event.actionMasked)} " +
+                "strip=$triggerIndex handle=${handle.id} panelMode=${gestureSession.panelMode()} " +
+                "active=${gestureSession.isActive()} raw=(${event.rawX},${event.rawY})"
+        )
         val handled = when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 layoutCoordinator.syncZoneLayout()
@@ -400,6 +420,11 @@ class EdgeGestureOverlayView(
     fun keepsOverlayExpanded(): Boolean = layoutCoordinator.keepsOverlayExpanded()
 
     fun forceRecoverInteractionState() {
+        EdgeDiag.logStack(
+            "recover",
+            "forceRecoverInteractionState before: panelMode=${gestureSession.panelMode()} " +
+                "active=${gestureSession.isActive()} adjust=${adjustPanelController.hasAdjustPanel()}"
+        )
         if (adjustPanelController.isDismissing()) return
         // Activity 版 Shell 面板不随 edge recover 关闭（触钮点按收回会走到这里）。
         shellCoordinator.clearShellContinuousPick()

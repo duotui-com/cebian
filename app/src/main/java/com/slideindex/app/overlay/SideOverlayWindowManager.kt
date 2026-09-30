@@ -5,6 +5,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.gesture.CollapsedWindowBounds
 import com.slideindex.app.gesture.GestureZoneLayout
 import com.slideindex.app.gesture.KeyboardTriggerBoundsAdjuster
@@ -101,7 +102,16 @@ internal class SideOverlayWindowManager(
     }
 
     fun ensurePresentationAttached(forceWhenIdle: Boolean = false) {
-        if (overlayLayoutSuspended()) return
+        if (overlayLayoutSuspended()) {
+            EdgeDiag.log(
+                "window",
+                "ensurePresentationAttached 跳过：overlayLayoutSuspended=true " +
+                    "(edgeOverlayDetached=$edgeOverlayDetached " +
+                    "trampolineGuard=${OverlayTrampolineGuard.blocksOverlayPresentationTouch()})" +
+                    " panelMode=${presentationView?.panelMode()}"
+            )
+            return
+        }
         val root = presentationRoot() ?: return
         val content = presentationView ?: return
         val params = presentationParams ?: return
@@ -110,16 +120,30 @@ internal class SideOverlayWindowManager(
             !content.isSessionActive() &&
             !content.needsPresentationDirectTouch()
         ) {
+            EdgeDiag.log(
+                "window",
+                "ensurePresentationAttached 跳过：非会话且不需要直触 panelMode=${content.panelMode()}"
+            )
             return
         }
         applyFullScreenPresentationLayout(params)
         clearPresentationBrightnessOverride(params)
         applyPresentationTouchFlags(content, params)
         if (!presentationAttached) {
+            EdgeDiag.log(
+                "window",
+                "presentation 窗口 addView（panelMode=${content.panelMode()} " +
+                    "session=${content.isSessionActive()}）"
+            )
             runCatching { addOverlayView(root, params) }
                 .onSuccess { onPresentationNewlyAttached() }
                 .onFailure { Log.e(TAG, "Failed to attach presentation overlay", it) }
         } else {
+            EdgeDiag.log(
+                "window",
+                "presentation 窗口 updateViewLayout（panelMode=${content.panelMode()} " +
+                    "session=${content.isSessionActive()}）"
+            )
             runCatching { windowManager.updateViewLayout(root, params) }
                 .onFailure { Log.e(TAG, "Failed to sync presentation overlay", it) }
         }
@@ -127,6 +151,11 @@ internal class SideOverlayWindowManager(
 
     fun detachPresentationWindow() {
         if (!presentationAttached) return
+        EdgeDiag.logStack(
+            "window",
+            "detachPresentationWindow：摘掉全屏 presentation（panelMode=${presentationView?.panelMode()} " +
+                "session=${presentationView?.isSessionActive()}）"
+        )
         presentationParams?.let { clearPresentationBrightnessOverride(it) }
         presentationRoot()?.let { removeOverlayView(it) }
         presentationAttached = false
@@ -141,6 +170,12 @@ internal class SideOverlayWindowManager(
         ) {
             return
         }
+        EdgeDiag.log(
+            "window",
+            "detachPresentationUnlessRequired 判定为 idle → 摘窗 " +
+                "(panelMode=${view.panelMode()} session=${view.isSessionActive()} " +
+                "directTouch=${view.needsPresentationDirectTouch()} keepsExpanded=${view.keepsOverlayExpanded()})"
+        )
         detachPresentationWindow()
     }
 

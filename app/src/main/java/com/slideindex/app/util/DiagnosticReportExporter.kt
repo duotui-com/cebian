@@ -56,11 +56,14 @@ object DiagnosticReportExporter {
     }
 
     private fun buildExportOutcome(appContext: Context): ExportOutcome {
-        val fullReport = LocalCrashHandler.generateDiagnosticReport(appContext)
+        val report = buildString {
+            append(LocalCrashHandler.generateDiagnosticReport(appContext))
+            append(com.slideindex.app.diagnostic.EdgeDiag.exportText(appContext))
+        }
         val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = "xgesture_diagnostic_$stamp.log"
         return ExportOutcome.Ready(
-            fullReport = fullReport,
+            fullReport = report,
             fileName = fileName,
         )
     }
