@@ -2767,13 +2767,10 @@
     <string name="about_feedback_issues_desc">الإبلاغ عن الأخطاء، أو اقتراح ميزات جديدة، أو مشاركة الإعدادات على GitHub</string>
     <string name="about_help_translate_title">المشاركة في الترجمة</string>
     <string name="about_help_translate_desc">ساعدنا في ترجمة هذا التطبيق</string>
-    <string name="about_weblate_url">https://hosted.weblate.org/engage/cebian/</string>
+    <string name="about_weblate_url">https://hosted.weblate.org/engage/XGesture/</string>
     <string name="about_telegram_chat_title">مجموعة نقاش Telegram</string>
     <string name="about_telegram_chat_desc">XGesture · XGesture</string>
     <string name="about_telegram_chat_url">https://t.me/+NtcG5HPiKXVmNTU1</string>
-    <string name="about_telegram_releases_title">إصدارات Telegram</string>
-    <string name="about_telegram_releases_desc">\@cebian_channel · الإصدارات والإعلانات</string>
-    <string name="about_telegram_releases_url">https://t.me/cebian_channel</string>
     <string name="about_qq_group_title">مجموعة QQ</string>
     <string name="about_qq_group_desc">1042783385</string>
     <string name="about_qq_group_url">https://qm.qq.com/q/Zx4wd2LB4G</string>

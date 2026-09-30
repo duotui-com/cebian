@@ -62,10 +62,10 @@
 
 ### 5. 验证
 
-1. 打开 https://hosted.weblate.org/projects/cebian/
+1. 打开 https://hosted.weblate.org/projects/XGesture/
 2. 选择 **简体中文** / **Japanese**，确认加载 `values-zh`、`values-ja`
 3. 试译一条并提交，检查 GitHub 是否出现 PR
-4. README 徽章：`https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg`
+4. README 徽章：`https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg`
 
 ## 语言代码对照
 

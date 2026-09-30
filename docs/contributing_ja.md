@@ -8,9 +8,9 @@
 
 ## アプリ UI の翻訳（Weblate 推奨）
 
-**アプリ内 UI テキスト** の貢献は [Weblate](https://hosted.weblate.org/engage/cebian/) が最も簡単です：
+**アプリ内 UI テキスト** の貢献は [Weblate](https://hosted.weblate.org/engage/XGesture/) が最も簡単です：
 
-[![翻訳状況](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻訳状況](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
 1. Weblate のプロジェクトページを開く（Git の知識不要）。
 2. 言語を選ぶ（English、日本語、または新規言語のリクエスト）。

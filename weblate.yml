@@ -4,7 +4,7 @@
 # core/* and feature/* and can be added as linked components later if needed.
 #
 # Maintainer one-time setup on hosted.weblate.org:
-# 1. Create project "XGesture" (slug: cebian), link https://github.com/qpst4/XGesture.git
+# 1. Create project "XGesture" ((slug: XGesture)), link https://github.com/qpst4/XGesture.git
 # 2. Import this file or add component manually with the fields below
 # 3. Set source language to English — template is values/strings.xml (Simplified Chinese lives in values-zh/)
 # 4. Enable "Create pull request" / push addon; do not push directly to main
@@ -12,7 +12,7 @@
 component:
   name: App strings
   slug: app-strings
-  project: cebian
+  project: XGesture
   filemask: app/src/main/res/values-*/strings.xml
   template: app/src/main/res/values/strings.xml
   file_format: aresource

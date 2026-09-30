@@ -359,9 +359,9 @@ cd XGesture
 
 ## 🌍 翻訳に参加
 
-[![翻訳状況](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻訳状況](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
-[Weblate](https://hosted.weblate.org/engage/cebian/) で **アプリ UI の翻訳** に協力（Git 不要）。詳細は [貢献ガイド（日本語）](docs/contributing_ja.md#アプリ-ui-の翻訳weblate-推奨)。
+[Weblate](https://hosted.weblate.org/engage/XGesture/) で **アプリ UI の翻訳** に協力（Git 不要）。詳細は [貢献ガイド（日本語）](docs/contributing_ja.md#アプリ-ui-の翻訳weblate-推奨)。
 
 ---
 
@@ -373,10 +373,9 @@ cd XGesture
 [![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/issues)
 <br>
 [![Telegram](https://img.shields.io/badge/Telegram-Chat-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
-[![Telegram Releases](https://img.shields.io/badge/Telegram-Releases-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/cebian_channel)
 [![QQ Group](art/qq_group_badge.svg)](https://qm.qq.com/q/Zx4wd2LB4G)
 
-> Telegram：[チャット](https://t.me/+NtcG5HPiKXVmNTU1) · [リリース @cebian_channel](https://t.me/cebian_channel) · QQ：**1042783385**
+> Telegram：[チャット](https://t.me/+NtcG5HPiKXVmNTU1) · QQ：**1042783385**
 
 </div>
 

@@ -376,9 +376,9 @@ cd XGesture
 
 ## 🌍 参与翻译
 
-[![翻译状态](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻译状态](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
-在 [Weblate](https://hosted.weblate.org/engage/cebian/) 贡献 **应用界面翻译**，无需 Git。详见 [贡献指南（中文）](docs/contributing_zh.md#翻译-app-界面推荐-weblate)。
+在 [Weblate](https://hosted.weblate.org/engage/XGesture/) 贡献 **应用界面翻译**，无需 Git。详见 [贡献指南（中文）](docs/contributing_zh.md#翻译-app-界面推荐-weblate)。
 
 ---
 
@@ -392,10 +392,9 @@ cd XGesture
 [![GitHub Issues](https://img.shields.io/badge/GitHub-Issues%20反馈-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/issues)
 <br>
 [![Telegram 讨论群](https://img.shields.io/badge/Telegram-XGesture_·_X手势-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
-[![Telegram 公告](https://img.shields.io/badge/Telegram-Releases-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/cebian_channel)
 [![QQ Group](art/qq_group_badge.svg)](https://qm.qq.com/q/Zx4wd2LB4G)
 
-> 官方 QQ 交流群号：**1042783385** · Telegram：[讨论群](https://t.me/+NtcG5HPiKXVmNTU1) · [发版频道 @cebian_channel](https://t.me/cebian_channel)
+> 官方 QQ 交流群号：**1042783385** · Telegram：[讨论群](https://t.me/+NtcG5HPiKXVmNTU1)
 
 </div>
 

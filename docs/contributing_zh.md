@@ -8,9 +8,9 @@
 
 ## 翻译 App 界面（推荐 Weblate）
 
-贡献 **应用内 UI 文案** 最简单的方式是使用 [Weblate](https://hosted.weblate.org/engage/cebian/)：
+贡献 **应用内 UI 文案** 最简单的方式是使用 [Weblate](https://hosted.weblate.org/engage/XGesture/)：
 
-[![翻译状态](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻译状态](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
 1. 打开 Weblate 项目页（无需会 Git）。
 2. 选择语言（如 English、日本語，或申请新语言）。

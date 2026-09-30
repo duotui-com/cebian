@@ -8,9 +8,9 @@ Thank you for helping improve **XGesture (X手势)**! This document covers how t
 
 ## Translating the app (Weblate — recommended)
 
-The easiest way to help with **in-app UI text** is [Weblate](https://hosted.weblate.org/engage/cebian/):
+The easiest way to help with **in-app UI text** is [Weblate](https://hosted.weblate.org/engage/XGesture/):
 
-[![Translation status](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![Translation status](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
 1. Open the project on Weblate (no Git knowledge required).
 2. Pick a language (e.g. English, 日本語, or request a new one).

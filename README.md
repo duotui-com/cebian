@@ -376,9 +376,9 @@ cd XGesture
 
 ## 🌍 Help Translate
 
-[![Translation status](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![Translation status](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
-Contribute **in-app UI translations** on [Weblate](https://hosted.weblate.org/engage/cebian/) — no Git required. See [CONTRIBUTING.md](CONTRIBUTING.md#translating-the-app-weblate--recommended).
+Contribute **in-app UI translations** on [Weblate](https://hosted.weblate.org/engage/XGesture/) — no Git required. See [CONTRIBUTING.md](CONTRIBUTING.md#translating-the-app-weblate--recommended).
 
 ---
 
@@ -392,10 +392,9 @@ Welcome to join the community discussions and provide feedback or feature reques
 [![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/issues)
 <br>
 [![Telegram Chat](https://img.shields.io/badge/Telegram-Chat-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
-[![Telegram Releases](https://img.shields.io/badge/Telegram-Releases-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/cebian_channel)
 [![QQ Group](art/qq_group_badge.svg)](https://qm.qq.com/q/Zx4wd2LB4G)
 
-> Telegram: [chat group](https://t.me/+NtcG5HPiKXVmNTU1) (XGesture · X手势) · [release channel @cebian_channel](https://t.me/cebian_channel) · QQ Group: **1042783385**
+> Telegram: [chat group](https://t.me/+NtcG5HPiKXVmNTU1) (XGesture · X手势) · QQ Group: **1042783385**
 
 </div>
 
