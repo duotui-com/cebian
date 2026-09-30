@@ -66,6 +66,8 @@ fun QuickLauncherEditorScreen(
         displaySettings = settings.quickLauncherDisplay,
         defaultColumns = settings.quickLauncherColumnsPerPage,
         defaultRows = settings.quickLauncherRowsPerPage,
+        shellCommands = settings.shellCommands,
+        activityShortcuts = settings.activityShortcuts,
     )
     QuickLauncherEditorContent(
         uiState = uiState,
@@ -146,7 +148,12 @@ fun QuickLauncherEditorContent(
                     ) {
                         key(uiState.currentPanel.id) {
                             val dummySettings = AppSettings(
-                                launcher = com.slideindex.app.settings.LauncherSettings(quickLauncherDisplay = uiState.displaySettings),
+                                launcher = com.slideindex.app.settings.LauncherSettings(
+                                    quickLauncherDisplay = uiState.displaySettings,
+                                    // 预览网格要按真实配置解析 Shell 命令 / 应用内直达的图标。
+                                    shellCommands = uiState.shellCommands,
+                                    activityShortcuts = uiState.activityShortcuts,
+                                ),
                                 quickLauncherColumnsPerPage = uiState.defaultColumns,
                                 quickLauncherRowsPerPage = uiState.defaultRows,
                             )
