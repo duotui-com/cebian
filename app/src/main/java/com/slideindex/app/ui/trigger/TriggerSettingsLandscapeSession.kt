@@ -54,6 +54,12 @@ object TriggerSettingsLandscapeSession {
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun lockLandscapeOrientation(activity: Activity) {
+        // 只有「用户手动指定横屏展示」才锁方向。系统自动旋转带来的横屏不能锁，
+        // 否则锁上之后用户把手机转回竖屏，页面也回不到竖屏触钮。
+        if (manualLandscapeDisplay != true) {
+            Log.i(TAG, "lock skipped: not manual (count=$activeScreenCount)")
+            return
+        }
         // 仍在横屏编辑流里：撤销上一次待执行的还原
         cancelPendingRelease()
         Log.i(TAG, "lock landscape count=$activeScreenCount from ${callerHint()}")
