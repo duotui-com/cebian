@@ -49,7 +49,8 @@ object TakeoverExtraRects {
    * 悬浮球与双贴边线条。
    *
    * 两者位置都随设置、键盘弹出和横屏变化（`keyboardAdjusted*`），因此每次下发都按当前状态重算；
-   * 拖拽落位后 app 会重新下发一次，拖拽过程中不需要更新（那会儿会话已经锁在该目标上）。
+   * 拖拽落位/换位后由 `ModuleHookConfigSync` 的签名比对触发重新下发（签名里带了本函数的
+   * 生成结果指纹，见其 `extraRectsFingerprint`），拖拽过程中不需要更新（那会儿会话已经锁在该目标上）。
    */
   private fun floatBallRects(
     settings: AppSettings,
