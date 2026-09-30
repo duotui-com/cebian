@@ -14,6 +14,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.slideindex.app.di.AppDependencies
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.clipboard.ClipboardAccess
 import com.slideindex.app.copy.UniversalCopyOverlay
 import com.slideindex.app.backtap.BackTapGestureHost
@@ -186,6 +187,11 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             if (action == android.view.MotionEvent.ACTION_DOWN) {
                 service.activeForwardedTarget = sideId
             }
+            EdgeDiag.log(
+                "module",
+                "模块转发触摸 sessionId=$sessionId side=$sideId " +
+                    "action=${android.view.MotionEvent.actionToString(action)} at=($x,$y)"
+            )
             mainHandler.post {
                 val event = android.view.MotionEvent.obtain(downTime, eventTime, action, x, y, metaState)
                 try {
@@ -208,9 +214,36 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             com.slideindex.app.overlay.ModuleForwardedTouchGate.markForwarded()
             val target = service.activeForwardedTarget
             service.activeForwardedTarget = NO_FORWARDED_TARGET
+            // 「正常终止」与「流被打断」必须分开处理：
+            //
+            // 模块只有在手指抬起/系统取消（ACTION_UP / ACTION_CANCEL）时才会发 REASON_UP / REASON_CANCEL，
+            // 而这两条事件本身也已经转发给 app 了，手势引擎已经自己收过尾（松手触发更是在这一拍里
+            // 才刚把面板打开）。此时再走 cancelForwardedTouch 的强制复位，会把刚打开的驻留面板
+            // （快速启动器 / 任务切换器 / Shell）连同全屏窗口一起拆掉——真机上表现为
+            // 「松手触发弹不出来」：面板 2ms 后被拆，180ms 的进场动画根本没机会露脸。
+            //
+            // 真正需要强制复位的是流被中途打断的情况（多指、桥断、本地复位）：那时 app 可能压根
+            // 没收到终止事件，全屏可触摸的 presentation 会一直吞触摸。真的连 UP/CANCEL 也丢了时，
+            // 由 EdgeGestureOverlayView 的 10s StuckGestureWatchdog 兜底。
+            val gracefulEnd = reason == com.slideindex.app.xposed.takeover.TakeoverSessionPolicy.REASON_UP ||
+                reason == com.slideindex.app.xposed.takeover.TakeoverSessionPolicy.REASON_CANCEL
+            EdgeDiag.logStack(
+                "module",
+                "模块会话结束 sessionId=$sessionId reason=${moduleEndReasonName(reason)} target=$target → " +
+                    if (gracefulEnd) {
+                        "正常终止：边缘触钮不再强制复位（驻留面板留在屏幕上；悬浮球/角轮盘照旧收窗）"
+                    } else {
+                        "异常终止：强制复位，收回可能卡住的全屏直触"
+                    }
+            )
             if (target == NO_FORWARDED_TARGET) return
             val side = target.toPanelSideOrNull()
             val cornerAnchor = if (side == null) target.toCornerAnchorOrNull() else null
+            // 只有边缘触钮吃这个豁免：
+            // 悬浮球 / 角轮盘的 cancelForwardedTouch 还负责把展开成全屏的触摸窗收回来
+            // （collapseBallTouchHostFromFullscreen / overlayView.cancelSession），
+            // 一起跳过会让整屏触摸被窗吃掉。
+            if (side != null && gracefulEnd) return
             mainHandler.post {
                 if (side != null) {
                     service.edgeOverlayHost?.cancelForwardedTouch(side)
@@ -220,6 +253,16 @@ class SlideIndexAccessibilityService : AccessibilityService() {
                     com.slideindex.app.overlay.FloatBallOverlay.cancelForwardedTouch(target)
                 }
             }
+        }
+
+        /** 模块侧会话结束原因名，便于在诊断日志里一眼区分「UP 结束」与「多指/桥断」。 */
+        private fun moduleEndReasonName(reason: Int): String = when (reason) {
+            com.slideindex.app.xposed.takeover.TakeoverSessionPolicy.REASON_UP -> "REASON_UP"
+            com.slideindex.app.xposed.takeover.TakeoverSessionPolicy.REASON_CANCEL -> "REASON_CANCEL"
+            com.slideindex.app.xposed.takeover.TakeoverSessionPolicy.REASON_MULTI_TOUCH -> "REASON_MULTI_TOUCH"
+            com.slideindex.app.xposed.takeover.TakeoverSessionPolicy.REASON_BRIDGE_LOST -> "REASON_BRIDGE_LOST"
+            com.slideindex.app.xposed.takeover.TakeoverSessionPolicy.REASON_RESET -> "REASON_RESET"
+            else -> "REASON_NONE($reason)"
         }
 
         private fun Int.toPanelSideOrNull(): PanelSide? = when (this) {
