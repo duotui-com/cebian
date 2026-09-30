@@ -7,6 +7,8 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import com.slideindex.app.settings.AppSettings
+import com.slideindex.app.settings.isLandscapeConfiguration
+import com.slideindex.app.settings.resolvedFreeWindowLayout
 import com.slideindex.app.settings.resolvedFreeWindowMode
 import com.slideindex.app.settings.usesNubiaFreeformIdentifier
 
@@ -71,13 +73,15 @@ object FreeWindowLauncher {
 
     fun launchBounds(context: Context, settings: AppSettings): Rect {
         val metrics = context.resources.displayMetrics
-        val widthPx = (metrics.widthPixels * settings.freeWindowWidthFraction).toInt()
+        // 竖屏 / 横屏各有一套预置，这里按当前显示方向取用，避免横屏沿用竖屏比例导致窗口过大。
+        val layout = settings.resolvedFreeWindowLayout(context.isLandscapeConfiguration())
+        val widthPx = (metrics.widthPixels * layout.widthFraction).toInt()
             .coerceAtLeast(1)
-        val heightPx = (metrics.heightPixels * settings.freeWindowHeightFraction).toInt()
+        val heightPx = (metrics.heightPixels * layout.heightFraction).toInt()
             .coerceAtLeast(1)
-        val leftPx = (metrics.widthPixels * settings.freeWindowLeftFraction).toInt()
+        val leftPx = (metrics.widthPixels * layout.leftFraction).toInt()
             .coerceIn(0, (metrics.widthPixels - widthPx).coerceAtLeast(0))
-        val topPx = (metrics.heightPixels * settings.freeWindowTopFraction).toInt()
+        val topPx = (metrics.heightPixels * layout.topFraction).toInt()
             .coerceIn(0, (metrics.heightPixels - heightPx).coerceAtLeast(0))
         return Rect(leftPx, topPx, leftPx + widthPx, topPx + heightPx)
     }

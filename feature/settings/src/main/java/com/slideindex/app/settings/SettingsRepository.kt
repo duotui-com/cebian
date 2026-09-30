@@ -333,8 +333,10 @@ class SettingsRepository @Inject constructor(
         overlay.setBottomNavBlurRadiusDp(value)
     suspend fun setFreeWindowEnabled(enabled: Boolean) = overlay.setFreeWindowEnabled(enabled)
     suspend fun setFreeWindowModeId(id: Int) = overlay.setFreeWindowModeId(id)
-    suspend fun setFreeWindowLayout(widthFraction: Float, heightFraction: Float, leftFraction: Float, topFraction: Float) =
-        overlay.setFreeWindowLayout(widthFraction, heightFraction, leftFraction, topFraction)
+    suspend fun setFreeWindowLayout(
+        portrait: FreeWindowLayoutFractions,
+        landscape: FreeWindowLayoutFractions,
+    ) = overlay.setFreeWindowLayout(portrait = portrait, landscape = landscape)
     suspend fun setAppLaunchPolicyId(id: Int) = overlay.setAppLaunchPolicyId(id)
     suspend fun setLongPressLaunchDurationMs(value: Int) = overlay.setLongPressLaunchDurationMs(value)
     suspend fun setFloatingPointerSensitivityFraction(value: Float) =

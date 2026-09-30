@@ -162,6 +162,10 @@ data class FreeWindowUiSettings(
     val freeWindowHeightFraction: Float = 0.55f,
     val freeWindowLeftFraction: Float = 0.1f,
     val freeWindowTopFraction: Float = 0.15f,
+    val freeWindowLandWidthFraction: Float = 0.68f,
+    val freeWindowLandHeightFraction: Float = 0.4f,
+    val freeWindowLandLeftFraction: Float = 0.16f,
+    val freeWindowLandTopFraction: Float = 0.05f,
     val appLaunchPolicyId: Int = AppLaunchPolicy.ALWAYS_FULLSCREEN.id,
     val longPressLaunchDurationMs: Int = 450,
 ) {
@@ -173,6 +177,10 @@ data class FreeWindowUiSettings(
             freeWindowHeightFraction = settings.freeWindowHeightFraction,
             freeWindowLeftFraction = settings.freeWindowLeftFraction,
             freeWindowTopFraction = settings.freeWindowTopFraction,
+            freeWindowLandWidthFraction = settings.freeWindowLandWidthFraction,
+            freeWindowLandHeightFraction = settings.freeWindowLandHeightFraction,
+            freeWindowLandLeftFraction = settings.freeWindowLandLeftFraction,
+            freeWindowLandTopFraction = settings.freeWindowLandTopFraction,
             appLaunchPolicyId = settings.appLaunchPolicyId,
             longPressLaunchDurationMs = settings.longPressLaunchDurationMs,
         )

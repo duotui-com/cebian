@@ -57,7 +57,7 @@ import com.slideindex.app.ui.CornerGestureSettingsScreen
 import com.slideindex.app.ui.CornerGestureSlotsSettingsScreen
 import com.slideindex.app.ui.ExcludedAppPickScreen
 import com.slideindex.app.ui.ExcludedAppsScreen
-import com.slideindex.app.ui.FreeWindowPreviewScreen
+import com.slideindex.app.ui.FreeWindowLayoutEditorSession
 import com.slideindex.app.ui.FreeWindowSettingsScreen
 import com.slideindex.app.ui.GestureActionPickerScreen
 import com.slideindex.app.ui.GestureAngleSettingsScreen
@@ -344,7 +344,7 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             onLongPressDurationChange = viewModel::setLongPressLaunchDurationMs,
             onLaunchPolicyChange = viewModel::setAppLaunchPolicyId,
             onOpenMode = { ctx.navigate(AppNavKey.HomeFreeWindowMode) },
-            onOpenPreview = { ctx.navigate(AppNavKey.HomeFreeWindowPreview) },
+            onOpenLayoutEditor = { FreeWindowLayoutEditorSession.open() },
         )
     }
 
@@ -374,17 +374,6 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             title = ctx.activity.getString(com.slideindex.app.R.string.free_window_mode_dialog_title),
             onBack = { ctx.navigateBackTo(AppNavKey.HomeFreeWindow) },
             items = freeWindowModeItems,
-        )
-    }
-
-    hiltEntry<AppNavKey.HomeFreeWindowPreview> {
-        val viewModel: HomeDetailSettingsViewModel = hiltViewModel()
-        val freeWindowSettings by viewModel.freeWindowUiSettings.collectAsStateWithLifecycle()
-        val settings = freeWindowSettings.toMinimalAppSettings()
-        FreeWindowPreviewScreen(
-            settings = settings,
-            onBack = { ctx.navigateBackTo(AppNavKey.HomeFreeWindow) },
-            onSave = viewModel::setFreeWindowLayout,
         )
     }
 

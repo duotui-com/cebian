@@ -118,6 +118,10 @@ fun OverlaySettings.toMinimalAppSettings(): AppSettings = AppSettings(
         freeWindowHeightFraction = freeWindowHeightFraction,
         freeWindowLeftFraction = freeWindowLeftFraction,
         freeWindowTopFraction = freeWindowTopFraction,
+        freeWindowLandWidthFraction = freeWindowLandWidthFraction,
+        freeWindowLandHeightFraction = freeWindowLandHeightFraction,
+        freeWindowLandLeftFraction = freeWindowLandLeftFraction,
+        freeWindowLandTopFraction = freeWindowLandTopFraction,
     ),
     floatingPointer = FloatingPointerSettings(
         floatingPointerSensitivityFraction = floatingPointerSensitivityFraction,
@@ -310,6 +314,10 @@ fun FreeWindowUiSettings.toMinimalAppSettings(): AppSettings = AppSettings(
         freeWindowHeightFraction = freeWindowHeightFraction,
         freeWindowLeftFraction = freeWindowLeftFraction,
         freeWindowTopFraction = freeWindowTopFraction,
+        freeWindowLandWidthFraction = freeWindowLandWidthFraction,
+        freeWindowLandHeightFraction = freeWindowLandHeightFraction,
+        freeWindowLandLeftFraction = freeWindowLandLeftFraction,
+        freeWindowLandTopFraction = freeWindowLandTopFraction,
     ),
     launcher = LauncherSettings(
         appLaunchPolicyId = appLaunchPolicyId,

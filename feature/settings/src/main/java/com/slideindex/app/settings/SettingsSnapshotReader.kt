@@ -225,6 +225,10 @@ internal object SettingsSnapshotReader {
                 freeWindowHeightFraction = prefs[SettingsPreferenceKeys.FREE_WINDOW_HEIGHT] ?: 0.55f,
                 freeWindowLeftFraction = prefs[SettingsPreferenceKeys.FREE_WINDOW_LEFT] ?: 0.1f,
                 freeWindowTopFraction = prefs[SettingsPreferenceKeys.FREE_WINDOW_TOP] ?: 0.15f,
+                freeWindowLandWidthFraction = prefs[SettingsPreferenceKeys.FREE_WINDOW_LAND_WIDTH] ?: 0.68f,
+                freeWindowLandHeightFraction = prefs[SettingsPreferenceKeys.FREE_WINDOW_LAND_HEIGHT] ?: 0.4f,
+                freeWindowLandLeftFraction = prefs[SettingsPreferenceKeys.FREE_WINDOW_LAND_LEFT] ?: 0.16f,
+                freeWindowLandTopFraction = prefs[SettingsPreferenceKeys.FREE_WINDOW_LAND_TOP] ?: 0.05f,
             ),
             launcher = LauncherSettings(
             appLaunchPolicyId = prefs[SettingsPreferenceKeys.APP_LAUNCH_POLICY] ?: legacyLaunchPolicy(prefs),

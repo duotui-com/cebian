@@ -84,15 +84,21 @@ class OverlaySettingsMutator @Inject constructor(
         it[SettingsPreferenceKeys.FREE_WINDOW_MODE] = FreeWindowMode.fromId(id).id
     }
     suspend fun setFreeWindowLayout(
-        widthFraction: Float,
-        heightFraction: Float,
-        leftFraction: Float,
-        topFraction: Float,
+        portrait: FreeWindowLayoutFractions,
+        landscape: FreeWindowLayoutFractions,
     ) = editor.edit {
-        it[SettingsPreferenceKeys.FREE_WINDOW_WIDTH] = widthFraction.coerceIn(0.35f, 0.95f)
-        it[SettingsPreferenceKeys.FREE_WINDOW_HEIGHT] = heightFraction.coerceIn(0.35f, 0.9f)
-        it[SettingsPreferenceKeys.FREE_WINDOW_LEFT] = leftFraction.coerceIn(0f, 0.65f)
-        it[SettingsPreferenceKeys.FREE_WINDOW_TOP] = topFraction.coerceIn(0f, 0.65f)
+        it[SettingsPreferenceKeys.FREE_WINDOW_WIDTH] = FreeWindowLayoutLimits.normalizeWidth(portrait.widthFraction)
+        it[SettingsPreferenceKeys.FREE_WINDOW_HEIGHT] = FreeWindowLayoutLimits.normalizeHeight(portrait.heightFraction)
+        it[SettingsPreferenceKeys.FREE_WINDOW_LEFT] = FreeWindowLayoutLimits.normalizeLeft(portrait.leftFraction)
+        it[SettingsPreferenceKeys.FREE_WINDOW_TOP] = FreeWindowLayoutLimits.normalizeTop(portrait.topFraction)
+        it[SettingsPreferenceKeys.FREE_WINDOW_LAND_WIDTH] =
+            FreeWindowLayoutLimits.normalizeWidth(landscape.widthFraction)
+        it[SettingsPreferenceKeys.FREE_WINDOW_LAND_HEIGHT] =
+            FreeWindowLayoutLimits.normalizeHeight(landscape.heightFraction)
+        it[SettingsPreferenceKeys.FREE_WINDOW_LAND_LEFT] =
+            FreeWindowLayoutLimits.normalizeLeft(landscape.leftFraction)
+        it[SettingsPreferenceKeys.FREE_WINDOW_LAND_TOP] =
+            FreeWindowLayoutLimits.normalizeTop(landscape.topFraction)
     }
     suspend fun setAppLaunchPolicyId(id: Int) = editor.edit {
         it[SettingsPreferenceKeys.APP_LAUNCH_POLICY] = AppLaunchPolicy.fromId(id).id

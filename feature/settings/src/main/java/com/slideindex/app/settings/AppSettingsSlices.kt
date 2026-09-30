@@ -424,10 +424,16 @@ data class SearchPanelSettings(
 data class FreeWindowSettings(
     val freeWindowEnabled: Boolean = false,
     val freeWindowModeId: Int = FreeWindowMode.detectDefault().id,
+    // 竖屏预置
     val freeWindowWidthFraction: Float = 0.8f,
     val freeWindowHeightFraction: Float = 0.55f,
     val freeWindowLeftFraction: Float = 0.1f,
     val freeWindowTopFraction: Float = 0.15f,
+    // 横屏预置（与竖屏完全独立，运行时按当前显示方向二选一）
+    val freeWindowLandWidthFraction: Float = 0.68f,
+    val freeWindowLandHeightFraction: Float = 0.4f,
+    val freeWindowLandLeftFraction: Float = 0.16f,
+    val freeWindowLandTopFraction: Float = 0.05f,
 )
 
 /** 小部件面板尺寸、模糊与页面。 */

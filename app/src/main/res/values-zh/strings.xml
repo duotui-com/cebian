@@ -614,6 +614,8 @@
     <string name="free_window_preview_title">调节小窗尺寸与位置</string>
     <string name="free_window_preview_save">完成预览并保存</string>
     <string name="free_window_portrait_preview">竖屏预览</string>
+    <string name="free_window_landscape_preview">横屏预览</string>
+    <string name="free_window_layout_summary">竖屏 %1$d%% × %2$d%% · 横屏 %3$d%% × %4$d%%</string>
     <string name="launch_policy_title">启动策略</string>
     <string name="launch_policy_always_fullscreen">始终全屏</string>
     <string name="launch_policy_always_fullscreen_desc">松开图标后直接全屏打开</string>

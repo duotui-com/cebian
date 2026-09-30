@@ -17,12 +17,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.slideindex.app.settings.FreeWindowLayoutFractions
+import com.slideindex.app.settings.OverlaySettings
+import com.slideindex.app.ui.FreeWindowLayoutEditorOverlay
+import com.slideindex.app.ui.FreeWindowLayoutEditorSession
+import kotlinx.coroutines.launch
 import com.slideindex.app.clipboard.monitor.ClipboardMonitorStartup
 import com.slideindex.app.di.AppDependencies
 import com.slideindex.app.external.AppLinks
@@ -149,16 +159,45 @@ class MainActivity : ComponentActivity() {
             val initialIntentAction by currentIntentAction
             val initialNavRoute by pendingNavRoute
             val showUpdate by pendingShowUpdate
-            MainNavHost(
-                activity = this@MainActivity,
-                deps = deps,
-                permissionStates = permissionStates,
-                initialIntentAction = initialIntentAction,
-                initialNavRoute = initialNavRoute,
-                showUpdateFromIntent = showUpdate,
-                onNavRouteConsumed = { pendingNavRoute.value = null },
-                onShowUpdateConsumed = { pendingShowUpdate.value = false }
+            // 小窗尺寸编辑层挂在根部（导航宿主之上），这样它能盖住整屏、且不受导航栈影响。
+            val freeWindowSettings by deps.settingsRepository.overlaySettings.collectAsStateWithLifecycle(
+                initialValue = OverlaySettings.from(deps.settingsRepository.readSnapshot()),
             )
+            val editorScope = rememberCoroutineScope()
+            Box(modifier = Modifier.fillMaxSize()) {
+                MainNavHost(
+                    activity = this@MainActivity,
+                    deps = deps,
+                    permissionStates = permissionStates,
+                    initialIntentAction = initialIntentAction,
+                    initialNavRoute = initialNavRoute,
+                    showUpdateFromIntent = showUpdate,
+                    onNavRouteConsumed = { pendingNavRoute.value = null },
+                    onShowUpdateConsumed = { pendingShowUpdate.value = false }
+                )
+                if (FreeWindowLayoutEditorSession.isOpen) {
+                    FreeWindowLayoutEditorOverlay(
+                        portrait = FreeWindowLayoutFractions(
+                            widthFraction = freeWindowSettings.freeWindowWidthFraction,
+                            heightFraction = freeWindowSettings.freeWindowHeightFraction,
+                            leftFraction = freeWindowSettings.freeWindowLeftFraction,
+                            topFraction = freeWindowSettings.freeWindowTopFraction,
+                        ),
+                        landscape = FreeWindowLayoutFractions(
+                            widthFraction = freeWindowSettings.freeWindowLandWidthFraction,
+                            heightFraction = freeWindowSettings.freeWindowLandHeightFraction,
+                            leftFraction = freeWindowSettings.freeWindowLandLeftFraction,
+                            topFraction = freeWindowSettings.freeWindowLandTopFraction,
+                        ),
+                        onDismiss = { FreeWindowLayoutEditorSession.close() },
+                        onSave = { portrait, landscape ->
+                            editorScope.launch {
+                                deps.settingsRepository.setFreeWindowLayout(portrait, landscape)
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 

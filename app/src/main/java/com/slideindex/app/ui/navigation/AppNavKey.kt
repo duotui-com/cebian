@@ -18,7 +18,6 @@ sealed interface AppNavKey : NavKey {
     @Serializable data object HomeExcludedApps : AppNavKey
     @Serializable data object HomeExcludedAppsPick : AppNavKey
     @Serializable data object HomeFreeWindow : AppNavKey
-    @Serializable data object HomeFreeWindowPreview : AppNavKey
     @Serializable data object HomeFreeWindowLaunchPolicy : AppNavKey
     @Serializable data object HomeFreeWindowMode : AppNavKey
     @Serializable data object HomeTriggerCollection : AppNavKey
