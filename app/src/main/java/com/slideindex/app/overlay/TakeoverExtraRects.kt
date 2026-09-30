@@ -46,6 +46,22 @@ object TakeoverExtraRects {
   }
 
   /**
+   * [build] 生成结果的指纹，供配置签名比对用（见 `ModuleHookConfigSync.extraRectsFingerprint`）。
+   *
+   * 抽成纯函数是为了让单测直接锁住这条行为：球线**换位**、沿边移动、改尺寸、切线条、横竖屏
+   * 都必须让指纹变化。否则签名不变 → `distinctUntilChanged` 吞掉发射 → 不重新下发 →
+   * 模块仍按旧侧矩形命中，而球的新位置通常正好落在该侧两条触钮手柄之间的竖直空隙里
+   *（无任何矩形覆盖）→ 直接放行 → 只剩系统返回手势。真机复现：球线换位后必现。
+   */
+  fun fingerprint(
+    settings: AppSettings,
+    screenWidthPx: Int,
+    screenHeightPx: Int,
+    density: Float,
+    isLandscape: Boolean,
+  ): String = build(settings, screenWidthPx, screenHeightPx, density, isLandscape).joinToString(";")
+
+  /**
    * 悬浮球与双贴边线条。
    *
    * 两者位置都随设置、键盘弹出和横屏变化（`keyboardAdjusted*`），因此每次下发都按当前状态重算；

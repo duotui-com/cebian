@@ -96,16 +96,17 @@ class ModuleHookConfigSync @Inject constructor(
    *
    * 不逐字段枚举，直接拿生成出来的 data class 文本——这样球的位置、停靠侧、球径、
    * 线条开关与长度、键盘避让、横竖屏 任一变化都会改变签名，不会漏字段。
+   * 纯函数那半在 `TakeoverExtraRects.fingerprint`（有单测锁住）。
    */
   private fun extraRectsFingerprint(settings: AppSettings): String = runCatching {
     val (screenWidthPx, screenHeightPx) = FloatBallScreenMetrics.sizePx(context)
-    TakeoverExtraRects.build(
+    TakeoverExtraRects.fingerprint(
       settings = settings,
       screenWidthPx = screenWidthPx,
       screenHeightPx = screenHeightPx,
       density = context.resources.displayMetrics.density,
       isLandscape = OverlaySuppression.isLandscape(context),
-    ).joinToString(";")
+    )
   }.getOrDefault("")
 
   private companion object {
