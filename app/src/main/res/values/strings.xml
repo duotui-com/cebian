@@ -1948,8 +1948,8 @@
     <string name="free_window_mode_nubia_desc">Uses system window-reply identifier; no Shizuku required</string>
     <string name="free_window_preview_title">Adjust freeform size &amp; position</string>
     <string name="free_window_preview_save">Finish preview and save</string>
-    <string name="free_window_portrait_preview">Portrait preview</string>
-    <string name="free_window_landscape_preview">Landscape preview</string>
+    <string name="free_window_portrait_preview">Portrait</string>
+    <string name="free_window_landscape_preview">Landscape</string>
     <string name="free_window_layout_summary">Portrait %1$d%% × %2$d%% · Landscape %3$d%% × %4$d%%</string>
     <string name="launch_policy_title">Launch policy</string>
     <string name="launch_policy_always_fullscreen">Always fullscreen</string>

@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import com.slideindex.app.R
 import com.slideindex.app.settings.FreeWindowLayoutFractions
 import com.slideindex.app.settings.FreeWindowLayoutLimits
 import kotlin.math.roundToInt
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private const val TAB_PORTRAIT = 0
 private const val TAB_LANDSCAPE = 1
@@ -88,6 +90,15 @@ fun FreeWindowLayoutEditorOverlay(
     }
     BackHandler(enabled = true) { onDismiss() }
 
+    // 组件维持 M3 分段控件 / 按钮，但配色统一走 Miuix 主题色，
+    // 避免与预览窗口（同样用 Miuix 主色）出现「同一主题两种蓝」。
+    val segmentedColors = SegmentedButtonDefaults.colors(
+        activeContainerColor = MiuixTheme.colorScheme.primary,
+        activeContentColor = MiuixTheme.colorScheme.onPrimary,
+        inactiveContainerColor = MiuixTheme.colorScheme.surfaceContainer,
+        inactiveContentColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -112,8 +123,8 @@ fun FreeWindowLayoutEditorOverlay(
                         height = with(density) { windowHeightPx.toDp() },
                     )
                     .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.22f))
-                    .border(2.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
+                    .background(MiuixTheme.colorScheme.primary.copy(alpha = 0.22f))
+                    .border(2.5.dp, MiuixTheme.colorScheme.primary, RoundedCornerShape(20.dp))
                     .pointerInput(selectedTab, canvasWidthPx, canvasHeightPx) {
                         detectDragGestures { change, dragAmount ->
                             change.consume()
@@ -140,7 +151,7 @@ fun FreeWindowLayoutEditorOverlay(
                 Text(
                     text = "${(currentLayout.widthFraction * 100).roundToInt()}% × " +
                         "${(currentLayout.heightFraction * 100).roundToInt()}%",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MiuixTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
                 )
 
@@ -180,7 +191,7 @@ fun FreeWindowLayoutEditorOverlay(
                             .size(18.dp)
                             .border(
                                 width = 3.dp,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = MiuixTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(bottomEnd = 5.dp),
                             )
                     )
@@ -191,7 +202,7 @@ fun FreeWindowLayoutEditorOverlay(
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 28.dp, start = 16.dp, end = 16.dp)
+                .padding(top = 24.dp, start = 16.dp, end = 16.dp)
                 .widthIn(max = 380.dp),
         ) {
             listOf(
@@ -202,8 +213,9 @@ fun FreeWindowLayoutEditorOverlay(
                     selected = selectedTab == index,
                     onClick = { selectedTab = index },
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+                    colors = segmentedColors,
                 ) {
-                    Text(label)
+                    Text(text = label, maxLines = 1)
                 }
             }
         }
@@ -213,6 +225,10 @@ fun FreeWindowLayoutEditorOverlay(
                 onSave(portraitState.value, landscapeState.value)
                 onDismiss()
             },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MiuixTheme.colorScheme.primary,
+                contentColor = MiuixTheme.colorScheme.onPrimary,
+            ),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp),
