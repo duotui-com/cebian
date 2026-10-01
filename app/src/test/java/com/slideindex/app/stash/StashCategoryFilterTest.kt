@@ -98,4 +98,40 @@ class StashCategoryFilterTest {
         assertEquals(listOf("p2", "c1", "p1", "p3"), StashCategoryFilter.All.apply(list).map { it.id })
         assertEquals(listOf("p2", "p1", "p3"), StashCategoryFilter.Uncategorized.apply(list).map { it.id })
     }
+
+    // ───────────────────────── 滑动切换分类的顺序 ─────────────────────────
+
+    private fun category(id: String) = StashCategory(id = id, name = id, createdAtEpochMs = 0L)
+
+    @Test
+    fun filterOrder_isAllThenCategoriesThenUncategorized() {
+        val order = stashFilterOrder(listOf(category("A"), category("B")))
+
+        assertEquals(
+            listOf(
+                StashCategoryFilter.All,
+                StashCategoryFilter.Category("A"),
+                StashCategoryFilter.Category("B"),
+                StashCategoryFilter.Uncategorized,
+            ),
+            order
+        )
+        assertEquals(listOf(StashCategoryFilter.All, StashCategoryFilter.Uncategorized), stashFilterOrder(emptyList()))
+    }
+
+    @Test
+    fun adjacentTo_movesOneStepAndStopsAtBothEnds() {
+        val order = stashFilterOrder(listOf(category("A")))
+
+        assertEquals(StashCategoryFilter.Category("A"), order.adjacentTo(StashCategoryFilter.All, 1))
+        assertEquals(StashCategoryFilter.Uncategorized, order.adjacentTo(StashCategoryFilter.Category("A"), 1))
+        assertEquals(null, order.adjacentTo(StashCategoryFilter.Uncategorized, 1))
+        assertEquals(null, order.adjacentTo(StashCategoryFilter.All, -1))
+        assertEquals(StashCategoryFilter.All, order.adjacentTo(StashCategoryFilter.Category("A"), -1))
+    }
+
+    @Test
+    fun adjacentTo_unknownCurrent_isNull() {
+        assertEquals(null, stashFilterOrder(emptyList()).adjacentTo(StashCategoryFilter.Category("gone"), 1))
+    }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,14 +15,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -31,6 +36,8 @@ import com.slideindex.app.overlay.FloatBallStashPanel
 import com.slideindex.app.settings.TopAppBarBlurStyle
 import com.slideindex.app.stash.StashCategory
 import com.slideindex.app.stash.StashCategoryFilter
+import com.slideindex.app.stash.stashFilterOrder
+import com.slideindex.app.stash.adjacentTo
 import com.slideindex.app.ui.miuix.MiuixBlurredTopBar
 import com.slideindex.app.ui.miuix.miuixAppBarColor
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
@@ -58,6 +65,15 @@ internal fun StashCategoryChipBar(
     modifier: Modifier = Modifier,
 ) {
     val blurActive = backdrop != null
+    val listState = rememberLazyListState()
+    val order = remember(categories) { stashFilterOrder(categories) }
+    // 用滑动切换分类时，被选中的那一项可能在筛选条的可视范围外，把它滚进来。
+    LaunchedEffect(selected, order) {
+        val index = order.indexOf(selected)
+        if (index >= 0 && listState.layoutInfo.visibleItemsInfo.none { it.index == index }) {
+            listState.animateScrollToItem(index)
+        }
+    }
     MiuixBlurredTopBar(
         backdrop = backdrop,
         enabled = blurActive,
@@ -68,6 +84,7 @@ internal fun StashCategoryChipBar(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyRow(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
@@ -215,5 +232,34 @@ internal fun openStashCategoryManagement(context: Context) {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra(MainActivity.EXTRA_NAV_ROUTE, MainActivity.NAV_ROUTE_EXTENSION_STASH_CATEGORIES)
         },
+    )
+}
+
+/**
+ * 在列表上左右滑动切换分类（顺序同底部筛选条：全部、各分类、未分类），不循环。
+ * 滑动距离超过阈值才切，避免斜着划列表时误触。
+ */
+internal fun Modifier.stashCategorySwipe(
+    categories: List<StashCategory>,
+    selected: StashCategoryFilter,
+    onSelect: (StashCategoryFilter) -> Unit,
+): Modifier = pointerInput(categories, selected) {
+    val threshold = 64.dp.toPx()
+    var total = 0f
+    detectHorizontalDragGestures(
+        onDragStart = { total = 0f },
+        onDragCancel = { total = 0f },
+        onDragEnd = {
+            val step = when {
+                total <= -threshold -> 1
+                total >= threshold -> -1
+                else -> 0
+            }
+            if (step != 0) {
+                stashFilterOrder(categories).adjacentTo(selected, step)?.let(onSelect)
+            }
+            total = 0f
+        },
+        onHorizontalDrag = { _, amount -> total += amount },
     )
 }

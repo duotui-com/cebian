@@ -16,7 +16,7 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** 暂存夹一条内容四周的内边距；想调整留白改这一个值。 */
-internal val StashItemPadding: Dp = 2.dp
+internal val StashItemPadding: Dp = 3.dp
 
 /**
  * 暂存夹列表里的一条：没有卡片底色和圆角，条与条之间用分隔线隔开。

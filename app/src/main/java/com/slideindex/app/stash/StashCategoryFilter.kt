@@ -49,3 +49,15 @@ fun List<StashEntry>.sortedInCategory(): List<StashEntry> =
 /** 置顶的条目排到前面；稳定排序，置顶和未置顶两组内部都保持原顺序。 */
 fun List<StashEntry>.pinnedFirst(): List<StashEntry> =
     if (none { it.starred }) this else sortedByDescending { it.starred }
+
+/** 底部筛选条里各项的顺序：全部、各分类、未分类。左右滑动切换分类就按这个顺序走。 */
+fun stashFilterOrder(categories: List<StashCategory>): List<StashCategoryFilter> =
+    listOf<StashCategoryFilter>(StashCategoryFilter.All) +
+        categories.map { StashCategoryFilter.Category(it.id) } +
+        StashCategoryFilter.Uncategorized
+
+/** [current] 往后（[step] > 0）或往前（[step] < 0）走 |step| 项；走出两头返回 null，不循环。 */
+fun List<StashCategoryFilter>.adjacentTo(current: StashCategoryFilter, step: Int): StashCategoryFilter? {
+    val index = indexOf(current).takeIf { it >= 0 } ?: return null
+    return getOrNull(index + step)
+}

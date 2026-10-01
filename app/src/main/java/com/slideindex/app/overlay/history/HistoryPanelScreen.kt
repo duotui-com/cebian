@@ -278,25 +278,37 @@ internal fun HistoryPanelScreen(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 0,
+                    // 暂存夹页上左右滑动用来切换分类；这一页不让 pager 响应滑动，切到剪贴板靠点顶部的标签。
+                    userScrollEnabled = selectedTab != HistoryPanelTab.Stash,
                 ) { page ->
                     when (HistoryPanelTab.entries[page]) {
                         HistoryPanelTab.Stash -> Box(modifier = Modifier.fillMaxSize()) {
-                            HistoryStashTabBody(
-                                allEntries = stashEntries,
-                                filteredEntries = filteredStashEntries,
-                                searchQuery = stashSearchQuery,
-                                categories = stashCategories,
-                                categoryFilter = stashCategoryFilter,
-                                isActive = selectedTab == HistoryPanelTab.Stash,
-                                panelBlurActive = panelBlurActive,
-                                listTopPadding = listTopPadding,
-                                listBackdrop = barBackdrop,
-                                repo = stashRepo,
-                                // 按钮靠抽屉内侧（贴着屏幕边那一侧）：面板在右边就右对齐。
-                                buttonsAtEnd = gravityEnd,
-                                onPreviewImage = { stashPreview = it },
-                                onShowMessage = showPanelMessage,
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .stashCategorySwipe(
+                                        categories = stashCategories,
+                                        selected = stashCategoryFilter,
+                                        onSelect = viewModel::setStashCategoryFilter,
+                                    ),
+                            ) {
+                                HistoryStashTabBody(
+                                    allEntries = stashEntries,
+                                    filteredEntries = filteredStashEntries,
+                                    searchQuery = stashSearchQuery,
+                                    categories = stashCategories,
+                                    categoryFilter = stashCategoryFilter,
+                                    isActive = selectedTab == HistoryPanelTab.Stash,
+                                    panelBlurActive = panelBlurActive,
+                                    listTopPadding = listTopPadding,
+                                    listBackdrop = barBackdrop,
+                                    repo = stashRepo,
+                                    // 按钮靠抽屉内侧（贴着屏幕边那一侧）：面板在右边就右对齐。
+                                    buttonsAtEnd = gravityEnd,
+                                    onPreviewImage = { stashPreview = it },
+                                    onShowMessage = showPanelMessage,
+                                )
+                            }
                             StashCategoryChipBar(
                                 categories = stashCategories,
                                 selected = stashCategoryFilter,
