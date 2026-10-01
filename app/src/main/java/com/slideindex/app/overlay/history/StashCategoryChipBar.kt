@@ -42,7 +42,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 internal val StashCategoryBarHeight = 44.dp
 
 /**
- * 暂存夹页底部的分类筛选条：全部 / 未分类 / 各分类，末尾是打开管理页的「管理」。
+ * 暂存夹页底部的分类筛选条：全部 / 各分类 / 未分类，末尾是打开管理页的「管理」。
  *
  * 固定叠在抽屉底部而不是放进列表，这样列表怎么滚它都在，
  * 分类下没有条目时列表为空，筛选条也一直在。
@@ -88,19 +88,19 @@ internal fun StashCategoryChipBar(
                         onClick = { onSelect(StashCategoryFilter.All) },
                     )
                 }
-                item(key = "filter_uncategorized") {
-                    StashCategoryChip(
-                        label = stringResource(R.string.stash_category_uncategorized),
-                        selected = selected == StashCategoryFilter.Uncategorized,
-                        onClick = { onSelect(StashCategoryFilter.Uncategorized) },
-                    )
-                }
                 items(categories, key = { it.id }) { category ->
                     val filter = StashCategoryFilter.Category(category.id)
                     StashCategoryChip(
                         label = category.name,
                         selected = selected == filter,
                         onClick = { onSelect(filter) },
+                    )
+                }
+                item(key = "filter_uncategorized") {
+                    StashCategoryChip(
+                        label = stringResource(R.string.stash_category_uncategorized),
+                        selected = selected == StashCategoryFilter.Uncategorized,
+                        onClick = { onSelect(StashCategoryFilter.Uncategorized) },
                     )
                 }
                 item(key = "manage") {

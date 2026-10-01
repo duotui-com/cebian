@@ -184,8 +184,16 @@ internal fun HistoryPanelScreen(
         searchExpanded = true
     }
 
-    DisposableEffect(searchExpanded, activeSearchQuery, selectedTab) {
+    // 暂存夹里正在预览大图的那一条；预览盖在整个面板上。
+    var stashPreview by remember { mutableStateOf<com.slideindex.app.stash.StashEntry?>(null) }
+
+    DisposableEffect(searchExpanded, activeSearchQuery, selectedTab, stashPreview) {
         onRegisterBackInterceptor {
+            // 返回键先关预览。
+            if (stashPreview != null) {
+                stashPreview = null
+                return@onRegisterBackInterceptor true
+            }
             consumeExpandableSearchBack(
                 expanded = searchExpanded,
                 query = activeSearchQuery,
@@ -284,6 +292,9 @@ internal fun HistoryPanelScreen(
                                 listTopPadding = listTopPadding,
                                 listBackdrop = barBackdrop,
                                 repo = stashRepo,
+                                // 按钮靠抽屉内侧（贴着屏幕边那一侧）：面板在右边就右对齐。
+                                buttonsAtEnd = gravityEnd,
+                                onPreviewImage = { stashPreview = it },
                                 onShowMessage = showPanelMessage,
                             )
                             StashCategoryChipBar(
@@ -382,6 +393,17 @@ internal fun HistoryPanelScreen(
                     HorizontalDivider(color = scheme.dividerLine)
                     }
                 }
+                stashPreview?.let { previewEntry ->
+                    StashImagePreview(
+                        entry = previewEntry,
+                        repo = stashRepo,
+                        onClose = { stashPreview = null },
+                        onSend = {
+                            stashPreview = null
+                            StashCoordinator.sendStashEntry(context, previewEntry)
+                        },
+                    )
+                }
                 SnackbarHost(
                     state = snackbarHostState,
                     modifier = Modifier
@@ -407,6 +429,8 @@ private fun HistoryStashTabBody(
     listTopPadding: Dp,
     listBackdrop: LayerBackdrop?,
     repo: com.slideindex.app.stash.StashRepository?,
+    buttonsAtEnd: Boolean,
+    onPreviewImage: (com.slideindex.app.stash.StashEntry) -> Unit,
     onShowMessage: (Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -471,6 +495,8 @@ private fun HistoryStashTabBody(
                 items(filteredEntries, key = { it.id }) { entry ->
                     HistoryStashEntryCard(
                         entry = entry,
+                        buttonsAtEnd = buttonsAtEnd,
+                        onPreviewImage = { onPreviewImage(entry) },
                         onShowMessage = onShowMessage,
                         onPin = {
                             when (entry.type) {
@@ -509,7 +535,8 @@ private fun HistoryStashTabBody(
                             }
                         },
                         onSend = { StashCoordinator.sendStashEntry(context, entry) },
-                        onToggleStar = { scope.launch { repo?.toggleStar(entry.id) } },
+                        // 「星标」改成置顶：复用 starred 字段，列表里置顶的排在最前。
+                        onTogglePinTop = { scope.launch { repo?.toggleStar(entry.id) } },
                         onDelete = { scope.launch { repo?.delete(entry.id) } },
                         categoryUi = StashCardCategoryUi(
                             currentCategoryId = entry.categoryId,

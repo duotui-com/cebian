@@ -11,12 +11,15 @@ sealed interface StashCategoryFilter {
 
     data class Category(val id: String) : StashCategoryFilter
 
-    /** 过滤条目；单个分类内按手动顺序排，其余保持仓库里的顺序（新的在前）。 */
+    /**
+     * 过滤条目；单个分类内按手动顺序排，其余保持仓库里的顺序（新的在前）。
+     * 置顶（[StashEntry.starred]）的条目排在最前面，各自保持原有的相对顺序，所以在每个分类里都是各自置顶。
+     */
     fun apply(entries: List<StashEntry>): List<StashEntry> = when (this) {
         All -> entries
         Uncategorized -> entries.filter { it.categoryId == null }
         is Category -> entries.filter { it.categoryId == id }.sortedInCategory()
-    }
+    }.pinnedFirst()
 
     /** 存进 SavedStateHandle 的字符串形式。 */
     fun encode(): String = when (this) {
@@ -42,3 +45,7 @@ sealed interface StashCategoryFilter {
 /** 分类内的展示顺序：先按手动排序，相同时新的在前。 */
 fun List<StashEntry>.sortedInCategory(): List<StashEntry> =
     sortedWith(compareBy<StashEntry> { it.sortOrder }.thenByDescending { it.createdAtEpochMs })
+
+/** 置顶的条目排到前面；稳定排序，置顶和未置顶两组内部都保持原顺序。 */
+fun List<StashEntry>.pinnedFirst(): List<StashEntry> =
+    if (none { it.starred }) this else sortedByDescending { it.starred }
