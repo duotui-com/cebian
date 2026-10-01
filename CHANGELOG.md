@@ -2,7 +2,7 @@
 
 All notable changes to XGesture are documented in this file.
 
-## [Unreleased]
+## [1.32.0] - 2026-10-01
 
 ### Fixed
 - **暂存夹页 / 扩展 tab 的剪贴板副标题**：改为以**真实运行状态**为准——在跑就按实际通道显示「剪贴板 · LSPosed / Shizuku / Root / 标准」，只有开关开着却没跑起来才说「监听未就绪」；两个入口共用同一个 helper 不再各写一套。能力判断补上 `usesLsposed` 分支并改用 `effectiveClipboardMonitoringMode()`（LSPosed 不需要 Shizuku/Root，也不走焦点探针，所以不再要求悬浮窗）——此前 LSPosed 掉进"要 Shizuku"那一档，Shizuku 没授权 / binder 没连上时，明明白名单通道在跑、常驻通知也写着「运行中」，副标题却显示「监听未就绪」；而且模式标签里没有 LSPosed 这一档，正常时也会被误写成 Shizuku。顺带把扩展 tab 的精简设置快照补回通道 / 采集方式 / 白名单三项，否则它永远按默认的「跟随特权 + Shizuku」解析，和暂存夹页给出的结果不一致。另外统一了这一行的文案格式：内层不再自带「剪贴板 · 」前缀（`off` / `shizuku` / `root` / `lsposed` / `not_ready` 四条），避免和外层分隔符拼成两个「·」，四个语种同步调整
@@ -14,6 +14,9 @@ All notable changes to XGesture are documented in this file.
 ### Added
 - **诊断**：模块状态串新增 `wl=`（模块**当前生效**的白名单大小），设置页 LSPosed 状态行直接写「模块白名单已同步：N 个包（本地 M 个）」；数量对不上时状态胶囊变「白名单未同步」并给出成因（配置没下发到 system_server），不用再翻 LSPosed 日志
 - **诊断**：新增边缘手势/接管链路的环形缓冲埋点（`EdgeDiag`，release 下关闭）与「扩展 → 诊断与日志」一键导出，报告里带包名、进程、无障碍/宿主/接管状态与带调用栈的关键埋点
+
+### Changed
+- **Weblate 配置**：`weblate.yml` 里项目 slug 注释的笔误修正，并统一写作 XGesture（仅配置注释，不影响翻译流程与线上项目）
 
 ## [1.31.0] - 2026-09-30
 
