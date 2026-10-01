@@ -38,8 +38,8 @@ android {
         applicationId = "com.slideindex.app"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = 37
-        versionCode = 66
-        versionName = "1.31.0"
+        versionCode = 67
+        versionName = "1.32.0"
 
         ndk {
             abiFilters += "arm64-v8a"
@@ -497,6 +497,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
+    // 模块侧（xposed/）代码现在有单测覆盖：libxposed api 是 compileOnly，
+    // 单测运行时类路径上也得有，否则加载 ClipboardWhitelistHook 会 NoClassDefFoundError。
+    testImplementation(libs.libxposed.api)
 
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)

@@ -1598,8 +1598,8 @@
     <string name="volume_panel_notification">Notification</string>
     <string name="volume_panel_ring">Ring</string>
     <string name="volume_panel_media">Media</string>
-    <string name="gesture_action_screen_translate">Screen translate</string>
-    <string name="gesture_action_screen_translate_desc">Overlay translated text on screen in place</string>
+    <string name="gesture_action_screen_translate">Screen translate (experimental)</string>
+    <string name="gesture_action_screen_translate_desc">Overlay translated text on screen in place. Requires the translate engine and language models; may not work reliably</string>
     <string name="gesture_action_screen_search">Screen search</string>
     <string name="gesture_action_screen_search_desc">Find text on screen, highlight matches, auto-scroll</string>
     <string name="screen_search_keyword_hint">Keyword to find</string>
@@ -2989,7 +2989,7 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="stash_search_empty">No matching stash items</string>
     <string name="stash_clipboard_entry_title">Stash &amp; clipboard</string>
     <string name="stash_clipboard_entry_summary">%1$s · %2$s</string>
-    <string name="stash_clipboard_entry_summary_clipboard_off">Clipboard monitoring off</string>
+    <string name="stash_clipboard_entry_summary_clipboard_off">Monitoring off</string>
     <string name="stash_clipboard_settings_title">Stash &amp; clipboard</string>
     <string name="stash_clipboard_section_clipboard">Clipboard</string>
     <string name="stash_clipboard_section_history">Clipboard history</string>
@@ -3081,9 +3081,10 @@ Questions: open a GitHub Issue on the project repository.</string>
     <string name="clipboard_monitor_notification_root_unavailable">Root unavailable; listening stopped</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_title">Shizuku disconnected</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_text">Clipboard listening stopped; check Shizuku</string>
-    <string name="stash_clipboard_entry_summary_clipboard_shizuku">Clipboard · Shizuku monitor</string>
-    <string name="stash_clipboard_entry_summary_clipboard_root">Clipboard · Root monitor</string>
-    <string name="stash_clipboard_entry_summary_clipboard_not_ready">Clipboard · Monitor not ready</string>
+    <string name="stash_clipboard_entry_summary_clipboard_shizuku">Shizuku monitor</string>
+    <string name="stash_clipboard_entry_summary_clipboard_lsposed">LSPosed monitor</string>
+    <string name="stash_clipboard_entry_summary_clipboard_root">Root monitor</string>
+    <string name="stash_clipboard_entry_summary_clipboard_not_ready">Monitor not ready</string>
     <string name="clipboard_clear_history">Clear clipboard history</string>
     <string name="clipboard_clear_history_confirm_title">Clear clipboard history?</string>
     <string name="clipboard_clear_history_confirm_message">All clipboard entries will be deleted. This cannot be undone.</string>
@@ -3609,6 +3610,10 @@ or revoke permanent Root for Shell in APatch.</string>
     <string name="clipboard_monitoring_lsposed_state_clipboard_missing">Allowlist hook missing</string>
     <string name="clipboard_monitoring_lsposed_pill_clipboard_missing">Not ready</string>
     <string name="clipboard_monitoring_lsposed_detail_clipboard_missing">The module is loaded, but the clipboard allowlist hook was not installed. The current system build may be incompatible.</string>
+    <string name="clipboard_monitoring_lsposed_state_whitelist_stale">Allowlist out of sync</string>
+    <string name="clipboard_monitoring_lsposed_pill_whitelist_stale">Out of sync</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_stale">The module only holds %1$d apps, but %2$d are configured here — the config never reached system_server (reboot the phone, or reopen this app to push it again).</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_synced">Allowlist in sync with the module: %1$d apps (local: %2$d).</string>
     <string name="clipboard_monitoring_page_title">Clipboard background monitoring</string>
     <string name="clipboard_monitoring_status_section">Background monitoring status</string>
     <string name="clipboard_monitoring_master_desc">Copied content is added to clipboard history automatically</string>

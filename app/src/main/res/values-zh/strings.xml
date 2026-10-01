@@ -909,8 +909,8 @@
     <string name="volume_panel_notification">通知</string>
     <string name="volume_panel_ring">铃声</string>
     <string name="volume_panel_media">媒体</string>
-    <string name="gesture_action_screen_translate">屏幕翻译</string>
-    <string name="gesture_action_screen_translate_desc">在原位覆盖译文（开关式）</string>
+    <string name="gesture_action_screen_translate">屏幕翻译（实验性）</string>
+    <string name="gesture_action_screen_translate_desc">在原位覆盖译文（开关式）。需先安装翻译引擎与语言模型，可能不生效</string>
     <string name="screen_translate_started">正在翻译…</string>
     <string name="screen_translate_failed">翻译失败</string>
     <string name="screen_translate_no_text">未找到可翻译文本</string>
@@ -3013,7 +3013,7 @@
     <string name="stash_search_empty">没有匹配的暂存内容</string>
     <string name="stash_clipboard_entry_title">暂存夹与剪贴板</string>
     <string name="stash_clipboard_entry_summary">%1$s · %2$s</string>
-    <string name="stash_clipboard_entry_summary_clipboard_off">剪贴板监听已关闭</string>
+    <string name="stash_clipboard_entry_summary_clipboard_off">监听已关闭</string>
     <string name="stash_clipboard_settings_title">暂存夹与剪贴板</string>
     <string name="stash_clipboard_section_clipboard">剪贴板</string>
     <string name="stash_clipboard_section_history">剪贴板历史</string>
@@ -3094,6 +3094,10 @@
     <string name="clipboard_monitoring_lsposed_state_clipboard_missing">白名单未挂上</string>
     <string name="clipboard_monitoring_lsposed_pill_clipboard_missing">未就绪</string>
     <string name="clipboard_monitoring_lsposed_detail_clipboard_missing">模块已加载，但剪贴板白名单 hook 没装上，可能当前系统的内部实现不兼容。</string>
+    <string name="clipboard_monitoring_lsposed_state_whitelist_stale">白名单未同步</string>
+    <string name="clipboard_monitoring_lsposed_pill_whitelist_stale">未同步</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_stale">模块手里只有 %1$d 个包，本地设置是 %2$d 个：配置没下发到 system_server（重启手机，或重开本应用会重新下发）。</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_synced">模块白名单已同步：%1$d 个包（本地 %2$d 个）。</string>
     <string name="clipboard_monitoring_page_title">剪贴板后台监听</string>
     <string name="clipboard_monitoring_status_section">后台监听状态</string>
     <string name="clipboard_monitoring_master_desc">复制内容后自动进入剪贴板历史</string>
@@ -3179,9 +3183,10 @@
     <string name="clipboard_monitor_notification_root_unavailable">Root 不可用，监听已停止</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_title">Shizuku 已断开</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_text">剪贴板监听已停止，请检查 Shizuku</string>
-    <string name="stash_clipboard_entry_summary_clipboard_shizuku">剪贴板 · Shizuku 监听</string>
-    <string name="stash_clipboard_entry_summary_clipboard_root">剪贴板 · Root 监听</string>
-    <string name="stash_clipboard_entry_summary_clipboard_not_ready">剪贴板 · 监听未就绪</string>
+    <string name="stash_clipboard_entry_summary_clipboard_shizuku">Shizuku 监听</string>
+    <string name="stash_clipboard_entry_summary_clipboard_lsposed">LSPosed 监听</string>
+    <string name="stash_clipboard_entry_summary_clipboard_root">Root 监听</string>
+    <string name="stash_clipboard_entry_summary_clipboard_not_ready">监听未就绪</string>
     <string name="clipboard_clear_history">清空剪贴板历史</string>
     <string name="clipboard_clear_history_confirm_title">清空剪贴板历史？</string>
     <string name="clipboard_clear_history_confirm_message">将删除全部剪贴板记录，此操作不可撤销。</string>

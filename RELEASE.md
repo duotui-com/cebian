@@ -45,9 +45,9 @@ git diff ${last_tag}..HEAD --name-only --diff-filter=A
 
 同步修改：
 - `app/build.gradle.kts` → `versionCode`、`versionName`
-- `README.md` → 顶部版本行（`版本：X.Y.Z（versionCode N）`）
+- `README.md` / `README_zh.md` / `README_ja.md` → 顶部版本行（`版本：X.Y.Z（versionCode N）`，**三份都要改**，容易漏 zh / ja）
 
-*(注：`update.json` 会由云端 CI 在生成精确 APK 后自动计算并回填，无需本地提前手动修改)*
+*(注：`update.json` 会由云端 CI 在生成精确 APK 后自动计算并回填，无需本地提前手动修改；README 顶部的 Release 徽章是 shields.io 动态徽章，数据源就是 GitHub 最新 Release，发布后自动变成新版本号，不需要手改)*
 
 ---
 
