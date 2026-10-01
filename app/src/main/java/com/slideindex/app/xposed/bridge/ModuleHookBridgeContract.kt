@@ -93,6 +93,15 @@ object ModuleHookBridgeContract {
   const val STATUS_DETAIL_CLIPBOARD_PREFIX = "clip="
 
   /**
+   * 状态串里**模块当前生效**的白名单大小：`wl=<int>`。
+   *
+   * app 侧拿它和本地设置比对：hook 装上了（`clip=ok`）但大小对不上，就说明配置没下发到
+   * system_server（实测 Flyme/Android 16 上磁盘快照读不到、只能靠广播），设置页会直接提示
+   * 「白名单未同步」，不用再去翻 LSPosed 日志。
+   */
+  const val STATUS_DETAIL_WHITELIST_PREFIX = "wl="
+
+  /**
    * 状态回执所属通道：`system`（系统框架）/ `phone`（电话进程）。
    *
    * 电话进程与系统框架各注册一个状态通道，App 侧按通道分槽缓存；

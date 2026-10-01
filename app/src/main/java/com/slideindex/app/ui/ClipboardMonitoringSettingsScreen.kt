@@ -89,8 +89,10 @@ fun ClipboardMonitoringSettingsScreen(
         mutableStateOf(PermissionHelper.isBatteryOptimizationExempt(context))
     }
     // LSPosed 通道：模块代码是否是当前版本、白名单 hook 是否装上——不是"服务在跑"就算正常。
-    var lsposedReadiness by remember {
-        mutableStateOf(ClipboardLsposedModuleStatus.Readiness.NotReady)
+    var lsposedStatus by remember {
+        mutableStateOf(
+            ClipboardLsposedModuleStatus.Status(ClipboardLsposedModuleStatus.Readiness.NotReady),
+        )
     }
     var readLogsGranted by remember {
         mutableStateOf(ClipboardPermissionHelper.hasReadLogsPermission(context))
@@ -102,7 +104,9 @@ fun ClipboardMonitoringSettingsScreen(
         notificationGranted = granted || PermissionHelper.hasNotificationPermission(context)
     }
     LaunchedEffect(Unit) {
-        ClipboardLsposedModuleStatus.refresh(context) { lsposedReadiness = it }
+        ClipboardLsposedModuleStatus.refresh(context, settings.clipboardLsposedWhitelist.size) {
+            lsposedStatus = it
+        }
     }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
@@ -111,7 +115,10 @@ fun ClipboardMonitoringSettingsScreen(
                 notificationGranted = PermissionHelper.hasNotificationPermission(context)
                 batteryExempt = PermissionHelper.isBatteryOptimizationExempt(context)
                 readLogsGranted = ClipboardPermissionHelper.hasReadLogsPermission(context)
-                ClipboardLsposedModuleStatus.refresh(context) { lsposedReadiness = it }
+                ClipboardLsposedModuleStatus.refresh(
+                    context,
+                    settings.clipboardLsposedWhitelist.size,
+                ) { lsposedStatus = it }
             }
         }
         lifecycle.addObserver(observer)
@@ -132,9 +139,9 @@ fun ClipboardMonitoringSettingsScreen(
             statusOk = false
             statusDetail = principleText
         }
-        lsposedChannelActive && lsposedReadiness != ClipboardLsposedModuleStatus.Readiness.Ready -> {
+        lsposedChannelActive && lsposedStatus.readiness != ClipboardLsposedModuleStatus.Readiness.Ready -> {
             statusOk = false
-            statusDetail = when (lsposedReadiness) {
+            statusDetail = when (lsposedStatus.readiness) {
                 ClipboardLsposedModuleStatus.Readiness.StaleModuleCode -> {
                     statusLabel = stringResource(
                         R.string.clipboard_monitoring_lsposed_state_restart_needed,
@@ -153,6 +160,19 @@ fun ClipboardMonitoringSettingsScreen(
                     )
                     stringResource(R.string.clipboard_monitoring_lsposed_detail_clipboard_missing)
                 }
+                ClipboardLsposedModuleStatus.Readiness.WhitelistStale -> {
+                    statusLabel = stringResource(
+                        R.string.clipboard_monitoring_lsposed_state_whitelist_stale,
+                    )
+                    statusPill = stringResource(
+                        R.string.clipboard_monitoring_lsposed_pill_whitelist_stale,
+                    )
+                    stringResource(
+                        R.string.clipboard_monitoring_lsposed_detail_whitelist_stale,
+                        lsposedStatus.moduleWhitelistSize ?: 0,
+                        settings.clipboardLsposedWhitelist.size,
+                    )
+                }
                 else -> {
                     statusLabel = stringResource(
                         R.string.clipboard_monitoring_lsposed_state_not_ready,
@@ -168,7 +188,18 @@ fun ClipboardMonitoringSettingsScreen(
             statusLabel = stringResource(R.string.clipboard_monitoring_state_running)
             statusPill = stringResource(R.string.clipboard_monitoring_pill_service)
             statusOk = true
-            statusDetail = principleText
+            // LSPosed 通道且模块就绪时，把模块手里那份名单的大小写进状态行——
+            // 「名单没同步」这类问题不用翻日志（本地数量在下面白名单那一行）。
+            val moduleWhitelistSize = lsposedStatus.moduleWhitelistSize
+            statusDetail = if (lsposedChannelActive && moduleWhitelistSize != null) {
+                stringResource(
+                    R.string.clipboard_monitoring_lsposed_detail_whitelist_synced,
+                    moduleWhitelistSize,
+                    settings.clipboardLsposedWhitelist.size,
+                )
+            } else {
+                principleText
+            }
         }
         !backendReady -> {
             statusLabel = stringResource(R.string.clipboard_monitoring_state_blocked)

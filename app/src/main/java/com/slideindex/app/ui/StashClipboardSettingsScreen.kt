@@ -32,7 +32,6 @@ import com.slideindex.app.settings.ClipboardFloatListStyle
 import com.slideindex.app.settings.ClipboardHistoryCapacity
 import com.slideindex.app.settings.ClipboardMonitoringMode
 import com.slideindex.app.settings.ClipboardOverlayScale
-import com.slideindex.app.settings.effectiveClipboardMonitoringMode
 import com.slideindex.app.settings.ExtensionHubSettings
 import com.slideindex.app.settings.HistoryFloatHandleWidth
 import com.slideindex.app.settings.toMinimalAppSettings
@@ -40,7 +39,7 @@ import com.slideindex.app.util.PermissionHelper
 import com.slideindex.app.ui.miuix.MiuixConfirmDialog
 import com.slideindex.app.ui.miuix.groupedCardItems
 import com.slideindex.app.ui.settings.clipboard.ClipboardMonitoringUiState
-import com.slideindex.app.ui.settings.clipboard.isClipboardMonitoringBackendReady
+import com.slideindex.app.ui.settings.clipboard.clipboardMonitorSummaryText
 import com.slideindex.app.ui.settings.clipboard.rememberClipboardMonitoringUiState
 import com.slideindex.app.ui.settings.components.SettingDropdownRow
 import com.slideindex.app.ui.settings.components.SettingSwitchNavigationRow
@@ -164,20 +163,8 @@ private fun clipboardIndexHistorySubtitle(
     entryCount: Int,
 ): String {
     val count = pluralStringResource(R.plurals.clipboard_history_count, entryCount, entryCount)
-    val monitor = when {
-        !settings.clipboardBackgroundMonitoring ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_off)
-        settings.isClipboardMonitoringBackendReady(monitoringUi) &&
-            settings.effectiveClipboardMonitoringMode().usesStandardApi ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_standard)
-        settings.isClipboardMonitoringBackendReady(monitoringUi) &&
-            settings.effectiveClipboardMonitoringMode().usesRoot ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_root)
-        settings.isClipboardMonitoringBackendReady(monitoringUi) ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_shizuku)
-        else ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_not_ready)
-    }
+    // 以真实运行状态为准（扩展 tab 的卡片共用同一个 helper，避免两处再走偏）。
+    val monitor = clipboardMonitorSummaryText(settings.clipboardBackgroundMonitoring, monitoringUi)
     return stringResource(R.string.stash_clipboard_entry_summary, count, monitor)
 }
 
@@ -803,20 +790,8 @@ fun SettingsCardScope.StashClipboardEntryCard(
         stashEntryCount,
         stashEntryCount,
     )
-    val appSettings = settings.toMinimalAppSettings()
-    val effectiveMode = appSettings.effectiveClipboardMonitoringMode()
-    val clipboardPart = when {
-        !settings.clipboardBackgroundMonitoring ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_off)
-        appSettings.isClipboardMonitoringBackendReady(monitoringUi) && effectiveMode.usesStandardApi ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_standard)
-        appSettings.isClipboardMonitoringBackendReady(monitoringUi) && effectiveMode.usesRoot ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_root)
-        appSettings.isClipboardMonitoringBackendReady(monitoringUi) ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_shizuku)
-        else ->
-            stringResource(R.string.stash_clipboard_entry_summary_clipboard_not_ready)
-    }
+    // 和暂存夹页共用同一个 helper：只看真实运行状态，LSPosed 不再被当成"要 Shizuku"。
+    val clipboardPart = clipboardMonitorSummaryText(settings.clipboardBackgroundMonitoring, monitoringUi)
     SettingNavigationRow(
         icon = { label ->
             Icon(HubLeadingIcons.stashClipboard(outlinedLeadingIcons), contentDescription = label)

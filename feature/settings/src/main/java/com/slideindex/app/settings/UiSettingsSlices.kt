@@ -109,6 +109,15 @@ data class ExtensionHubSettings(
     val floatingPointerSensitivityFraction: Float = 0.52f,
     val clipboardBackgroundMonitoring: Boolean = true,
     val clipboardBackgroundMonitoringMode: ClipboardMonitoringMode = ClipboardMonitoringMode.FOLLOW_PRIVILEGE,
+    /**
+     * 提权通道 / 采集方式 / 白名单也要带上：扩展 tab 的卡片靠它们判断"实际跑的是哪条通道"。
+     *
+     * 少了这三件时 [toMinimalAppSettings] 只能按默认的「跟随特权 + Shizuku」解析，
+     * 选了 LSPosed 的机器上卡片会显示成 Shizuku（或"未就绪"），与暂存夹页不一致。
+     */
+    val clipboardMonitoringChannel: ClipboardMonitoringChannel = ClipboardMonitoringChannel.FOLLOW_PRIVILEGE,
+    val clipboardMonitoringCapture: ClipboardMonitoringCapture = ClipboardMonitoringCapture.LOGCAT,
+    val clipboardLsposedWhitelist: Set<String> = setOf(CLIPBOARD_LSPOSED_SELF_PACKAGE),
     val privilegeMode: PrivilegeMode = PrivilegeMode.SHIZUKU,
     val holographicHiddenAppCount: Int = 0,
 ) {
@@ -125,6 +134,9 @@ data class ExtensionHubSettings(
             floatingPointerSensitivityFraction = settings.floatingPointerSensitivityFraction,
             clipboardBackgroundMonitoring = settings.clipboardBackgroundMonitoring,
             clipboardBackgroundMonitoringMode = settings.clipboardBackgroundMonitoringMode,
+            clipboardMonitoringChannel = settings.clipboardMonitoringChannel,
+            clipboardMonitoringCapture = settings.clipboardMonitoringCapture,
+            clipboardLsposedWhitelist = settings.clipboardLsposedWhitelist,
             privilegeMode = settings.privilegeMode,
             holographicHiddenAppCount = settings.holographicLauncher.hiddenAppPackages.size,
         )
