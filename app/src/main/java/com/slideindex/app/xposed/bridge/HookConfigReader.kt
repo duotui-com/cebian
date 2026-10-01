@@ -37,9 +37,8 @@ class HookConfigReader(
     }
     // 盘上那份**只有比内存里更新时才允许替换**。
     //
-    // 为什么必须比：历史遗留的 [/data/system/slideindex] 快照 app 早已写不动，
-    // 内容会永久停在某个旧状态（例如"两侧接管关闭"时的 groups=4）。而它是本进程唯一
-    // 读得到的快照（外部私有目录 / 设备保护目录 system_server 都读不到）。原来无条件
+    // 为什么必须比：部分 ROM 上 system_server 只能读到磁盘三种来源里的一种，而那份可能停在
+    // 几天前的旧状态（例如"两侧接管关闭"时的 groups=4、或白名单里只有自己）。原来无条件
     // `cached = parsed`，于是每次 TTL（2s）到期都会用这份旧快照把广播刚下发的新配置顶掉：
     // 现象就是「开关关→开之后只有两三秒生效，之后又变回系统手势」。
     val fromDisk = loadFromDisk()
@@ -96,35 +95,42 @@ class HookConfigReader(
   }
 
   private fun loadFromDisk(): ModuleHookSnapshot? {
-    // 读取顺序：app 导出的外部快照 → 设备保护目录（system_server 多读不到，试一下无害）
-    // → 历史遗留的 /data/system/slideindex（**仅在内存里没有任何快照时**兜底）。
-    val fromExternal = runCatching {
-      readText(File(ModuleHookBridgeContract.APP_EXTERNAL_SNAPSHOT_PATH))
-    }.getOrNull()
-    val fromApp = if (fromExternal == null) {
-      runCatching { readText(File(ModuleHookBridgeContract.APP_SNAPSHOT_PATH)) }.getOrNull()
-    } else {
-      null
-    }
-    // 遗留目录只在冷启动（内存里还没有任何配置）时用一次，避免它每 2 秒把广播下发的配置顶掉。
-    val fromLegacySystem = if (fromExternal == null && fromApp == null && cached == null) {
-      runCatching { readText(systemSnapshotFile()) }.getOrNull()
-    } else {
-      null
-    }
+    // 三个可读来源放在一起比 `updatedAtMs`，取最新的一份。
+    //
+    // 为什么不能"读到第一份就用"：磁盘来源在部分 ROM 上只有其中一份可读
+    // （实测 Flyme/Android 16：system_server 读不到 app 外部快照，设备保护目录多半也读不到）。
+    // 原来"遗留目录只在内存为空时读一次"，一旦某份旧快照先被读到就会永久停在那里——
+    // 现象就是白名单只有自己、用户后加的包永远不生效。取最新一份后，
+    // 无论先读到谁，都不会压住更新的配置（时间戳比较见 [preferNewer]）。
+    val raws = listOf(
+      readText(File(ModuleHookBridgeContract.APP_EXTERNAL_SNAPSHOT_PATH)),
+      readText(File(ModuleHookBridgeContract.APP_SNAPSHOT_PATH)),
+      readText(systemSnapshotFile()),
+    )
     lastLoadAtMs = SystemClock.elapsedRealtime()
-    return ModuleHookSnapshot.parse(fromExternal ?: fromApp ?: fromLegacySystem)
+    return newestSnapshot(raws)
   }
 
-  private fun readText(file: File): String? {
-    if (!file.isFile || !file.canRead()) return null
-    val text = file.readText()
-    return text.ifBlank { null }
-  }
+  /** 读盘失败（不存在 / 无权限 / IO 异常）一律当"这份没有"，绝不让异常冒到 hook 热路径上。 */
+  private fun readText(file: File): String? = runCatching {
+    if (!file.isFile || !file.canRead()) return@runCatching null
+    file.readText().ifBlank { null }
+  }.getOrNull()
 
   private fun systemSnapshotFile(): File =
     File(
       File(ModuleHookBridgeContract.SYSTEM_SNAPSHOT_DIR),
       ModuleHookBridgeContract.SNAPSHOT_FILE_NAME,
     )
+
+  internal companion object {
+    /**
+     * 多份磁盘快照里取 `updatedAtMs` 最新的一份（不可读 / 解析失败的忽略），全空返回 null。
+     *
+     * 抽成纯函数是为了能直测这条回归：只"读到第一份就用"会让一份几天前的旧快照
+     * 永久压住新配置 —— Flyme/Android 16 上「白名单里永远只有自己」就是这么来的。
+     */
+    fun newestSnapshot(raws: List<String?>): ModuleHookSnapshot? =
+      raws.mapNotNull { ModuleHookSnapshot.parse(it) }.maxByOrNull { it.updatedAtMs }
+  }
 }

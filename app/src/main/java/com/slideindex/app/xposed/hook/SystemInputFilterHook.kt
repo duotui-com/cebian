@@ -18,6 +18,7 @@ import com.slideindex.app.xposed.hookMethod
 import com.slideindex.app.xposed.takeover.SystemGestureTakeoverController
 import com.slideindex.app.xposed.takeover.TakeoverSessionPolicy
 import io.github.libxposed.api.XposedInterface
+import java.io.File
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Proxy
 import java.util.Collections
@@ -298,9 +299,12 @@ class SystemInputFilterHook {
         val takeoverController = controller
         when (intent?.action) {
           ModuleHookBridgeContract.ACTION_CONFIG_CHANGED -> {
-            ensureController()?.onConfigBroadcast(
-              intent.getStringExtra(ModuleHookBridgeContract.EXTRA_CONFIG_JSON),
-            )
+            val configJson = intent.getStringExtra(ModuleHookBridgeContract.EXTRA_CONFIG_JSON)
+            ensureController()?.onConfigBroadcast(configJson)
+            // 剪贴板白名单的 reader 不会自己收广播（它的 HookConfigReader 只被这里转手才会更新），
+            // 漏掉这一行 = 白名单只能靠磁盘那份旧快照，用户后加的包永远不生效。
+            ClipboardWhitelistHook.onConfigBroadcast(configJson)
+            persistSystemSnapshot(configJson)
             ensureController()?.let { syncFilterEnabled(it) }
           }
           ModuleHookBridgeContract.ACTION_MODULE_STATUS_REQUEST -> {
@@ -334,6 +338,23 @@ class SystemInputFilterHook {
       addAction(Intent.ACTION_USER_PRESENT)
     }
     ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
+  }
+
+  /**
+   * 模块侧也持久化一份到 `/data/system`（system_server 有写权限，电话进程没有）。
+   *
+   * 为什么需要：磁盘兜底顺序是「app 外部快照 → app 设备保护目录 → 这份遗留快照」，
+   * 而前两份在部分 ROM（实测 Flyme/Android 16）system_server 读不到 —— 外部目录被 FUSE 拒、
+   * 设备保护目录是 app 私有。于是这份遗留快照就成了冷启动唯一读得到的配置：
+   * 不刷新它，模块重启后会一直用几天前那份旧名单（现象：白名单里只有自己）。
+   */
+  private fun persistSystemSnapshot(json: String?) {
+    if (json.isNullOrBlank()) return
+    runCatching {
+      val dir = File(ModuleHookBridgeContract.SYSTEM_SNAPSHOT_DIR)
+      if (!dir.isDirectory) dir.mkdirs()
+      File(dir, ModuleHookBridgeContract.SNAPSHOT_FILE_NAME).writeText(json)
+    }.onFailure { XposedLog.w(TAG, "persist system snapshot failed: ${it.message}") }
   }
 
   private fun sendStatusResponse(context: Context, attempt: Int = 0) {
@@ -391,6 +412,8 @@ class SystemInputFilterHook {
       // 模块代码版本 + 剪贴板白名单 hook 状态：app 侧据此判断"是不是覆盖安装后还没重启"。
       append(",code=").append(ModuleHookBridgeContract.MODULE_CODE_VERSION)
       append(",clip=").append(ClipboardWhitelistHook.installStatus)
+      // 模块当前生效的白名单大小：app 侧拿它和本地设置比对，不一致就是"配置没下发到 system_server"。
+      append(",wl=").append(ClipboardWhitelistHook.activeWhitelist().size)
       if (errors.isNotEmpty()) {
         append(",errors=").append(errors.joinToString(" | "))
       }

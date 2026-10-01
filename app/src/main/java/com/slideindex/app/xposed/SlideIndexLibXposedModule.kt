@@ -81,7 +81,7 @@ class SlideIndexLibXposedModule : XposedModule() {
       .onFailure { reportStepFailure("inputFilter", it) }
     runCatching { permissionGranterHook.install(this, classLoader) }
       .onFailure { reportStepFailure("permissionGranter", it) }
-    runCatching { clipboardWhitelistHook.install(this, classLoader) }
+    runCatching { ClipboardWhitelistHook.install(this, classLoader) }
       .onFailure { reportStepFailure("clipboardWhitelist", it) }
   }
 
@@ -110,6 +110,6 @@ class SlideIndexLibXposedModule : XposedModule() {
     private val systemInputInjectorHook = SystemInputInjectorHook()
     private val systemInputFilterHook = SystemInputFilterHook()
     private val permissionGranterHook = PermissionGranterHook()
-    private val clipboardWhitelistHook = ClipboardWhitelistHook()
+    // 剪贴板白名单是单例：安装点和配置广播入口必须共用同一个 reader（见 ClipboardWhitelistHook）。
   }
 }
