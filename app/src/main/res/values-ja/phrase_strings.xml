@@ -90,4 +90,10 @@
     <string name="stash_send_fail_image">画像ファイルがない、またはクリップボードに置けません</string>
     <string name="stash_send_fail_unexpected">送信中にエラーが発生しました。もう一度お試しください</string>
     <string name="stash_send_fail_partial">前半の内容は送信できましたが、後半の送信に失敗しました</string>
+
+    <!-- 置顶与大图预览 -->
+    <string name="stash_category_pin_top">先頭に固定</string>
+    <string name="stash_category_unpin_top">固定を解除</string>
+    <string name="stash_send_preview_close">閉じる</string>
+    <string name="stash_send_preview_send">送信</string>
 </resources>

@@ -90,4 +90,10 @@
     <string name="stash_send_fail_image">图片文件丢失，或无法放到剪贴板</string>
     <string name="stash_send_fail_unexpected">发送时出错了，请重试</string>
     <string name="stash_send_fail_partial">前面的内容已发出，后面的发送失败了</string>
+
+    <!-- 置顶与大图预览 -->
+    <string name="stash_category_pin_top">置顶</string>
+    <string name="stash_category_unpin_top">取消置顶</string>
+    <string name="stash_send_preview_close">关闭</string>
+    <string name="stash_send_preview_send">发送</string>
 </resources>

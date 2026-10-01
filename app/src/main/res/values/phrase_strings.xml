@@ -90,4 +90,10 @@
     <string name="stash_send_fail_image">The image file is missing or cannot be put on the clipboard</string>
     <string name="stash_send_fail_unexpected">Something went wrong while sending — try again</string>
     <string name="stash_send_fail_partial">Earlier content was sent, but a later part failed</string>
+
+    <!-- 置顶与大图预览 -->
+    <string name="stash_category_pin_top">Pin to top</string>
+    <string name="stash_category_unpin_top">Unpin from top</string>
+    <string name="stash_send_preview_close">Close</string>
+    <string name="stash_send_preview_send">Send</string>
 </resources>

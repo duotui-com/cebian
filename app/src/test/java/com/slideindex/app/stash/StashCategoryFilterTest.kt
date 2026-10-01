@@ -72,4 +72,30 @@ class StashCategoryFilterTest {
         assertEquals(StashCategoryFilter.All, StashCategoryFilter.decode("garbage"))
         assertEquals(StashCategoryFilter.All, StashCategoryFilter.decode("category:"))
     }
+
+    // ───────────────────────── 置顶 ─────────────────────────
+
+    private fun pinned(e: StashEntry) = e.copy(starred = true)
+
+    @Test
+    fun pinnedEntries_comeFirstWithinEachCategoryAndKeepTheirOwnOrder() {
+        val list = listOf(
+            entry("a1", categoryId = "A", sortOrder = 0),
+            pinned(entry("a2", categoryId = "A", sortOrder = 1)),
+            entry("a3", categoryId = "A", sortOrder = 2),
+            pinned(entry("a4", categoryId = "A", sortOrder = 3)),
+            pinned(entry("b1", categoryId = "B")),
+        )
+
+        assertEquals(listOf("a2", "a4", "a1", "a3"), StashCategoryFilter.Category("A").apply(list).map { it.id })
+        assertEquals(listOf("b1"), StashCategoryFilter.Category("B").apply(list).map { it.id })
+    }
+
+    @Test
+    fun pinnedEntries_comeFirstInAllAndUncategorized() {
+        val list = listOf(entry("p1"), pinned(entry("p2")), entry("p3"), pinned(entry("c1", categoryId = "A")))
+
+        assertEquals(listOf("p2", "c1", "p1", "p3"), StashCategoryFilter.All.apply(list).map { it.id })
+        assertEquals(listOf("p2", "p1", "p3"), StashCategoryFilter.Uncategorized.apply(list).map { it.id })
+    }
 }

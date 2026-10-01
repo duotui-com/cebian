@@ -2,6 +2,7 @@ package com.slideindex.app.overlay.history
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,16 +19,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.VerticalAlignTop
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -289,18 +288,22 @@ private val StashCardButtonSize = 28.dp
 private val StashCardThumbSize = 64.dp
 
 /**
- * 暂存夹里的一条：左边缩略图（有图才有），右边两行文案 + 一排按钮（复制 / 发送 / 星标 / 更多）。
+ * 暂存夹里的一条：左边缩略图（有图才有），右边两行文案 + 一排按钮（复制 / 置顶 / 更多）。
+ * 点按整条就发送；点缩略图先弹出大图预览（[onPreviewImage]），在预览里确认后再发送。
  * 文案固定最多两行、超出截断，不再展开；没有卡片底色，条与条之间是分隔线。
+ * 按钮靠抽屉内侧（贴着屏幕边那一侧）排：[buttonsAtEnd] 为 true 时右对齐。
  */
 @Composable
 internal fun HistoryStashEntryCard(
     entry: StashEntry,
+    buttonsAtEnd: Boolean,
+    onPreviewImage: () -> Unit,
     onShowMessage: (Int) -> Unit,
     onPin: () -> Unit,
     onCopy: () -> Unit,
     onShare: () -> Unit,
     onSend: () -> Unit,
-    onToggleStar: () -> Unit,
+    onTogglePinTop: () -> Unit,
     onDelete: () -> Unit,
     categoryUi: StashCardCategoryUi,
 ) {
@@ -379,31 +382,33 @@ internal fun HistoryStashEntryCard(
 
     HistoryStashItemShell(
         leading = if (hasThumb) {
-            { StashCardThumb(shownBitmap) }
+            { StashCardThumb(shownBitmap, onClick = onPreviewImage) }
         } else {
             null
         },
+        onClick = onSend,
         onLongPress = onLongPressDrag,
     ) {
         HistoryCollapsedSummaryText(text = summaryText, maxLines = 2)
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = if (buttonsAtEnd) Arrangement.End else Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             HistoryCardActionIcon(
                 icon = Icons.Default.ContentCopy,
                 contentDescription = stringResource(R.string.clipboard_history_float_copy),
                 onClick = onCopy,
                 buttonSize = StashCardButtonSize,
             )
-            HistoryCardActionIcon(
-                icon = Icons.AutoMirrored.Filled.Send,
-                contentDescription = stringResource(R.string.stash_send_action),
-                onClick = onSend,
-                buttonSize = StashCardButtonSize,
-            )
-            IconButton(onClick = onToggleStar, modifier = Modifier.size(StashCardButtonSize)) {
+            IconButton(onClick = onTogglePinTop, modifier = Modifier.size(StashCardButtonSize)) {
                 MiuixIcon(
-                    imageVector = if (entry.starred) Icons.Default.Star else Icons.Outlined.StarOutline,
-                    contentDescription = null,
+                    imageVector = Icons.Default.VerticalAlignTop,
+                    contentDescription = stringResource(
+                        if (entry.starred) R.string.stash_category_unpin_top else R.string.stash_category_pin_top,
+                    ),
                     modifier = Modifier.size(StashCardButtonSize - 12.dp),
+                    // 已置顶用主题色标出来。
                     tint = if (entry.starred) {
                         MiuixTheme.colorScheme.primary
                     } else {
@@ -481,14 +486,15 @@ internal fun HistoryStashEntryCard(
     }
 }
 
-/** 左侧缩略图：固定方块，图还没加载出来时先占位，免得列表跳动。 */
+/** 左侧缩略图：固定方块，图还没加载出来时先占位，免得列表跳动；点按弹出大图预览。 */
 @Composable
-private fun StashCardThumb(bitmap: Bitmap?) {
+private fun StashCardThumb(bitmap: Bitmap?, onClick: () -> Unit) {
     val imageBitmap = rememberHistoryImageBitmap(bitmap)
     Box(
         modifier = Modifier
             .size(StashCardThumbSize)
-            .clip(RoundedCornerShape(8.dp)),
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick),
     ) {
         if (imageBitmap != null) {
             Image(
