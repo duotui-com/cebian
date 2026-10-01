@@ -99,6 +99,10 @@ data class AppSettings(
     val freeWindowHeightFraction get() = freeWindow.freeWindowHeightFraction
     val freeWindowLeftFraction get() = freeWindow.freeWindowLeftFraction
     val freeWindowTopFraction get() = freeWindow.freeWindowTopFraction
+    val freeWindowLandWidthFraction get() = freeWindow.freeWindowLandWidthFraction
+    val freeWindowLandHeightFraction get() = freeWindow.freeWindowLandHeightFraction
+    val freeWindowLandLeftFraction get() = freeWindow.freeWindowLandLeftFraction
+    val freeWindowLandTopFraction get() = freeWindow.freeWindowLandTopFraction
 
     val widgetPanelPages get() = widgetPanel.widgetPanelPages
     val widgetPanelWidthFraction get() = widgetPanel.widgetPanelWidthFraction
@@ -204,6 +208,8 @@ data class AppSettings(
     val holographicLauncher get() = launcher.holographicLauncher
     val shellCommands get() = launcher.shellCommands
     val activityShortcuts get() = launcher.activityShortcuts
+    val launcherShortcutMenuOrder get() = launcher.launcherShortcutMenuOrder
+    val launcherShortcutMenuDisabled get() = launcher.launcherShortcutMenuDisabled
 
     val floatingPointerSensitivityFraction get() = floatingPointer.floatingPointerSensitivityFraction
     val floatingPointerJoystickDiameterPx get() = floatingPointer.floatingPointerJoystickDiameterPx

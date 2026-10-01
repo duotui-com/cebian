@@ -64,6 +64,7 @@ import com.slideindex.app.ui.mainNavMiuixRailContentInsets
 import com.slideindex.app.ui.mainNavRailContentClip
 import com.slideindex.app.ui.MainBottomNavDestination
 import com.slideindex.app.ui.MainMiuixNavigationRail
+import com.slideindex.app.ui.FreeWindowLayoutEditorSession
 import com.slideindex.app.ui.MainBottomNavHorizontalPadding
 import com.slideindex.app.ui.MainBottomNavOuterPadding
 import com.slideindex.app.ui.mainAppPrefersNavigationRail
@@ -177,7 +178,20 @@ fun MainNavHost(
 
     val floatingPointerAreaPreviewEnabledState = rememberSaveable { mutableStateOf(false) }
     val floatingPointerAreaPreviewEnabled by floatingPointerAreaPreviewEnabledState
-    val prefersNavigationRail = mainAppPrefersNavigationRail()
+    val shellPrefersNavigationRail = mainAppPrefersNavigationRail()
+    // 小窗编辑态会主动转屏，而本导航壳在宽度跨断点时会在底栏/侧栏之间切换布局。
+    // 编辑期间冻结外壳布局，避免转屏时外壳整体换结构带来的跳变与重建。
+    val frozenShellPrefersNavigationRail = remember { mutableStateOf(shellPrefersNavigationRail) }
+    LaunchedEffect(shellPrefersNavigationRail, FreeWindowLayoutEditorSession.isOpen) {
+        if (!FreeWindowLayoutEditorSession.isOpen) {
+            frozenShellPrefersNavigationRail.value = shellPrefersNavigationRail
+        }
+    }
+    val prefersNavigationRail = if (FreeWindowLayoutEditorSession.isOpen) {
+        frozenShellPrefersNavigationRail.value
+    } else {
+        shellPrefersNavigationRail
+    }
     val bottomNavStyle = BottomNavStyle.fromId(overlayUiSettings.bottomNavStyleId)
     val currentKey = activeBackStack.currentAppNavKey() ?: currentTab.toRootNavKey()
     val isRootDestination = currentKey.isRootDestination()

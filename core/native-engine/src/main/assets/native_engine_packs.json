@@ -6,7 +6,7 @@
       "packRevision": 6,
       "displayVersion": "ONNX Runtime 1.30.0 / OpenCV 5.0.0.1",
       "sizeBytes": 29062445,
-      "url": "https://github.com/qpst4/cebian/releases/download/v1.13.0/ocr-engine-arm64-v6.zip",
+      "url": "https://github.com/qpst4/XGesture/releases/download/v1.13.0/ocr-engine-arm64-v6.zip",
       "mirrorUrls": [],
       "sha256": "27eb21243f3940782af232785c4fabdeb8078f00f0be58ed4e6b1f7a379bfc1b",
       "minAppVersionCode": 6,
@@ -21,7 +21,7 @@
     {
       "id": "translate-engine",
       "sizeBytes": 7216845,
-      "url": "https://github.com/qpst4/cebian/releases/download/v1.6.0/translate-engine-arm64-v1.zip",
+      "url": "https://github.com/qpst4/XGesture/releases/download/v1.6.0/translate-engine-arm64-v1.zip",
       "mirrorUrls": [],
       "sha256": "57ef0c870b4a79ac5b4e2b4b9e2662f05812ef02b37b271ff5fd89523777c220",
       "minAppVersionCode": 6,
@@ -34,7 +34,7 @@
     {
       "id": "segmentation-engine",
       "sizeBytes": 4141875,
-      "url": "https://github.com/qpst4/cebian/releases/download/v1.6.0/segmentation-engine-arm64-v1.zip",
+      "url": "https://github.com/qpst4/XGesture/releases/download/v1.6.0/segmentation-engine-arm64-v1.zip",
       "mirrorUrls": [],
       "sha256": "8d4cf26510ce0899ab2d8933c3c54e639dc805061af75c9a4d4301582c1c2b46",
       "minAppVersionCode": 6,

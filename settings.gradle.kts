@@ -20,7 +20,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Cebian"
+rootProject.name = "XGesture"
 include(":app")
 include(":core:common")
 include(":core:autofill")

@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +58,7 @@ import com.slideindex.app.ui.CornerGestureSettingsScreen
 import com.slideindex.app.ui.CornerGestureSlotsSettingsScreen
 import com.slideindex.app.ui.ExcludedAppPickScreen
 import com.slideindex.app.ui.ExcludedAppsScreen
-import com.slideindex.app.ui.FreeWindowPreviewScreen
+import com.slideindex.app.ui.FreeWindowLayoutEditorSession
 import com.slideindex.app.ui.FreeWindowSettingsScreen
 import com.slideindex.app.ui.GestureActionPickerScreen
 import com.slideindex.app.ui.GestureAngleSettingsScreen
@@ -344,7 +345,7 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             onLongPressDurationChange = viewModel::setLongPressLaunchDurationMs,
             onLaunchPolicyChange = viewModel::setAppLaunchPolicyId,
             onOpenMode = { ctx.navigate(AppNavKey.HomeFreeWindowMode) },
-            onOpenPreview = { ctx.navigate(AppNavKey.HomeFreeWindowPreview) },
+            onOpenLayoutEditor = { FreeWindowLayoutEditorSession.open() },
         )
     }
 
@@ -374,17 +375,6 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             title = ctx.activity.getString(com.slideindex.app.R.string.free_window_mode_dialog_title),
             onBack = { ctx.navigateBackTo(AppNavKey.HomeFreeWindow) },
             items = freeWindowModeItems,
-        )
-    }
-
-    hiltEntry<AppNavKey.HomeFreeWindowPreview> {
-        val viewModel: HomeDetailSettingsViewModel = hiltViewModel()
-        val freeWindowSettings by viewModel.freeWindowUiSettings.collectAsStateWithLifecycle()
-        val settings = freeWindowSettings.toMinimalAppSettings()
-        FreeWindowPreviewScreen(
-            settings = settings,
-            onBack = { ctx.navigateBackTo(AppNavKey.HomeFreeWindow) },
-            onSave = viewModel::setFreeWindowLayout,
         )
     }
 
@@ -1444,6 +1434,12 @@ private fun HomeTriggerCollectionRoute(
     val settings = gestureSettings.toMinimalAppSettings().copy(
         cornerGestureSettings = overlaySettings.cornerGestureSettings,
     )
+    // 手势/系统返回不会走 onBack 回调，这里兜底：离开触钮编辑流时释放方向锁。
+    // 释放前会检查「还有没有触钮页面在场」，因此转屏 / 换外壳布局引起的销毁重建不会误释放。
+    DisposableEffect(Unit) {
+        TriggerSettingsLandscapeSession.onEditorScreenEnter()
+        onDispose { TriggerSettingsLandscapeSession.onEditorScreenExit(ctx.activity) }
+    }
     TriggerCollectionScreen(
         settings = settings,
         serviceEnabled = true,

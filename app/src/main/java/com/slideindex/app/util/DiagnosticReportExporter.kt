@@ -56,11 +56,14 @@ object DiagnosticReportExporter {
     }
 
     private fun buildExportOutcome(appContext: Context): ExportOutcome {
-        val fullReport = LocalCrashHandler.generateDiagnosticReport(appContext)
+        val report = buildString {
+            append(LocalCrashHandler.generateDiagnosticReport(appContext))
+            append(com.slideindex.app.diagnostic.EdgeDiag.exportText(appContext))
+        }
         val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val fileName = "cebian_diagnostic_$stamp.log"
+        val fileName = "xgesture_diagnostic_$stamp.log"
         return ExportOutcome.Ready(
-            fullReport = fullReport,
+            fullReport = report,
             fileName = fileName,
         )
     }
@@ -108,7 +111,7 @@ object DiagnosticReportExporter {
     private fun copyToClipboard(context: Context, text: String): Boolean {
         val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return false
         return runCatching {
-            clipboard.setPrimaryClip(ClipData.newPlainText("Cebian Diagnostic Report", text))
+            clipboard.setPrimaryClip(ClipData.newPlainText("XGesture Diagnostic Report", text))
             true
         }.getOrDefault(false)
     }

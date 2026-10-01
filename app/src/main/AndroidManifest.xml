@@ -139,7 +139,7 @@
                 <data
                     android:host="open"
                     android:path="/notification-history"
-                    android:scheme="cebian" />
+                    android:scheme="xgesture" />
             </intent-filter>
         </activity>
 
@@ -412,7 +412,7 @@
                 <data
                     android:host="open"
                     android:path="/stash"
-                    android:scheme="cebian" />
+                    android:scheme="xgesture" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -421,7 +421,7 @@
                 <data
                     android:host="open"
                     android:path="/clipboard"
-                    android:scheme="cebian" />
+                    android:scheme="xgesture" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.slideindex.app.action.OPEN_STASH_PANEL" />
@@ -448,7 +448,7 @@
                 <data
                     android:host="open"
                     android:path="/search-panel"
-                    android:scheme="cebian" />
+                    android:scheme="xgesture" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.slideindex.app.action.OPEN_SEARCH_PANEL" />
@@ -531,25 +531,21 @@
 
         <service
             android:name=".service.OcrModelDownloadService"
-            android:process=":engine"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
         <service
             android:name=".service.NativeEnginePackDownloadService"
-            android:process=":engine"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
         <service
             android:name=".service.EngineBootService"
-            android:process=":engine"
             android:exported="false"
             android:stopWithTask="true" />
 
         <service
             android:name=".engine.EngineOcrService"
-            android:process=":engine"
             android:exported="false" />
 
         <service

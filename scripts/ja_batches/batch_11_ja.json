@@ -313,7 +313,7 @@
   },
   {
     "name": "gesture_action_quick_tools_overlay_permission",
-    "ja": "Cebian の有効化が必要です"
+    "ja": "XGesture の有効化が必要です"
   },
   {
     "name": "gesture_action_widget_popup_overlay",
@@ -321,7 +321,7 @@
   },
   {
     "name": "gesture_action_widget_popup_overlay_permission",
-    "ja": "Cebian の有効化が必要です"
+    "ja": "XGesture の有効化が必要です"
   },
   {
     "name": "gesture_action_stash_panel",
@@ -329,7 +329,7 @@
   },
   {
     "name": "gesture_action_stash_panel_permission",
-    "ja": "Cebian の有効化が必要です"
+    "ja": "XGesture の有効化が必要です"
   },
   {
     "name": "gesture_action_clipboard_panel",
@@ -337,7 +337,7 @@
   },
   {
     "name": "gesture_action_clipboard_panel_permission",
-    "ja": "Cebian の有効化が必要です"
+    "ja": "XGesture の有効化が必要です"
   },
   {
     "name": "gesture_action_clipboard_float",
@@ -349,7 +349,7 @@
   },
   {
     "name": "gesture_action_clipboard_float_permission",
-    "ja": "Cebian の有効化とオーバーレイ権限が必要です"
+    "ja": "XGesture の有効化とオーバーレイ権限が必要です"
   },
   {
     "name": "clipboard_float_style_title",
@@ -381,7 +381,7 @@
   },
   {
     "name": "gesture_action_clipboard_pick_permission",
-    "ja": "Cebian の有効化が必要です"
+    "ja": "XGesture の有効化が必要です"
   },
   {
     "name": "gesture_action_toggle_dnd",
@@ -433,7 +433,7 @@
   },
   {
     "name": "trigger_mode_default_slot_desc",
-    "ja": "Cebian デフォルトに従う（%1$s）"
+    "ja": "XGesture デフォルトに従う（%1$s）"
   },
   {
     "name": "slot_pick_action",

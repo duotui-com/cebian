@@ -1,6 +1,6 @@
-# Cebian（边栏）への貢献
+# XGesture（X手势）への貢献
 
-**Cebian（边栏）** の改善にご協力いただきありがとうございます。翻訳とコード貢献の手順です。
+**XGesture（X手势）** の改善にご協力いただきありがとうございます。翻訳とコード貢献の手順です。
 
 **言語：** [English](../CONTRIBUTING.md) · [简体中文](contributing_zh.md) · **日本語**
 
@@ -8,9 +8,9 @@
 
 ## アプリ UI の翻訳（Weblate 推奨）
 
-**アプリ内 UI テキスト** の貢献は [Weblate](https://hosted.weblate.org/engage/cebian/) が最も簡単です：
+**アプリ内 UI テキスト** の貢献は [Weblate](https://hosted.weblate.org/engage/XGesture/) が最も簡単です：
 
-[![翻訳状況](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻訳状況](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
 1. Weblate のプロジェクトページを開く（Git の知識不要）。
 2. 言語を選ぶ（English、日本語、または新規言語のリクエスト）。
@@ -30,16 +30,16 @@
 - string の **`name` は変更しない**。`<string>` 内の本文のみ翻訳。
 - **プレースホルダを維持**：`%1$s`、`%1$d` など、型を間違えない。
 - **HTML/XML エンティティ** と `\n` を保持。
-- **固有名詞**（Cebian、Shizuku、LSPosed、Miuix 等）は原則そのまま（ソースが既にローカライズされていればそれに従う）。
+- **固有名詞**（XGesture、Shizuku、LSPosed、Miuix 等）は原則そのまま（ソースが既にローカライズされていればそれに従う）。
 - UI 向けに自然で簡潔な表現を優先。
 
 ### Pull Request で翻訳（代替）
 
 ```text
-app/src/main/res/values/strings.xml       # ソース（中国語）
-app/src/main/res/values-en/strings.xml    # 英語
+app/src/main/res/values/strings.xml       # ソース（英語）
+app/src/main/res/values-zh/strings.xml    # 簡体字中国語
 app/src/main/res/values-ja/strings.xml    # 日本語
-app/src/main/res/values-xx/strings.xml    # 新言語：values-en をコピーして翻訳
+app/src/main/res/values-xx/strings.xml    # 新言語：values/（英語ソース）をコピーして翻訳
 ```
 
 1. リポジトリを Fork してブランチ作成。
@@ -51,7 +51,7 @@ app/src/main/res/values-xx/strings.xml    # 新言語：values-en をコピー�
 
 ## コード貢献
 
-1. Fork & clone: `git clone https://github.com/qpst4/cebian.git`
+1. Fork & clone: `git clone https://github.com/qpst4/XGesture.git`
 2. `main` から機能ブランチを作成。
 3. 変更は小さく、既存の Kotlin / Compose スタイルに合わせる。
 4. ローカル: `.\gradlew.bat compileLiteDebugKotlin`（UI/文字列変更時は `lintLiteDebug` 推奨）。
@@ -67,8 +67,8 @@ app/src/main/res/values-xx/strings.xml    # 新言語：values-en をコピー�
 
 ## コミュニティ
 
-- [GitHub Issues](https://github.com/qpst4/cebian/issues)
-- [GitHub Discussions](https://github.com/qpst4/cebian/discussions)
+- [GitHub Issues](https://github.com/qpst4/XGesture/issues)
+- [GitHub Discussions](https://github.com/qpst4/XGesture/discussions)
 - QQ グループ：**1042783385**
 
 ---

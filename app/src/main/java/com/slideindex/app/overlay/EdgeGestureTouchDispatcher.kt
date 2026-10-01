@@ -2,6 +2,7 @@ package com.slideindex.app.overlay
 
 import android.view.MotionEvent
 import com.slideindex.app.copy.UniversalCopyOverlay
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.gesture.GestureSession
 
 internal class EdgeGestureTouchDispatcher(
@@ -37,6 +38,11 @@ internal class EdgeGestureTouchDispatcher(
         if (UniversalCopyOverlay.isShowing) return false
         if (composeOverlayDialogShowing()) return false
         if (gestureSession.panelMode() != OverlayPanelMode.NONE && !gestureSession.isActive()) {
+            EdgeDiag.logStack(
+                "touch",
+                "捕获条 DOWN：面板 ${gestureSession.panelMode()} 仍是 leave-open → " +
+                    "forceReset(notifySessionEnd=true)（会直接把面板关掉）"
+            )
             gestureSession.forceReset(notifySessionEnd = true)
         }
         if (gestureSession.isActive()) {
@@ -58,6 +64,12 @@ internal class EdgeGestureTouchDispatcher(
         if (UniversalCopyOverlay.isShowing) return false
         if (composeOverlayDialogShowing()) return false
         val (localX, localY) = rawToLocal(event.rawX, event.rawY)
+        EdgeDiag.log(
+            "route",
+            "handleTouch action=${MotionEvent.actionToString(event.actionMasked)} " +
+                "panelMode=${gestureSession.panelMode()} active=${gestureSession.isActive()} " +
+                "edgeTouchActive=${edgeCaptureTouchActive()} raw=(${event.rawX},${event.rawY})"
+        )
         if (adjustPanelController.hasAdjustPanel() && !gestureSession.isActive()) {
             if (adjustPanelController.handleTouch(event, localX, localY)) return true
         }

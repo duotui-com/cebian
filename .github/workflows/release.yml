@@ -121,13 +121,13 @@ jobs:
           name: ${{ github.ref_name }}
           body_path: release-notes.md
           files: |
-            release-apk-full/cebian-*-full.apk
-            release-apk-lite/cebian-*-lite.apk
+            release-apk-full/xgesture-*-full.apk
+            release-apk-lite/xgesture-*-lite.apk
           fail_on_unmatched_files: true
 
       - name: Update update.json Manifest
         run: |
-          LITE_APK=$(find release-apk-lite -name "cebian-*-lite.apk" | head -n 1)
+          LITE_APK=$(find release-apk-lite -name "xgesture-*-lite.apk" | head -n 1)
           python scripts/update-release-manifest.py \
             --version "${{ github.ref_name }}" \
             --apk-file "$LITE_APK"
@@ -149,7 +149,7 @@ jobs:
 
       - name: Verify Remote Manifests
         run: |
-          LITE_APK=$(find release-apk-lite -name "cebian-*-lite.apk" | head -n 1)
+          LITE_APK=$(find release-apk-lite -name "xgesture-*-lite.apk" | head -n 1)
           python scripts/update-release-manifest.py \
             --version "${{ github.ref_name }}" \
             --apk-file "$LITE_APK" \

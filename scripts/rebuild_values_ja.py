@@ -149,7 +149,7 @@ def main() -> None:
         if picked is None:
             picked = sources.get(name) or current_ja.get(name) or en.get(name, zh.get(name, ""))
         if name == "app_name":
-            picked = "Cebian"
+            picked = "XGesture"
         ja_map[name] = picked
 
     lines = ['<?xml version="1.0" encoding="utf-8"?>', "<resources>"]

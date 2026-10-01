@@ -9,6 +9,9 @@ import com.slideindex.app.launcher.QuickLauncherItemCodec
 import com.slideindex.app.launcher.QuickLauncherItemType
 import com.slideindex.app.launcher.QuickLauncherPanel
 import com.slideindex.app.launcher.QuickLauncherPanelDefaults
+import com.slideindex.app.launcher.LauncherShortcutsApplier
+import com.slideindex.app.launcher.resolveFolderItems
+import com.slideindex.app.launcher.withItemsAtFolder
 import com.slideindex.app.overlay.honeycombRuntimeItems
 import com.slideindex.app.settings.FloatingPointerEdgeSide
 import com.slideindex.app.settings.FloatingPointerTrailType
@@ -141,28 +144,38 @@ class ExtensionSettingsViewModel @Inject constructor(
         settingsRepository.removeHolographicHiddenApp(packageName)
     }
 
-    fun toggleQuickLauncherPanelItem(panelId: String, item: QuickLauncherItem, added: Boolean) = launchSettingsWrite {
+    /**
+     * 增删面板条目。[folderIndex] 指向面板内的文件夹时改动写进该文件夹的子项，
+     * 为负（默认）时写面板根列表。
+     */
+    fun toggleQuickLauncherPanelItem(
+        panelId: String,
+        item: QuickLauncherItem,
+        added: Boolean,
+        folderIndex: Int = -1,
+    ) = launchSettingsWrite {
         val currentPanels = QuickLauncherPanelDefaults.effectivePanels(settingsRepository.readSnapshot().quickLauncherPanels)
         val updated = currentPanels.map { panel ->
             if (panel.id == panelId) {
+                val targetItems = panel.items.resolveFolderItems(folderIndex)
                 val nextItems = if (added) {
                     when (item.type) {
-                        QuickLauncherItemType.APP -> panel.items.filterNot { it.type == QuickLauncherItemType.APP && it.payload == item.payload }
+                        QuickLauncherItemType.APP -> targetItems.filterNot { it.type == QuickLauncherItemType.APP && it.payload == item.payload }
                         QuickLauncherItemType.SHORTCUT -> {
                             val key = QuickLauncherItemCodec.shortcutItemKey(item)
-                            panel.items.filterNot { it.type == QuickLauncherItemType.SHORTCUT && QuickLauncherItemCodec.shortcutItemKey(it) == key }
+                            targetItems.filterNot { it.type == QuickLauncherItemType.SHORTCUT && QuickLauncherItemCodec.shortcutItemKey(it) == key }
                         }
                         QuickLauncherItemType.ACTION -> {
                             val actionKey = QuickLauncherItemCodec.parseActionPayload(item.payload)?.let(QuickLauncherItemCodec::actionKey)
-                            panel.items.filterNot { it.type == QuickLauncherItemType.ACTION && QuickLauncherItemCodec.parseActionPayload(it.payload)?.let(QuickLauncherItemCodec::actionKey) == actionKey }
+                            targetItems.filterNot { it.type == QuickLauncherItemType.ACTION && QuickLauncherItemCodec.parseActionPayload(it.payload)?.let(QuickLauncherItemCodec::actionKey) == actionKey }
                         }
-                        QuickLauncherItemType.WIDGET -> panel.items.filterNot { it.type == QuickLauncherItemType.WIDGET && it.payload == item.payload }
-                        QuickLauncherItemType.FOLDER -> panel.items.filterNot { it.type == QuickLauncherItemType.FOLDER && it.payload == item.payload && it.label == item.label }
+                        QuickLauncherItemType.WIDGET -> targetItems.filterNot { it.type == QuickLauncherItemType.WIDGET && it.payload == item.payload }
+                        QuickLauncherItemType.FOLDER -> targetItems.filterNot { it.type == QuickLauncherItemType.FOLDER && it.payload == item.payload && it.label == item.label }
                     }
                 } else {
-                    panel.items + item
+                    targetItems + item
                 }
-                panel.copy(items = nextItems)
+                panel.copy(items = panel.items.withItemsAtFolder(folderIndex, nextItems))
             } else {
                 panel
             }
@@ -170,8 +183,8 @@ class ExtensionSettingsViewModel @Inject constructor(
         settingsRepository.setQuickLauncherPanels(QuickLauncherPanelDefaults.effectivePanels(updated))
     }
 
-    fun addQuickLauncherPanelItem(panelId: String, item: QuickLauncherItem) =
-        toggleQuickLauncherPanelItem(panelId, item, added = false)
+    fun addQuickLauncherPanelItem(panelId: String, item: QuickLauncherItem, folderIndex: Int = -1) =
+        toggleQuickLauncherPanelItem(panelId, item, added = false, folderIndex = folderIndex)
 
     fun toggleHoneycombItem(item: QuickLauncherItem, added: Boolean) = launchSettingsWrite {
         val current = settingsRepository.readSnapshot().honeycombLauncher.honeycombRuntimeItems()
@@ -211,6 +224,24 @@ class ExtensionSettingsViewModel @Inject constructor(
 
     fun setActivityShortcuts(items: List<com.slideindex.app.activity.ActivityShortcut>) = launchSettingsWrite {
         settingsRepository.setActivityShortcuts(items)
+    }
+
+    fun setLauncherShortcutMenuOrder(ids: List<String>) = launchSettingsWrite {
+        val disabled = settingsRepository.readSnapshot().launcherShortcutMenuDisabled
+        settingsRepository.setLauncherShortcutMenuOrder(ids).also { result ->
+            if (result.isSuccess) {
+                LauncherShortcutsApplier.sync(appContext, ids, disabled)
+            }
+        }
+    }
+
+    fun setLauncherShortcutMenuDisabled(ids: Set<String>) = launchSettingsWrite {
+        val order = settingsRepository.readSnapshot().launcherShortcutMenuOrder
+        settingsRepository.setLauncherShortcutMenuDisabled(ids).also { result ->
+            if (result.isSuccess) {
+                LauncherShortcutsApplier.sync(appContext, order, ids)
+            }
+        }
     }
 
     fun setWidgetPanelPages(pages: List<WidgetPanelPage>) = launchSettingsWrite {

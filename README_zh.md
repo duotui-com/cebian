@@ -1,15 +1,15 @@
 <div align="center">
 
-<img src="art/logo.svg" width="96" alt="边栏 (Cebian)" />
+<img src="art/logo.svg" width="96" alt="X手势 (XGesture)" />
 
-# 📱 边栏（Cebian）— Android 终极全能手势与单手生产力神器
+# 📱 X手势（XGesture）— Android 终极全能手势与单手生产力神器
 
 **打破三星独占的 OHO+、全开源现代化 FooView、免买断单手触达指针的集大成者**  
 *边缘手势 · 单手光标触达 · 悬浮球离线取词搜图 · 摇晃/扣桌/敲击手势 · 通知与 OTP 管理 · 应用冻结 · 自由小窗 · Shizuku & LSPosed*
 
 **简体中文** | [English](README.md) | [日本語](README_ja.md)
 
-[![Release](https://img.shields.io/github/v/release/qpst4/cebian?style=flat-square&color=6340e6)](https://github.com/qpst4/cebian/releases)
+[![Release](https://img.shields.io/github/v/release/qpst4/XGesture?style=flat-square&color=6340e6)](https://github.com/qpst4/XGesture/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%2012%2B-brightgreen?style=flat-square)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple?style=flat-square)](https://kotlinlang.org)
@@ -21,18 +21,18 @@
 
 <br />
 
-<img src="art/screenshots/hero_showcase.webp" width="96%" alt="边栏 (Cebian) 全景预览" />
+<img src="art/screenshots/hero_showcase.webp" width="96%" alt="X手势 (XGesture) 全景预览" />
 
 </div>
 
 ---
 
-**边栏（Cebian）** 是一款面向全体 Android 12+ 全品牌设备打造的系统级全能手势与单手生产力增强工具。基于无障碍服务，深度整合 **Shizuku、原生 Root（KernelSU / Magisk / APatch）** 及可选 **LSPosed** 多重提权模式，彻底解决现代大屏手机的单手触达与操作痛点。
+**X手势（XGesture）** 是一款面向全体 Android 12+ 全品牌设备打造的系统级全能手势与单手生产力增强工具。基于无障碍服务，深度整合 **Shizuku、原生 Root（KernelSU / Magisk / APatch）** 及可选 **LSPosed** 多重提权模式，彻底解决现代大屏手机的单手触达与操作痛点。
 
 支持通过屏幕边缘多角度多段滑动、单手悬浮指针、全能悬浮球、机身晃动、扣桌或背部敲击手势，轻松触发 **50+ 种系统动作**；深度整合 **100% 本地离线多引擎 OCR**、分词（CppJieba）与以图搜图聚合，并在任意应用之上提供高效率的悬浮启动面板、应用冻结室、OTP 验证码提取、通知管理与主流 OEM 自由小窗，全程无云端上传与商业广告，纯净隐私优先。
 
 - **应用包名：** `com.slideindex.app`
-- **当前版本：** 1.25.5（versionCode 64）
+- **当前版本：** 1.31.0（versionCode 66）
 - **系统要求：** Android 12+（API 31+）
 - **开源协议：** [AGPL-3.0 License](LICENSE)
 
@@ -42,15 +42,15 @@
 
 <div align="center">
 
-[![Download Full APK](https://img.shields.io/badge/下载%20Full%20完整包-内置离线引擎-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/cebian/releases/latest)
-[![Download Lite APK](https://img.shields.io/badge/下载%20Lite%20轻量包-体积小巧-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/cebian/releases/latest)
+[![Download Full APK](https://img.shields.io/badge/下载%20Full%20完整包-内置离线引擎-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
+[![Download Lite APK](https://img.shields.io/badge/下载%20Lite%20轻量包-体积小巧-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
 
 </div>
 
 | 产物版本 | 适用场景 | 说明 |
 | :--- | :--- | :--- |
-| **Full 完整包** (`cebian-*-full.apk`) | **新用户首选** | 开箱即用，已内置完整离线 OCR、Jieba 分词与离线翻译 Native 引擎 |
-| **Lite 轻量包** (`cebian-*-lite.apk`) | 追求小体积 / 在线热更新 | 仅保留核心手势与基础功能，体积更小，可按需在线下载扩展引擎 |
+| **Full 完整包** (`xgesture-*-full.apk`) | **新用户首选** | 开箱即用，已内置完整离线 OCR、Jieba 分词与离线翻译 Native 引擎 |
+| **Lite 轻量包** (`xgesture-*-lite.apk`) | 追求小体积 / 在线热更新 | 仅保留核心手势与基础功能，体积更小，可按需在线下载扩展引擎 |
 
 > [!TIP]
 > 两个版本的 `applicationId` 均为 `com.slideindex.app`，支持直接相互覆盖安装，配置无缝保留。
@@ -130,11 +130,11 @@
 | **应用冻结室** | 扩展 → 冻结室 | 批量冻结后台顽固应用与一键解冻（依赖 Shizuku / Root），支持手势面板快捷重新冻结 |
 | **搜索面板** | 扩展 → 搜索面板 | 本地应用、联系人、文件、系统设置项与网络文字/以图搜图聚合搜索 |
 | **Activity 快捷方式** | 扩展 → Activity 快捷方式 | 系统隐藏设置、未导出 Activity 提取、App Shortcuts 快捷方式与 URI 深链 |
-| **外部调用** | 扩展 → 外部调用 | `cebian://` Deeplink 与 Intent Action，供 Tasker / MacroDroid 等搭配使用 |
+| **外部调用** | 扩展 → 外部调用 | `xgesture://` Deeplink 与 Intent Action，供 Tasker / MacroDroid 等搭配使用 |
 | **Shell 命令** | 扩展 → Shell 命令 | 命令面板、模板变量替换与自定义图标；依赖 Shizuku / Root 执行 |
 | **Widget 面板** | 扩展 → Widget 面板 | 将桌面小部件悬浮化绑定展示，支持可调模糊背景与快捷多选 |
 | **悬浮指针** | 扩展 → 悬浮指针 | 跟手虚拟摇杆控制环形指针，支持悬停框选、径向功能环与手势录制回放 |
-| **剪贴板历史** | 手势动作「剪贴板面板」 | 图文历史搜索、贴边浮窗与分页加载；支持 Shizuku 后台监听与 `cebian://` 外部协议 |
+| **剪贴板历史** | 手势动作「剪贴板面板」 | 图文历史搜索、贴边浮窗与分页加载；支持 Shizuku 后台监听与 `xgesture://` 外部协议 |
 | **设置备份** | 扩展 → 设置备份 | 将全量配置与资产导出为 ZIP 或一键导入；敏感数据独立加密保护 |
 
 #### 📸 核心界面与交互预览
@@ -176,33 +176,33 @@
 
 ## 🔗 外部调用
 
-从其他应用、Tasker、MacroDroid 或 `adb` 唤起边栏面板。应用内可在 **扩展 → 快捷操作 → 外部调用** 查看并一键复制。
+从其他应用、Tasker、MacroDroid 或 `adb` 唤起X手势面板。应用内可在 **扩展 → 快捷操作 → 外部调用** 查看并一键复制。
 
-> **前置条件：** 搜索面板、收纳夹、剪贴板面板需已开启边栏与无障碍服务；通知滤盒需已授予通知监听权限。
+> **前置条件：** 搜索面板、收纳夹、剪贴板面板需已开启X手势与无障碍服务；通知滤盒需已授予通知监听权限。
 
 ### Deeplink（推荐）
 
-统一格式：`cebian://open/<path>?q=<可选关键词>`
+统一格式：`xgesture://open/<path>?q=<可选关键词>`
 
 | 功能 | URI | 说明 |
 | :--- | :--- | :--- |
-| 通知滤盒 | `cebian://open/notification-history` | 打开通知滤盒 |
-| 通知滤盒（预填搜索） | `cebian://open/notification-history?q=关键词` | 打开并预填搜索词 |
-| 收纳夹 | `cebian://open/stash` | 打开收纳夹面板 |
-| 收纳夹（预填搜索） | `cebian://open/stash?q=关键词` | 打开并预填搜索词 |
-| 剪贴板 | `cebian://open/clipboard` | 打开剪贴板面板 |
-| 剪贴板（预填搜索） | `cebian://open/clipboard?q=关键词` | 打开并预填搜索词 |
-| 搜索面板 | `cebian://open/search-panel` | 打开搜索面板 |
-| 搜索面板（预填关键词） | `cebian://open/search-panel?q=关键词` | 打开并预填搜索词 |
+| 通知滤盒 | `xgesture://open/notification-history` | 打开通知滤盒 |
+| 通知滤盒（预填搜索） | `xgesture://open/notification-history?q=关键词` | 打开并预填搜索词 |
+| 收纳夹 | `xgesture://open/stash` | 打开收纳夹面板 |
+| 收纳夹（预填搜索） | `xgesture://open/stash?q=关键词` | 打开并预填搜索词 |
+| 剪贴板 | `xgesture://open/clipboard` | 打开剪贴板面板 |
+| 剪贴板（预填搜索） | `xgesture://open/clipboard?q=关键词` | 打开并预填搜索词 |
+| 搜索面板 | `xgesture://open/search-panel` | 打开搜索面板 |
+| 搜索面板（预填关键词） | `xgesture://open/search-panel?q=关键词` | 打开并预填搜索词 |
 
 示例：
 
 ```bash
 # 打开搜索面板
-adb shell am start -a android.intent.action.VIEW -d "cebian://open/search-panel"
+adb shell am start -a android.intent.action.VIEW -d "xgesture://open/search-panel"
 
 # 打开搜索面板并预填关键词
-adb shell am start -a android.intent.action.VIEW -d "cebian://open/search-panel?q=天气"
+adb shell am start -a android.intent.action.VIEW -d "xgesture://open/search-panel?q=天气"
 ```
 
 ### Intent Action（高级）
@@ -241,13 +241,13 @@ Android 历史上诞生过许多极具开创性的手势与效率神器：
 - **Quick Cursor**：首创了巧妙的边缘单手光标指针，拯救了无数大屏握持痛点。
 - **FooView (FV悬浮球)**：将悬浮球取词、多引擎搜图与悬浮小窗的集成度推到了前所未有的高度。
 
-### 为什么诞生 Cebian？
+### 为什么诞生 XGesture？
 我们深爱并由衷致敬这些经典的先驱作品，但现代 Android 用户在日常使用中仍面临一些遗憾：
 - **打破品牌壁垒**：OHO+ 堪称移动端体验最顶级的手势工具之一，但长期严格受限于三星 Galaxy 机型。小米、OPPO、vivo、Pixel、魅族等众多非三星用户渴望在自己的主力机上拥有同等水准的边缘手势。
-- **开源与隐私优先**：传统商业工具往往包含闭源组件与云端接口。Cebian 坚持 **100% AGPL-3.0 完全开源**，并内置 **本地离线模型（PaddleOCR ONNX / ML Kit）**，敏感数据纯离线处理。
-- **全合一无缝融合**：无需在后台同时常驻 3~4 个独立的小工具，Cebian 将边缘多段手势、大屏指针触达、悬浮球取词识图深度串联，并辅以优雅的 Miuix 阻尼动效。
+- **开源与隐私优先**：传统商业工具往往包含闭源组件与云端接口。XGesture 坚持 **100% AGPL-3.0 完全开源**，并内置 **本地离线模型（PaddleOCR ONNX / ML Kit）**，敏感数据纯离线处理。
+- **全合一无缝融合**：无需在后台同时常驻 3~4 个独立的小工具，XGesture 将边缘多段手势、大屏指针触达、悬浮球取词识图深度串联，并辅以优雅的 Miuix 阻尼动效。
 
-| 维度对比 | **Cebian (边栏)** | **Samsung OHO+** | **Quick Cursor** | **FooView (FV悬浮球)** |
+| 维度对比 | **XGesture (X手势)** | **Samsung OHO+** | **Quick Cursor** | **FooView (FV悬浮球)** |
 | :--- | :---: | :---: | :---: | :---: |
 | **开源协议与代码** | ✅ **AGPL-3.0 (100% 完全开源)** | ❌ 闭源 (官方专有组件) | ❌ 闭源 (独立商业应用) | ❌ 闭源 (独立商业应用) |
 | **适配设备范围** | ✅ **全品牌通用 (Android 12+)** | ⚠️ 仅限三星 Galaxy 设备 | ✅ 全机型通用 | ✅ 全机型通用 |
@@ -362,8 +362,8 @@ Android 历史上诞生过许多极具开创性的手势与效率神器：
 ### 构建命令
 ```bash
 # 克隆仓库
-git clone https://github.com/qpst4/cebian.git
-cd cebian
+git clone https://github.com/qpst4/XGesture.git
+cd XGesture
 
 # 编译 Full Debug 包（含内置离线引擎）
 ./gradlew assembleFullDebug
@@ -376,9 +376,9 @@ cd cebian
 
 ## 🌍 参与翻译
 
-[![翻译状态](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻译状态](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
-在 [Weblate](https://hosted.weblate.org/engage/cebian/) 贡献 **应用界面翻译**，无需 Git。详见 [贡献指南（中文）](docs/contributing_zh.md#翻译-app-界面推荐-weblate)。
+在 [Weblate](https://hosted.weblate.org/engage/XGesture/) 贡献 **应用界面翻译**，无需 Git。详见 [贡献指南（中文）](docs/contributing_zh.md#翻译-app-界面推荐-weblate)。
 
 ---
 
@@ -388,14 +388,13 @@ cd cebian
 
 <div align="center">
 
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/cebian/discussions)
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues%20反馈-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/cebian/issues)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/discussions)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues%20反馈-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/issues)
 <br>
-[![Telegram 讨论群](https://img.shields.io/badge/Telegram-Cebian_·_边栏-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
-[![Telegram 公告](https://img.shields.io/badge/Telegram-Releases-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/cebian_channel)
+[![Telegram 讨论群](https://img.shields.io/badge/Telegram-XGesture_·_X手势-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
 [![QQ Group](art/qq_group_badge.svg)](https://qm.qq.com/q/Zx4wd2LB4G)
 
-> 官方 QQ 交流群号：**1042783385** · Telegram：[讨论群](https://t.me/+NtcG5HPiKXVmNTU1) · [发版频道 @cebian_channel](https://t.me/cebian_channel)
+> 官方 QQ 交流群号：**1042783385** · Telegram：[讨论群](https://t.me/+NtcG5HPiKXVmNTU1)
 
 </div>
 
@@ -403,7 +402,7 @@ cd cebian
 
 ## 💖 赞赏与支持
 
-如果您觉得「边栏（Cebian）」对您的日常使用有所帮助，欢迎赞赏请作者喝杯咖啡 ☕，您的支持是项目持续迭代与积极适配的最大动力！
+如果您觉得「X手势（XGesture）」对您的日常使用有所帮助，欢迎赞赏请作者喝杯咖啡 ☕，您的支持是项目持续迭代与积极适配的最大动力！
 
 <div align="center">
   <img src="art/sponsor.png" width="220" alt="微信赞赏码" />

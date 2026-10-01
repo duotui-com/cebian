@@ -38,8 +38,8 @@ android {
         applicationId = "com.slideindex.app"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = 37
-        versionCode = 64
-        versionName = "1.25.5"
+        versionCode = 66
+        versionName = "1.31.0"
 
         ndk {
             abiFilters += "arm64-v8a"
@@ -183,7 +183,7 @@ androidComponents {
         val versionName = android.defaultConfig.versionName ?: "unknown"
         val bundleFlavor = variant.productFlavors.firstOrNull { it.first == "bundle" }?.second ?: "unknown"
         variant.outputs.forEach { output ->
-            output.outputFileName.set("cebian-$versionName-$bundleFlavor.apk")
+            output.outputFileName.set("xgesture-$versionName-$bundleFlavor.apk")
         }
     }
 }

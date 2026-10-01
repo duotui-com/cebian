@@ -239,7 +239,6 @@ private fun AboutContent(
     val weblateUrl = stringResource(R.string.about_weblate_url)
     val qqGroupUrl = stringResource(R.string.about_qq_group_url)
     val telegramChatUrl = stringResource(R.string.about_telegram_chat_url)
-    val telegramReleasesUrl = stringResource(R.string.about_telegram_releases_url)
     val appInfoTitle = stringResource(R.string.about_section_app_info)
     val communityTitle = stringResource(R.string.about_section_community)
     val helpTranslateTitle = stringResource(R.string.about_help_translate_title)
@@ -451,19 +450,6 @@ private fun AboutContent(
                                 subtitle = stringResource(R.string.about_telegram_chat_desc),
                                 onClick = {
                                     val uri = telegramChatUrl.toUri()
-                                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                                }
-                            )
-                        }
-                    )
-                    add(
-                        settingsCardScopeItem("telegram-releases") {
-                            SettingNavigationRow(
-                                icon = { label -> Icon(Icons.Outlined.NewReleases, contentDescription = label) },
-                                title = stringResource(R.string.about_telegram_releases_title),
-                                subtitle = stringResource(R.string.about_telegram_releases_desc),
-                                onClick = {
-                                    val uri = telegramReleasesUrl.toUri()
                                     context.startActivity(Intent(Intent.ACTION_VIEW, uri))
                                 }
                             )

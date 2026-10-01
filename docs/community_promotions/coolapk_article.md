@@ -9,8 +9,8 @@
 
 ### 推荐标题（任选其一）
 - **标题 1（最抓眼球）**：不仅是手势：把三星 OHO+、Quick Cursor 和 FooView 揉成一个开源软件是种什么体验？
-- **标题 2（解决痛点）**：换掉三星后想念 OHO+？我做了一款全品牌通用的开源手势与单手生产力神器【边栏 Cebian】
-- **标题 3（极客技术风）**：【开源】基于 Compose + Shizuku + 离线 OCR 的全能手势工具 Cebian：支持小窗/指针/聚合搜索
+- **标题 2（解决痛点）**：换掉三星后想念 OHO+？我做了一款全品牌通用的开源手势与单手生产力神器【X手势 XGesture】
+- **标题 3（极客技术风）**：【开源】基于 Compose + Shizuku + 离线 OCR 的全能手势工具 XGesture：支持小窗/指针/聚合搜索
 
 ---
 
@@ -20,7 +20,7 @@
 
 三星的 **One Hand Operation+ (OHO+)** 被誉为移动端最强手势软件，但它死死焊在三星手机上；**Quick Cursor** 解决了大屏单手触达，但高级功能需要买断且功能相对单一；**FooView（FV悬浮球）** 曾是神作，但长期闭源、权限庞大且界面停留在几年前；而在国内极客圈深受欢迎的 **SearchEVO** 也是独立工具。
 
-既然大家都在找替代品，不如把这些经典交互的精髓打通，做一款真正属于 Android 极客的现代化开源神器——**边栏（Cebian）**。
+既然大家都在找替代品，不如把这些经典交互的精髓打通，做一款真正属于 Android 极客的现代化开源神器——**X手势（XGesture）**。
 
 ---
 
@@ -50,8 +50,8 @@
 
 ### 📥 下载与开源主页
 
-- **GitHub 源码主页**：https://github.com/qpst4/cebian
-- **最新版 APK 下载**：https://github.com/qpst4/cebian/releases/latest
+- **GitHub 源码主页**：https://github.com/qpst4/XGesture
+- **最新版 APK 下载**：https://github.com/qpst4/XGesture/releases/latest
   （提供内置离线引擎的 Full 完整包，以及体积轻盈的 Lite 轻量包）
 - **官方 QQ 交流群**：1042783385
 

@@ -511,7 +511,7 @@
   },
   {
     "name": "service_notification_title",
-    "text": "Cebian is running",
+    "text": "XGesture is running",
     "source": "en"
   },
   {
@@ -711,17 +711,17 @@
   },
   {
     "name": "secure_settings_title",
-    "text": "Cebian keep-alive",
+    "text": "XGesture keep-alive",
     "source": "en"
   },
   {
     "name": "secure_settings_desc",
-    "text": "Automatically restore Cebian if the system disables it (requires WRITE_SECURE_SETTINGS)",
+    "text": "Automatically restore XGesture if the system disables it (requires WRITE_SECURE_SETTINGS)",
     "source": "en"
   },
   {
     "name": "secure_settings_enabled_summary",
-    "text": "Cebian keep-alive on",
+    "text": "XGesture keep-alive on",
     "source": "en"
   },
   {
@@ -771,7 +771,7 @@
   },
   {
     "name": "permission_accessibility_title",
-    "text": "Cebian",
+    "text": "XGesture",
     "source": "en"
   },
   {
@@ -781,7 +781,7 @@
   },
   {
     "name": "permission_accessibility_grant",
-    "text": "Enable Cebian",
+    "text": "Enable XGesture",
     "source": "en"
   },
   {
@@ -811,7 +811,7 @@
   },
   {
     "name": "hidden_apps_desc",
-    "text": "Hidden apps won\\'t appear in Cebian panels, but can still be opened from the home screen and elsewhere.",
+    "text": "Hidden apps won\\'t appear in XGesture panels, but can still be opened from the home screen and elsewhere.",
     "source": "en"
   },
   {
@@ -876,7 +876,7 @@
   },
   {
     "name": "accessibility_service_name",
-    "text": "Cebian",
+    "text": "XGesture",
     "source": "en"
   },
   {
@@ -896,7 +896,7 @@
   },
   {
     "name": "gesture_hint_style_capsule_desc",
-    "text": "Rounded capsule expands with Cebian",
+    "text": "Rounded capsule expands with XGesture",
     "source": "en"
   }
 ]

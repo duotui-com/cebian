@@ -36,7 +36,7 @@ body:
     id: preset_json
     attributes:
       label: "Preset Content / 配置内容 (JSON 或口令)"
-      description: "在 Cebian 中导出为 JSON 或备份文件内容，粘贴在下方代码块中"
+      description: "在 XGesture 中导出为 JSON 或备份文件内容，粘贴在下方代码块中"
       render: json
     validations:
       required: true

@@ -6,9 +6,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.lifecycle.lifecycleScope
 import com.slideindex.app.R
 import com.slideindex.app.di.AppDependencies
+import com.slideindex.app.external.AppLinks
 import com.slideindex.app.overlay.searchpanel.SearchPanelOverlayWindow
 import com.slideindex.app.overlay.searchpanel.SearchPanelQueryBridge
 import com.slideindex.app.util.PermissionHelper
@@ -62,10 +64,19 @@ class SearchPanelTrampolineActivity : ComponentActivity() {
             searchQuery?.let { SearchPanelQueryBridge.rememberQuery(this@SearchPanelTrampolineActivity, it) }
 
             val shown = retryShowPanel()
-            if (!shown) {
+            if (shown) {
+                reportShortcutUsage()
+            } else {
                 toast(R.string.shortcut_panel_open_failed)
             }
             finishTransparent()
+        }
+    }
+
+    /** 面板条目可能被用户在「外部调用」里关掉，此时该 shortcutId 不存在，需容错。 */
+    private fun reportShortcutUsage() {
+        runCatching {
+            ShortcutManagerCompat.reportShortcutUsed(this, SHORTCUT_ID_SEARCH_PANEL)
         }
     }
 
@@ -93,26 +104,15 @@ class SearchPanelTrampolineActivity : ComponentActivity() {
 
     companion object {
         const val ACTION_OPEN_SEARCH_PANEL = "com.slideindex.app.action.OPEN_SEARCH_PANEL"
+        const val SHORTCUT_ID_SEARCH_PANEL = "search_panel"
 
-        private const val SCHEME = "cebian"
-        private const val HOST = "open"
-        private const val PATH_SEARCH_PANEL = "search-panel"
-        private const val QUERY_PARAM = "q"
+        private const val QUERY_PARAM = AppLinks.QUERY_PARAM
 
         private const val SHOW_RETRY_ATTEMPTS = 5
         private const val SHOW_RETRY_DELAY_MS = 150L
 
         fun uriFor(query: String? = null): Uri =
-            Uri.Builder()
-                .scheme(SCHEME)
-                .authority(HOST)
-                .appendPath(PATH_SEARCH_PANEL)
-                .apply {
-                    query?.trim()?.takeIf { it.isNotEmpty() }?.let {
-                        appendQueryParameter(QUERY_PARAM, it)
-                    }
-                }
-                .build()
+            AppLinks.uri(path = AppLinks.PATH_SEARCH_PANEL, query = query)
 
         fun createIntent(context: Context, query: String? = null): Intent =
             Intent(Intent.ACTION_VIEW, uriFor(query)).apply {

@@ -14,7 +14,7 @@ import com.slideindex.app.R
 object FreezerLauncherHelper {
     private const val TAG = "FreezerLauncherHelper"
     private const val SHORTCUT_ID = "freezer_panel"
-    /** 旧版 activity-alias，升级后从 manifest 移除；启动时强制禁用以免 Flyme 残留「边栏」图标 */
+    /** 旧版 activity-alias，升级后从 manifest 移除；启动时强制禁用以免 Flyme 残留「X手势」图标 */
     private const val LEGACY_ALIAS_CLASS = "com.slideindex.app.freezer.FreezerPanelLauncher"
 
     /**

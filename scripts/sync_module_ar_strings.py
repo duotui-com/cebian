@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRIB = Path(r"d:\Downloads\Telegram Desktop\string边栏_1.10.3.apk.xml")
+CONTRIB = Path(r"d:\Downloads\Telegram Desktop\stringX手势_1.10.3.apk.xml")
 
 MODULE_RES_DIRS = [
     ROOT / "feature/settings/src/main/res",

@@ -1,93 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 暂存夹分类与微信一键发送（话术）。key 统一以 stash_category_ / stash_send_ 开头。 -->
+<!-- Stash categories and one-tap send to WeChat (canned replies). Keys are prefixed stash_category_ / stash_send_. Default (English) source; Chinese lives in values-zh/. -->
 <resources>
-    <!-- 设置页入口 -->
-    <string name="stash_category_manage_title">分类与话术管理</string>
-    <string name="stash_category_manage_subtitle">给暂存内容分类，在微信里一键发送</string>
+    <!-- Settings entry -->
+    <string name="stash_category_manage_title">Categories &amp; canned replies</string>
+    <string name="stash_category_manage_subtitle">Sort stash items into categories and send them in WeChat with one tap</string>
 
-    <!-- 管理页：一键发送设置 -->
-    <string name="stash_category_settings_title">分类与话术管理</string>
-    <string name="stash_category_settings_subtitle">带分类的内容长期保留，可一键发到微信聊天</string>
-    <string name="stash_category_send_section">一键发送</string>
-    <string name="stash_category_accessibility_title">无障碍服务</string>
-    <string name="stash_category_accessibility_on">已开启，可在微信聊天界面里一键发送</string>
-    <string name="stash_category_accessibility_off">未开启，点击前往开启</string>
-    <string name="stash_category_collapse_title">发送后自动收起面板</string>
-    <string name="stash_category_collapse_desc">点「发送」后先收起收纳面板，再往微信里填内容</string>
-    <string name="stash_category_wechat_env_hint">「发送」只在微信聊天界面里生效：需要开启无障碍服务，并让微信停在要发送的聊天页。发送会覆盖输入框里已有的草稿。部分机型或微信版本下，无障碍读不到微信界面（节点树为空），此时会提示并改为复制到剪贴板；可在系统无障碍设置里开启「随选朗读」，让微信重新生成界面树后再试。</string>
+    <!-- Manage page: one-tap send settings -->
+    <string name="stash_category_settings_title">Categories &amp; canned replies</string>
+    <string name="stash_category_settings_subtitle">Categorized items are kept long-term and can be sent to a WeChat chat with one tap</string>
+    <string name="stash_category_send_section">One-tap send</string>
+    <string name="stash_category_accessibility_title">Accessibility service</string>
+    <string name="stash_category_accessibility_on">Enabled — one-tap send works in WeChat chats</string>
+    <string name="stash_category_accessibility_off">Not enabled. Tap to open settings</string>
+    <string name="stash_category_collapse_title">Close the panel after sending</string>
+    <string name="stash_category_collapse_desc">Tapping Send closes the collection panel first, then fills in WeChat</string>
+    <string name="stash_category_wechat_env_hint">Send only works in a WeChat chat: turn on the accessibility service and keep WeChat open on the chat you want to send to. Sending overwrites any draft in the input box. On some devices or WeChat versions accessibility cannot read the WeChat screen (an empty node tree); you will get a message and the content is copied to the clipboard instead. Try turning on “Select to Speak” in the system accessibility settings so WeChat rebuilds its view tree, then retry.</string>
 
-    <!-- 管理页：分类列表 -->
-    <string name="stash_category_section">分类</string>
-    <string name="stash_category_add">新增分类</string>
-    <string name="stash_category_add_desc">分类里的内容长期保留，不占 200 条上限，也不会被「清空暂存夹」清掉</string>
-    <string name="stash_category_empty">还没有分类。新建一个，再把内容放进去。</string>
-    <string name="stash_category_add_title">新增分类</string>
-    <string name="stash_category_rename_title">重命名分类</string>
-    <string name="stash_category_name_hint">分类名称</string>
-    <string name="stash_category_name_rejected">分类名称不能为空，也不能与已有分类重名</string>
-    <string name="stash_category_entry_count">%d 条内容</string>
-    <string name="stash_category_rename">重命名</string>
-    <string name="stash_category_delete">删除分类</string>
-    <string name="stash_category_delete_title">删除分类？</string>
-    <string name="stash_category_delete_message">分类「%1$s」下的 %2$d 条内容不会被删除，会变回普通暂存条目（排在最前面；暂存夹超过 200 条时，仍会按规则淘汰最早的普通条目）。</string>
+    <!-- Manage page: category list -->
+    <string name="stash_category_section">Categories</string>
+    <string name="stash_category_add">Add category</string>
+    <string name="stash_category_add_desc">Items in a category are kept long-term: they do not count toward the 200-item limit and are not removed by “Clear stash”</string>
+    <string name="stash_category_empty">No categories yet. Create one, then put items into it.</string>
+    <string name="stash_category_add_title">Add category</string>
+    <string name="stash_category_rename_title">Rename category</string>
+    <string name="stash_category_name_hint">Category name</string>
+    <string name="stash_category_name_rejected">The name must not be empty or duplicate an existing category</string>
+    <string name="stash_category_entry_count">Entries: %d</string>
+    <string name="stash_category_rename">Rename</string>
+    <string name="stash_category_delete">Delete category</string>
+    <string name="stash_category_delete_title">Delete category?</string>
+    <string name="stash_category_delete_message">The %2$d item(s) in “%1$s” are kept and become regular stash items again (placed first; once the stash exceeds 200 items the oldest regular items are still dropped).</string>
 
-    <!-- 管理页：分类内条目 -->
-    <string name="stash_category_entries_add">新增话术</string>
-    <string name="stash_category_entries_add_desc">文字、图片，或图文一起发</string>
-    <string name="stash_category_entries_empty">这个分类里还没有内容</string>
-    <string name="stash_category_entries_reorder_hint">长按条目可拖动排序，点击可编辑</string>
-    <string name="stash_category_entry_type_text">文字</string>
-    <string name="stash_category_entry_type_image">图片</string>
-    <string name="stash_category_entry_type_rich">图文</string>
-    <string name="stash_category_entry_image_only">[图片]</string>
-    <string name="stash_category_move">移到其它分类</string>
-    <string name="stash_category_move_title">移到分类</string>
-    <string name="stash_category_move_uncategorized">移出分类（变回普通暂存）</string>
-    <string name="stash_category_entry_delete_title">删除这条内容？</string>
-    <string name="stash_category_entry_delete_message">此操作不可撤销。</string>
-    <string name="stash_category_clear">清空此分类</string>
-    <string name="stash_category_clear_desc">删除该分类下的全部内容（含图片），分类本身保留</string>
-    <string name="stash_category_clear_confirm_title">清空此分类？</string>
-    <string name="stash_category_clear_confirm_message">将删除「%1$s」下的 %2$d 条内容（含图片），此操作不可撤销。</string>
+    <!-- Manage page: items in a category -->
+    <string name="stash_category_entries_add">Add item</string>
+    <string name="stash_category_entries_add_desc">Text, an image, or both</string>
+    <string name="stash_category_entries_empty">This category is empty</string>
+    <string name="stash_category_entries_reorder_hint">Long-press to drag and reorder, tap to edit</string>
+    <string name="stash_category_entry_type_text">Text</string>
+    <string name="stash_category_entry_type_image">Image</string>
+    <string name="stash_category_entry_type_rich">Text + image</string>
+    <string name="stash_category_entry_image_only">[Image]</string>
+    <string name="stash_category_move">Move to another category</string>
+    <string name="stash_category_move_title">Move to category</string>
+    <string name="stash_category_move_uncategorized">Remove from category (back to regular stash)</string>
+    <string name="stash_category_entry_delete_title">Delete this item?</string>
+    <string name="stash_category_entry_delete_message">This cannot be undone.</string>
+    <string name="stash_category_clear">Clear this category</string>
+    <string name="stash_category_clear_desc">Delete every item in this category (including images); the category itself stays</string>
+    <string name="stash_category_clear_confirm_title">Clear this category?</string>
+    <string name="stash_category_clear_confirm_message">This will delete the %2$d item(s) in “%1$s” (including images). This cannot be undone.</string>
 
-    <!-- 管理页：新增 / 编辑一条 -->
-    <string name="stash_category_editor_add_title">新增话术</string>
-    <string name="stash_category_editor_edit_title">编辑话术</string>
-    <string name="stash_category_editor_save">保存</string>
-    <string name="stash_category_editor_text_section">文字</string>
-    <string name="stash_category_editor_text_label">话术文字（只发图片时可留空）</string>
-    <string name="stash_category_editor_image_section">图片</string>
-    <string name="stash_category_editor_pick_image">选择图片</string>
-    <string name="stash_category_editor_change_image">更换图片</string>
-    <string name="stash_category_editor_remove_image">移除图片</string>
-    <string name="stash_category_editor_order_hint">文字和图片都填写时，会先发文字，再发图片。</string>
-    <string name="stash_category_editor_complex">这条内容包含多段文字或多张图片，不支持在这里编辑。可以返回后移动或删除它。</string>
-    <string name="stash_category_image_load_failed">图片读取失败</string>
-    <string name="stash_category_save_failed">保存失败</string>
+    <!-- Manage page: add / edit an item -->
+    <string name="stash_category_editor_add_title">Add item</string>
+    <string name="stash_category_editor_edit_title">Edit item</string>
+    <string name="stash_category_editor_save">Save</string>
+    <string name="stash_category_editor_text_section">Text</string>
+    <string name="stash_category_editor_text_label">Text (optional if you only send an image)</string>
+    <string name="stash_category_editor_image_section">Image</string>
+    <string name="stash_category_editor_pick_image">Choose image</string>
+    <string name="stash_category_editor_change_image">Change image</string>
+    <string name="stash_category_editor_remove_image">Remove image</string>
+    <string name="stash_category_editor_order_hint">If both are filled in, the text is sent first, then the image.</string>
+    <string name="stash_category_editor_complex">This item has several text blocks or images and cannot be edited here. Go back to move or delete it.</string>
+    <string name="stash_category_image_load_failed">Failed to read the image</string>
+    <string name="stash_category_save_failed">Failed to save</string>
 
-    <!-- 收纳面板：筛选条与卡片 -->
-    <string name="stash_category_all">全部</string>
-    <string name="stash_category_uncategorized">未分类</string>
-    <string name="stash_category_manage">管理</string>
-    <string name="stash_category_empty_hint">该分类暂无内容，可在管理页添加，或在暂存条目上选择「移入分类」</string>
-    <string name="stash_category_uncategorized_empty_hint">没有未分类的内容</string>
-    <string name="stash_category_move_to">移入分类</string>
-    <string name="stash_category_move_out">移出分类</string>
-    <string name="stash_category_move_manage">管理分类…</string>
-    <string name="stash_category_moved">已移动</string>
-    <string name="stash_category_clear_all_confirm_message">将删除未归入分类的暂存内容（含图片），此操作不可撤销。分类中的内容不会被清空。</string>
+    <!-- Collection panel: filter bar and cards -->
+    <string name="stash_category_all">All</string>
+    <string name="stash_category_uncategorized">Uncategorized</string>
+    <string name="stash_category_manage">Manage</string>
+    <string name="stash_category_empty_hint">This category is empty. Add items in the manage page, or use “Move to category” on a stash item</string>
+    <string name="stash_category_uncategorized_empty_hint">No uncategorized items</string>
+    <string name="stash_category_move_to">Move to category</string>
+    <string name="stash_category_move_out">Remove from category</string>
+    <string name="stash_category_move_manage">Manage categories…</string>
+    <string name="stash_category_moved">Moved</string>
+    <string name="stash_category_clear_all_confirm_message">Stash items that are not in a category (including images) will be deleted. This cannot be undone. Items in categories are not cleared.</string>
 
-    <!-- 一键发送 -->
-    <string name="stash_send_action">发送到微信</string>
-    <string name="stash_send_empty">这条内容里没有可发送的文字或图片</string>
-    <string name="stash_send_busy">正在发送，请稍候</string>
-    <string name="stash_send_copied_suffix">，已复制到剪贴板</string>
-    <string name="stash_send_fail_accessibility">无障碍服务未开启，无法自动发送</string>
-    <string name="stash_send_fail_not_in_wechat">请先切到微信聊天界面再发送</string>
-    <string name="stash_send_fail_tree_empty">读不到微信界面（无障碍树为空），可在系统无障碍设置里开启「随选朗读」后重试</string>
-    <string name="stash_send_fail_input_not_found">没找到微信的输入框，请先打开一个聊天</string>
-    <string name="stash_send_fail_send_button">没找到「发送」按钮，请手动点发送</string>
-    <string name="stash_send_fail_image">图片文件丢失，或无法放到剪贴板</string>
-    <string name="stash_send_fail_unexpected">发送时出错了，请重试</string>
-    <string name="stash_send_fail_partial">前面的内容已发出，后面的发送失败了</string>
+    <!-- One-tap send -->
+    <string name="stash_send_action">Send to WeChat</string>
+    <string name="stash_send_empty">There is no text or image to send in this item</string>
+    <string name="stash_send_busy">Sending — please wait</string>
+    <string name="stash_send_copied_suffix">, copied to the clipboard</string>
+    <string name="stash_send_fail_accessibility">Accessibility service is off, so auto-send is unavailable</string>
+    <string name="stash_send_fail_not_in_wechat">Switch to a WeChat chat first</string>
+    <string name="stash_send_fail_tree_empty">Cannot read the WeChat screen (empty accessibility tree); try turning on “Select to Speak” in the accessibility settings and retry</string>
+    <string name="stash_send_fail_input_not_found">WeChat input box not found — open a chat first</string>
+    <string name="stash_send_fail_send_button">The Send button was not found — tap Send manually</string>
+    <string name="stash_send_fail_image">The image file is missing or cannot be put on the clipboard</string>
+    <string name="stash_send_fail_unexpected">Something went wrong while sending — try again</string>
+    <string name="stash_send_fail_partial">Earlier content was sent, but a later part failed</string>
 </resources>

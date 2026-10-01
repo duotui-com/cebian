@@ -2,6 +2,7 @@ package com.slideindex.app.ui.quicklauncher
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -70,6 +73,7 @@ internal fun QuickLauncherPageGrid(
     iconShape: Int = QuickLauncherDisplaySettings.ICON_SHAPE_DEFAULT,
     cellHeightDp: Dp = 80.dp,
     shellCommands: List<ShellCommand> = emptyList(),
+    onEnterFolder: ((Int) -> Unit)? = null,
 ) {
     val displayMapping = remember(items.size, dragFromGlobal, dragSlotGlobal, mergeTargetGlobal, pageStart, pageSize) {
         QuickLauncherGridLogic.displayMappingForPage(
@@ -96,10 +100,11 @@ internal fun QuickLauncherPageGrid(
                     Box(modifier = Modifier.weight(1f).height(cellHeightDp)) {
                         val originalIndex = displayMapping.getOrNull(cellIndex)
                         val item = originalIndex?.let { items.getOrNull(it) }
-                        if (item == null) {
+                        if (originalIndex == null || item == null) {
                             QuickLauncherEmptyGridCell()
                         } else {
                             val isMergeTarget = mergeTargetGlobal >= 0 && originalIndex == mergeTargetGlobal
+                            val enterable = onEnterFolder != null && item.isFolder && !isMergeTarget
                             QuickLauncherGridCell(
                                 item = item,
                                 appsByPackage = appsByPackage,
@@ -110,6 +115,12 @@ internal fun QuickLauncherPageGrid(
                                 iconSizeDp = iconSizeDp,
                                 iconShape = iconShape,
                                 shellCommands = shellCommands,
+                                onClick = if (enterable) {
+                                    { onEnterFolder(originalIndex) }
+                                } else {
+                                    null
+                                },
+                                showEnterAffordance = enterable,
                             )
                         }
                     }
@@ -142,6 +153,8 @@ internal fun QuickLauncherGridCell(
     iconShape: Int = QuickLauncherDisplaySettings.ICON_SHAPE_DEFAULT,
     activityShortcuts: List<com.slideindex.app.activity.ActivityShortcut> = emptyList(),
     shellCommands: List<ShellCommand> = emptyList(),
+    onClick: (() -> Unit)? = null,
+    showEnterAffordance: Boolean = false,
 ) {
     val context = LocalContext.current
     val label = quickLauncherGridLabel(context, item, appsByPackage)
@@ -176,7 +189,14 @@ internal fun QuickLauncherGridCell(
             .fillMaxSize()
             .then(cellBorderModifier)
             .clip(RoundedCornerShape(12.dp))
-            .background(cellBackground),
+            .background(cellBackground)
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(onClick = onClick)
+                } else {
+                    Modifier
+                },
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -252,6 +272,24 @@ internal fun QuickLauncherGridCell(
                     text = "−",
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall,
+                )
+            }
+        }
+        if (showEnterAffordance) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(3.dp)
+                    .size(17.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(13.dp),
                 )
             }
         }

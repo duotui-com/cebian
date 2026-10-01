@@ -1,12 +1,12 @@
 # Weblate 初次配置（维护者）
 
-本文档说明如何在 [hosted.weblate.org](https://hosted.weblate.org) 为 **Cebian（边栏）** 开通社区翻译。贡献者无需阅读本文。
+本文档说明如何在 [hosted.weblate.org](https://hosted.weblate.org) 为 **XGesture（X手势）** 开通社区翻译。贡献者无需阅读本文。
 
 ## 前置条件
 
-- GitHub 仓库：`https://github.com/qpst4/cebian`
+- GitHub 仓库：`https://github.com/qpst4/XGesture`
 - 仓库根目录已包含 [`weblate.yml`](../weblate.yml)
-- 源语言为 **简体中文**（`app/src/main/res/values/strings.xml`）
+- 源语言为 **英语**（`app/src/main/res/values/strings.xml`，简体中文位于 `values-zh/`）
 
 ## 步骤
 
@@ -15,17 +15,17 @@
 1. 使用 GitHub 登录 [hosted.weblate.org](https://hosted.weblate.org)
 2. **Manage** → **Create project**（开源项目可申请 Libre hosting）
 3. 项目信息建议：
-   - **Name**：Cebian
-   - **Slug**：`cebian`（与 `weblate.yml` 中 `project` 一致）
-   - **Website**：`https://github.com/qpst4/cebian`
-   - **Source language**：Chinese (Simplified) / `zh_Hans`
+   - **Name**：XGesture
+   - **Slug**：`XGesture`（与 `weblate.yml` 中 `project` 一致）
+   - **Website**：`https://github.com/qpst4/XGesture`
+   - **Source language**：English / `en`
 
 ### 2. 导入组件
 
 **方式 A（推荐）：从 weblate.yml 导入**
 
 1. 在项目中 **Add new translation component**
-2. Repository：`https://github.com/qpst4/cebian.git`，Branch：`main`
+2. Repository：`https://github.com/qpst4/XGesture.git`，Branch：`main`
 3. 若界面提供 **Import from weblate.yml**，选用根目录配置
 
 **方式 B：手动创建 App strings 组件**
@@ -37,7 +37,7 @@
 | File format | Android String Resource |
 | File mask | `app/src/main/res/values-*/strings.xml` |
 | Monolingual base language file | `app/src/main/res/values/strings.xml` |
-| Source language | Chinese (Simplified) |
+| Source language | English |
 
 当前 **仅** 覆盖主应用 `app` 模块字符串。`core/*`、`feature/*` 与 `preset_shortcuts.json` 未纳入；需要时可后续增加 linked component。
 
@@ -62,23 +62,23 @@
 
 ### 5. 验证
 
-1. 打开 https://hosted.weblate.org/projects/cebian/
-2. 选择 **English** / **Japanese**，确认加载 `values-en`、`values-ja`
+1. 打开 https://hosted.weblate.org/projects/XGesture/
+2. 选择 **简体中文** / **Japanese**，确认加载 `values-zh`、`values-ja`
 3. 试译一条并提交，检查 GitHub 是否出现 PR
-4. README 徽章：`https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg`
+4. README 徽章：`https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg`
 
 ## 语言代码对照
 
 | 目录 | 语言 |
 |------|------|
-| `values/` | 简体中文（源） |
-| `values-en/` | English |
+| `values/` | English（源） |
+| `values-zh/` | 简体中文 |
 | `values-ja/` | Japanese |
 | `values-ar/` | Arabic (Modern Standard Arabic); also `feature/settings`, `feature/notification`, `core/ocr`, `core/common` |
 
 ## 故障排查
 
-- **源语言冲突**：monolingual base 必须是 `values/strings.xml`，源语言设为简体中文。
+- **源语言冲突**：monolingual base 必须是 `values/strings.xml`，源语言设为英语（English），简体中文放在 `values-zh/`。
 - **Lint 失败**：占位符 `%1$s` / `%1$d` 类型须与源字符串一致。
 - **缺 key**：Repository → **Update** 同步最新 `strings.xml`。
 

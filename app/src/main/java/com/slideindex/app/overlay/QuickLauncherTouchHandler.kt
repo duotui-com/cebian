@@ -2,6 +2,7 @@ package com.slideindex.app.overlay
 
 import android.graphics.RectF
 import android.view.MotionEvent
+import com.slideindex.app.diagnostic.EdgeDiag
 
 internal class QuickLauncherTouchHandler(
     internal val ctrl: QuickLauncherOverlayController
@@ -33,6 +34,12 @@ internal class QuickLauncherTouchHandler(
             else -> ctrl.quickLauncherToolbarTouchActive
         }
         val continuousPick = host.gestureSession().quickLauncherContinuousPickActive()
+        EdgeDiag.log(
+            "qlTouch",
+            "面板收到触摸 action=${MotionEvent.actionToString(event.actionMasked)} " +
+                "continuousPick=$continuousPick 高亮=${host.panelGridSession().highlightedIndex} " +
+                "local=($localX,$localY) adjustedX=$touchX"
+        )
         if (event.actionMasked == MotionEvent.ACTION_UP ||
             event.actionMasked == MotionEvent.ACTION_CANCEL
         ) {
@@ -314,6 +321,7 @@ internal class QuickLauncherTouchHandler(
     }
 
     private fun endQuickLauncherSessionAnimated() {
+        EdgeDiag.logStack("qlTouch", "endQuickLauncherSessionAnimated：关闭快速启动器面板")
         if (ctrl.quickLauncherExiting) return
         if (host.gestureSession().panelMode() != OverlayPanelMode.QUICK_LAUNCHER) {
             host.gestureSession().endSession()

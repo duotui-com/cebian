@@ -1,4 +1,4 @@
-# cebian UI 规范
+# XGesture UI 规范
 
 改 `app/src/main/java/com/slideindex/app/ui/` 下任何 Compose 界面前先读本文件。
 

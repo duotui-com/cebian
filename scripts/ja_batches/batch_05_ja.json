@@ -177,11 +177,11 @@
   },
   {
     "name": "share_image_ocr_target_label",
-    "ja": "Cebian OCR 選択"
+    "ja": "XGesture OCR 選択"
   },
   {
     "name": "share_image_ocr_service_required",
-    "ja": "先に Cebian アクセシビリティサービスを有効にしてください"
+    "ja": "先に XGesture アクセシビリティサービスを有効にしてください"
   },
   {
     "name": "share_image_ocr_model_required",
@@ -461,7 +461,7 @@
   },
   {
     "name": "diagnostic_report_share_subject",
-    "ja": "Cebian 診断ログ"
+    "ja": "XGesture 診断ログ"
   },
   {
     "name": "diagnostic_report_truncation_suffix",

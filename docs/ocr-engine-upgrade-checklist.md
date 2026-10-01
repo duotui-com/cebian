@@ -133,8 +133,8 @@ Debug 包在 `OcrStartupSmokeVerifier` 下会做启动 OCR 冒烟（仅 `BuildCo
 2. 提交并 push `main`。
 3. **只 push 一次** tag（如 `v1.9.23`），触发 `.github/workflows/release.yml`。
 4. GitHub Release 应包含：
-   - `cebian-<version>-full.apk`
-   - `cebian-<version>-lite.apk`
+   - `xgesture-<version>-full.apk`
+   - `xgesture-<version>-lite.apk`
    - （若单独分发）`ocr-engine-arm64-vN.zip`
 5. 确认 `native_engine_packs.json` 里的 `url` 与 Release 资产一致。
 6. CI 会更新 `update.json`；检查 Release 页无错误版本 APK。

@@ -48,6 +48,10 @@ object OverlayHostLease {
         if (!ownerAlive) {
             val pending = registrations.values.map { it.teardown }
             registrations.clear()
+            com.slideindex.app.diagnostic.EdgeDiag.logStack(
+                "host",
+                "OverlayHostLease 判定宿主失联（无障碍实例为 null）→ 强制拆卸 ${pending.size} 个宿主"
+            )
             Log.w(
                 TAG,
                 "浮层宿主失联（无障碍服务已不在本进程），强制拆卸 ${pending.size} 个宿主"

@@ -18,6 +18,7 @@ import com.slideindex.app.settings.AppCarouselSwitcherSettings
 import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.settings.AndroidBackColorSource
 import com.slideindex.app.settings.CornerSlotSubMenuConfig
+import com.slideindex.app.settings.FreeWindowLayoutFractions
 import com.slideindex.app.settings.SettingsRepository
 import kotlinx.coroutines.flow.first
 import com.slideindex.app.settings.KeyboardTriggerBehavior
@@ -160,8 +161,14 @@ class HomeDetailSettingsViewModel @Inject constructor(
         settingsRepository.setFreeWindowModeId(modeId)
     }
 
-    fun setFreeWindowLayout(width: Float, height: Float, left: Float, top: Float) = launchSettingsWrite {
-        settingsRepository.setFreeWindowLayout(width, height, left, top)
+    /**
+     * 一次性保存竖屏与横屏两套小窗尺寸位置；两套互不影响，运行时按当前显示方向取用。
+     */
+    fun setFreeWindowLayout(
+        portrait: FreeWindowLayoutFractions,
+        landscape: FreeWindowLayoutFractions,
+    ) = launchSettingsWrite {
+        settingsRepository.setFreeWindowLayout(portrait = portrait, landscape = landscape)
     }
 
     fun addBottomTriggerHandle() = launchOptimisticSettingsWrite(

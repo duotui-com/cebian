@@ -34,6 +34,7 @@ import com.slideindex.app.launcher.QuickLauncherItem
 import com.slideindex.app.launcher.QuickLauncherItemCodec
 import com.slideindex.app.launcher.QuickLauncherItemType
 import com.slideindex.app.launcher.QuickLauncherPanelDefaults
+import com.slideindex.app.launcher.resolveFolderItems
 import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.ui.compose.collectLaunchableAppsAsState
 import com.slideindex.app.ui.compose.rememberAppRepository
@@ -64,6 +65,7 @@ fun QuickLauncherAddPickerScreen(
     onOpenCreateFolder: () -> Unit,
     onOpenOpenLink: () -> Unit = {},
     onOpenSimulateKeyEvent: () -> Unit = {},
+    folderIndex: Int = -1,
 ) {
     val context = LocalContext.current
     val appRepository = rememberAppRepository()
@@ -80,7 +82,8 @@ fun QuickLauncherAddPickerScreen(
         QuickLauncherPanelDefaults.effectivePanels(settings.quickLauncherPanels).find { it.id == panelId }
             ?: QuickLauncherPanelDefaults.defaultPanel()
     }
-    val items = panel.items
+    val isInsideFolder = folderIndex >= 0
+    val items = panel.items.resolveFolderItems(folderIndex)
 
     val configuredAppPackages = remember(items) {
         items.filter { it.type == QuickLauncherItemType.APP }.map { it.payload }.toSet()
@@ -146,12 +149,15 @@ fun QuickLauncherAddPickerScreen(
         onBack = addPickerBack,
         modifier = Modifier.fillMaxSize(),
         actions = {
-            IconButton(onClick = onOpenCreateFolder) {
-                Icon(
-                    MiuixIcons.AddFolder,
-                    contentDescription = stringResource(R.string.quick_launcher_new_folder),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
+            // 文件夹只有一层，已经在文件夹内时不再提供新建文件夹。
+            if (!isInsideFolder) {
+                IconButton(onClick = onOpenCreateFolder) {
+                    Icon(
+                        MiuixIcons.AddFolder,
+                        contentDescription = stringResource(R.string.quick_launcher_new_folder),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
             MiuixExpandableSearchIconAction(
                 expanded = searchExpanded,

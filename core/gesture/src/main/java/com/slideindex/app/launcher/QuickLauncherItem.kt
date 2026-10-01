@@ -456,3 +456,55 @@ fun List<QuickLauncherItem>.mergeIntoFolder(
     }
 }
 
+/**
+ * 用 [children] 替换索引 [index] 处文件夹的子项。
+ * [index] 越界或不是文件夹时原样返回，避免调用方拿着过期索引改到别的条目上。
+ */
+fun List<QuickLauncherItem>.withFolderChildren(
+    index: Int,
+    children: List<QuickLauncherItem>,
+): List<QuickLauncherItem> {
+    if (index !in indices) return this
+    val folder = this[index]
+    if (!folder.isFolder) return this
+    return toMutableList().also { it[index] = folder.withFolderItems(children) }
+}
+
+/** 重命名索引 [index] 处的文件夹；名称留空表示沿用默认文案。 */
+fun List<QuickLauncherItem>.renameFolder(index: Int, name: String): List<QuickLauncherItem> {
+    if (index !in indices) return this
+    val folder = this[index]
+    if (!folder.isFolder) return this
+    return toMutableList().also { it[index] = folder.withFolderLabel(name) }
+}
+
+/** 解散索引 [index] 处的文件夹：子项按原顺序摊回根列表，空文件夹则直接移除。 */
+fun List<QuickLauncherItem>.dissolveFolder(index: Int): List<QuickLauncherItem> {
+    if (index !in indices) return this
+    val folder = this[index]
+    if (!folder.isFolder) return this
+    return toMutableList().also { list ->
+        list.removeAt(index)
+        list.addAll(index, folder.folderItems())
+    }
+}
+
+/**
+ * 取 [folderIndex] 处文件夹的子项；索引越界或不是文件夹时返回自身（面板根列表）。
+ * 添加流程用它把「已添加」状态与写入目标一起切到目标文件夹。
+ */
+fun List<QuickLauncherItem>.resolveFolderItems(folderIndex: Int): List<QuickLauncherItem> =
+    if (folderIndex in indices && this[folderIndex].isFolder) this[folderIndex].folderItems() else this
+
+/**
+ * 把 [newItems] 写回 [folderIndex] 处文件夹；[folderIndex] 为负表示写面板根列表。
+ * 索引失效（文件夹已被解散/删除）时原样返回，避免把子项写到根列表上。
+ */
+fun List<QuickLauncherItem>.withItemsAtFolder(
+    folderIndex: Int,
+    newItems: List<QuickLauncherItem>,
+): List<QuickLauncherItem> {
+    if (folderIndex < 0) return newItems
+    if (folderIndex !in indices || !this[folderIndex].isFolder) return this
+    return withFolderChildren(folderIndex, newItems)
+}

@@ -10,11 +10,38 @@ import com.slideindex.app.overlay.OverlayStatePort
 import com.slideindex.app.util.AppProcess
 import com.slideindex.app.util.PermissionHelper
 import com.slideindex.app.util.SecureSettingsHelper
+import com.slideindex.app.util.ServiceEnabledStore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 
 /** 根据 [serviceEnabled] 与权限状态启停 [OverlayService]（磁贴、快捷方式、开机恢复等场景复用）。 */
 object OverlayServiceLifecycle {
+    /**
+     * 进程最早期（`Application.onCreate`、首帧之前）就把常驻服务拉起来并前台化。
+     *
+     * 覆盖安装 / 被系统重启后，AMS 会在进程起来约 1 秒时就要求 OverlayService 在 **5 秒内**
+     * 调 `startForeground()`；而这一刻主线程正被 MainActivity 的首次组合 / 图标装载占着
+     * （冷启动、dex 还没优化时尤甚），服务消息要排队到 5 秒之后才轮到——真机打点：进程 +0.05s 起、
+     * 服务 onCreate 拖到 +5.1~5.3s，正好压在超时线上，AMS 随即抛
+     * `ForegroundServiceDidNotStartInTimeException` 杀进程。
+     *
+     * 所以这里不读 settings Flow、不做任何重活，只用最便宜的镜像 + 权限检查，抢在首帧之前让它先
+     * 前台化；服务前台上线后计时器即被清除，之后系统再重启它也不会超时。
+     */
+    fun warmStartEarly(context: Context) {
+        val appContext = context.applicationContext
+        runCatching {
+            val mirrorEnabled = ServiceEnabledStore.read(appContext)
+            val notificationGranted = PermissionHelper.hasNotificationPermission(appContext)
+            // 不查无障碍开关：覆盖安装后系统会在进程刚起来时把无障碍条目临时摘掉（实测 t+81ms
+            // 读到 a11y=false，而系统设置里是开的），而 OverlayService.onCreate 自己就会走
+            // recoverAccessibilityBinding 重新绑定——这里卡 a11y 等于在最需要抢先的那一瞬间放弃。
+            if (!mirrorEnabled) return
+            if (!notificationGranted) return
+            appContext.startForegroundService(Intent(appContext, OverlayService::class.java))
+        }.onFailure { Log.w(TAG, "warmStartEarly failed", it) }
+    }
+
     /**
      * 唤醒常驻交互进程：`OverlayService` 跑在 `:overlay`，把它拉起来就等于把整个
      * 无障碍 + 浮层宿主拉起来（其 onCreate 会自己走一遍恢复与状态上报）。
@@ -41,14 +68,25 @@ object OverlayServiceLifecycle {
         val settings = settingsRepository.settings.first()
         // 先把常驻服务拉起来/停掉：这一步直接决定"球多久出现"，不能排在可能带等待与重试的
         // 无障碍恢复之后（真机回归：安装后要等近一分钟球才出现，以前 5 秒内）。
+        //
+        // 注意：启动条件与停止条件是**不等价**的。覆盖安装后系统会短暂把无障碍条目摘掉
+        // （实测进程起来 t+81ms 时 isAccessibilityServiceEnabled()=false，而系统设置里是开的），
+        // 如果这时候用同一个条件去 stopService，就会把"刚被拉起、还在等 startForeground 的服务"
+        // 直接打下去——AMS 会把这当成前台服务违规，抛
+        // ForegroundServiceDidNotStartInTimeException 把进程杀掉（实测安装后连环崩，一次 16 秒里
+        // 能崩 28 次）。
+        // 所以：启动条件仍要求无障碍在位；停止只认"用户真的关了这个服务 / 通知权限没了"这类
+        // 稳定条件，无障碍那点瞬时抖动交给服务自己 recoverAccessibilityBinding 去救。
+        val notificationGranted = PermissionHelper.hasNotificationPermission(appContext)
         val shouldRun = settings.serviceEnabled &&
             PermissionHelper.isAccessibilityServiceEnabled(appContext) &&
-            PermissionHelper.hasNotificationPermission(appContext)
+            notificationGranted
+        val shouldStop = !settings.serviceEnabled || !notificationGranted
         val serviceIntent = Intent(appContext, OverlayService::class.java)
         if (shouldRun) {
             runCatching { appContext.startForegroundService(serviceIntent) }
                 .onFailure { Log.w(TAG, "start OverlayService failed", it) }
-        } else {
+        } else if (shouldStop) {
             runCatching { appContext.stopService(serviceIntent) }
         }
         val outcome = if (accessibilityRecoverRetries) {

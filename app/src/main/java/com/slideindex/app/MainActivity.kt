@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.ContentObserver
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -18,16 +17,28 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.slideindex.app.settings.FreeWindowLayoutFractions
+import com.slideindex.app.settings.OverlaySettings
+import com.slideindex.app.ui.FreeWindowLayoutEditorOverlay
+import com.slideindex.app.ui.FreeWindowLayoutEditorSession
+import kotlinx.coroutines.launch
 import com.slideindex.app.clipboard.monitor.ClipboardMonitorStartup
 import com.slideindex.app.di.AppDependencies
+import com.slideindex.app.external.AppLinks
 import com.slideindex.app.freezer.FreezerLaunchState
 import com.slideindex.app.freezer.FreezerTab
+import com.slideindex.app.launcher.LauncherShortcutsApplier
 import com.slideindex.app.notification.NotificationHistoryLaunchState
 import com.slideindex.app.overlay.FloatBallPickResultPanel
 import com.slideindex.app.overlay.WidgetPickerOverlayWindow
@@ -37,13 +48,10 @@ import com.slideindex.app.service.OverlayServiceController
 import com.slideindex.app.service.QuickLauncherAddTrampoline
 import com.slideindex.app.service.ShellCommandEditorTrampoline
 import com.slideindex.app.service.ShellCommandPanelTrampoline
-import com.slideindex.app.service.ShellCommandPanelTrampolineActivity
 import com.slideindex.app.service.ShellCommandResultTrampoline
 import com.slideindex.app.service.WidgetBindTrampolineActivity
 import com.slideindex.app.service.WidgetPickerTrampoline
 import com.slideindex.app.service.StashClipboardTrampolineActivity
-import com.slideindex.app.service.ToggleGestureTrampolineActivity
-import com.slideindex.app.overlay.StashPanelInitialTab
 import com.slideindex.app.ui.navigation.MainNavHost
 import com.slideindex.app.ui.navigation.NavPermissionStates
 import com.slideindex.app.update.UpdateAppForeground
@@ -57,9 +65,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
-import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -153,16 +159,45 @@ class MainActivity : ComponentActivity() {
             val initialIntentAction by currentIntentAction
             val initialNavRoute by pendingNavRoute
             val showUpdate by pendingShowUpdate
-            MainNavHost(
-                activity = this@MainActivity,
-                deps = deps,
-                permissionStates = permissionStates,
-                initialIntentAction = initialIntentAction,
-                initialNavRoute = initialNavRoute,
-                showUpdateFromIntent = showUpdate,
-                onNavRouteConsumed = { pendingNavRoute.value = null },
-                onShowUpdateConsumed = { pendingShowUpdate.value = false }
+            // 小窗尺寸编辑层挂在根部（导航宿主之上），这样它能盖住整屏、且不受导航栈影响。
+            val freeWindowSettings by deps.settingsRepository.overlaySettings.collectAsStateWithLifecycle(
+                initialValue = OverlaySettings.from(deps.settingsRepository.readSnapshot()),
             )
+            val editorScope = rememberCoroutineScope()
+            Box(modifier = Modifier.fillMaxSize()) {
+                MainNavHost(
+                    activity = this@MainActivity,
+                    deps = deps,
+                    permissionStates = permissionStates,
+                    initialIntentAction = initialIntentAction,
+                    initialNavRoute = initialNavRoute,
+                    showUpdateFromIntent = showUpdate,
+                    onNavRouteConsumed = { pendingNavRoute.value = null },
+                    onShowUpdateConsumed = { pendingShowUpdate.value = false }
+                )
+                if (FreeWindowLayoutEditorSession.isOpen) {
+                    FreeWindowLayoutEditorOverlay(
+                        portrait = FreeWindowLayoutFractions(
+                            widthFraction = freeWindowSettings.freeWindowWidthFraction,
+                            heightFraction = freeWindowSettings.freeWindowHeightFraction,
+                            leftFraction = freeWindowSettings.freeWindowLeftFraction,
+                            topFraction = freeWindowSettings.freeWindowTopFraction,
+                        ),
+                        landscape = FreeWindowLayoutFractions(
+                            widthFraction = freeWindowSettings.freeWindowLandWidthFraction,
+                            heightFraction = freeWindowSettings.freeWindowLandHeightFraction,
+                            leftFraction = freeWindowSettings.freeWindowLandLeftFraction,
+                            topFraction = freeWindowSettings.freeWindowLandTopFraction,
+                        ),
+                        onDismiss = { FreeWindowLayoutEditorSession.close() },
+                        onSave = { portrait, landscape ->
+                            editorScope.launch {
+                                deps.settingsRepository.setFreeWindowLayout(portrait, landscape)
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 
@@ -185,11 +220,11 @@ class MainActivity : ComponentActivity() {
 
     private fun resolveLaunchAction(intent: Intent?): String? {
         intent?.data?.let { uri ->
-            if (uri.scheme.equals(DEEP_LINK_SCHEME, ignoreCase = true) && uri.host == DEEP_LINK_HOST) {
+            if (AppLinks.isAppLink(uri)) {
                 when (uri.pathSegments.firstOrNull()?.lowercase()) {
-                    PATH_NOTIFICATION_HISTORY -> {
+                    AppLinks.PATH_NOTIFICATION_HISTORY -> {
                         NotificationHistoryLaunchState.setPendingSearchQuery(
-                            uri.getQueryParameter(QUERY_PARAM)
+                            uri.getQueryParameter(AppLinks.QUERY_PARAM)
                         )
                         return ACTION_OPEN_NOTIFICATION_HISTORY
                     }
@@ -212,53 +247,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun setupDynamicShortcuts() {
-        val toggleGestureShortcut = ShortcutInfoCompat.Builder(this, "toggle_gesture")
-            .setShortLabel(getString(R.string.shortcut_toggle_gesture))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher)) // fallback icon
-            .setIntent(Intent(this, ToggleGestureTrampolineActivity::class.java).setAction("com.slideindex.app.action.TOGGLE_GESTURE"))
-            .build()
-
-        val notificationHubShortcut = ShortcutInfoCompat.Builder(this, "notification_hub")
-            .setShortLabel(getString(R.string.shortcut_notification_hub))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(Intent(this, MainActivity::class.java).setAction(ACTION_OPEN_NOTIFICATION_HISTORY))
-            .build()
-
-        val shellPanelShortcut = ShortcutInfoCompat.Builder(this, "shell_panel")
-            .setShortLabel(getString(R.string.shortcut_shell_panel))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(ShellCommandPanelTrampolineActivity.createIntent(this).setAction("com.slideindex.app.action.OPEN_SHELL_PANEL"))
-            .build()
-
-        val stashPanelShortcut = ShortcutInfoCompat.Builder(
+        // 条目集合与顺序由「外部调用 → 桌面图标长按菜单」设置决定，见 LauncherShortcutsApplier。
+        val settings = deps.settingsRepository.readSnapshot()
+        LauncherShortcutsApplier.sync(
             this,
-            StashClipboardTrampolineActivity.SHORTCUT_ID_STASH
-        )
-            .setShortLabel(getString(R.string.shortcut_stash_panel))
-            .setLongLabel(getString(R.string.gesture_action_stash_panel))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(StashClipboardTrampolineActivity.createIntent(this, StashPanelInitialTab.Stash))
-            .build()
-
-        val clipboardPanelShortcut = ShortcutInfoCompat.Builder(
-            this,
-            StashClipboardTrampolineActivity.SHORTCUT_ID_CLIPBOARD
-        )
-            .setShortLabel(getString(R.string.shortcut_clipboard_panel))
-            .setLongLabel(getString(R.string.gesture_action_clipboard_panel))
-            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher))
-            .setIntent(StashClipboardTrampolineActivity.createIntent(this, StashPanelInitialTab.Clipboard))
-            .build()
-
-        ShortcutManagerCompat.setDynamicShortcuts(
-            this,
-            listOf(
-                toggleGestureShortcut,
-                notificationHubShortcut,
-                shellPanelShortcut,
-                stashPanelShortcut,
-                clipboardPanelShortcut
-            )
+            order = settings.launcherShortcutMenuOrder,
+            disabled = settings.launcherShortcutMenuDisabled,
         )
     }
 
@@ -400,24 +394,7 @@ class MainActivity : ComponentActivity() {
         const val NAV_ROUTE_EXTENSION_STASH_CATEGORIES = "extension_stash_categories"
         const val FREEZER_TAB_FROZEN = "frozen"
 
-        private const val DEEP_LINK_SCHEME = "cebian"
-        private const val DEEP_LINK_HOST = "open"
-        private const val PATH_NOTIFICATION_HISTORY = "notification-history"
-        private const val QUERY_PARAM = "q"
-
         /** Gaps after resume; first tick is relative to scheduling (see [schedulePermissionRefreshRetries]). */
         private val PERMISSION_REFRESH_RETRY_DELAYS_MS = longArrayOf(300L, 500L)
-
-        fun notificationHistoryUri(query: String? = null): Uri =
-            Uri.Builder()
-                .scheme(DEEP_LINK_SCHEME)
-                .authority(DEEP_LINK_HOST)
-                .appendPath(PATH_NOTIFICATION_HISTORY)
-                .apply {
-                    query?.trim()?.takeIf { it.isNotEmpty() }?.let {
-                        appendQueryParameter(QUERY_PARAM, it)
-                    }
-                }
-                .build()
     }
 }

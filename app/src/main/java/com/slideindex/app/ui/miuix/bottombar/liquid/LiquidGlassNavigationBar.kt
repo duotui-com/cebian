@@ -201,7 +201,7 @@ internal fun IosLiquidGlassNavigationBar(
     showLabels: Boolean,
     modifier: Modifier = Modifier,
     badge: (Int) -> (@Composable () -> Unit)? = { null },
-    // LOCAL PATCH (Cebian): 外部 pager 进度驱动胶囊跟手 + 可配置模糊半径。
+    // LOCAL PATCH (XGesture): 外部 pager 进度驱动胶囊跟手 + 可配置模糊半径。
     progress: (() -> Float)? = null,
     isTracking: () -> Boolean = { false },
     blurRadiusDp: Float = 4f,
@@ -247,7 +247,7 @@ internal fun IosLiquidGlassNavigationBar(
             .coerceIn(0, tabsCount - 1)
     }
 
-    // LOCAL PATCH (Cebian): 用来区分"点按"与"拖动"，点按当前页也要回调（回到顶部）。
+    // LOCAL PATCH (XGesture): 用来区分"点按"与"拖动"，点按当前页也要回调（回到顶部）。
     var dragMoved by remember { mutableStateOf(false) }
 
     val dampedDrag = remember(animationScope, tabsCount, density, isLtr) {
@@ -269,7 +269,7 @@ internal fun IosLiquidGlassNavigationBar(
                 val targetIndex = targetValue.roundToInt().coerceIn(0, tabsCount - 1)
                 val changed = currentIndex != targetIndex
                 if (changed) currentIndex = targetIndex
-                // LOCAL PATCH (Cebian): 点按（未发生拖动）时即使是当前页也要回调，供上层"回到顶部"。
+                // LOCAL PATCH (XGesture): 点按（未发生拖动）时即使是当前页也要回调，供上层"回到顶部"。
                 if (changed || !dragMoved) {
                     onItemClickUpdated(targetIndex)
                 }
@@ -306,7 +306,7 @@ internal fun IosLiquidGlassNavigationBar(
         }
     }
 
-    // LOCAL PATCH (Cebian): 页面横滑时把 pager 小数进度映射到胶囊，保持与页面同步。
+    // LOCAL PATCH (XGesture): 页面横滑时把 pager 小数进度映射到胶囊，保持与页面同步。
     if (progress != null) {
         LaunchedEffect(dampedDrag) {
             snapshotFlow { progress() }.collectLatest { value ->
@@ -322,7 +322,7 @@ internal fun IosLiquidGlassNavigationBar(
         if (currentIndex != index) {
             currentIndex = index
         }
-        // LOCAL PATCH (Cebian): 重复点击当前页也要回调，上层用它实现"回到顶部"。
+        // LOCAL PATCH (XGesture): 重复点击当前页也要回调，上层用它实现"回到顶部"。
         onItemClickUpdated(index)
         dampedDrag.animateToValue(index.toFloat())
     }

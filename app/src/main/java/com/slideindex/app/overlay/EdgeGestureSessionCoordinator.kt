@@ -1,5 +1,6 @@
 package com.slideindex.app.overlay
 
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.gesture.ActionExecutor
 import com.slideindex.app.gesture.GestureSession
 import com.slideindex.app.gesture.PanelGridSession
@@ -105,6 +106,10 @@ internal class EdgeGestureSessionCoordinator(
     }
 
     override fun onSessionStart(mode: OverlayPanelMode) {
+        EdgeDiag.log(
+            "session",
+            "onSessionStart mode=$mode（panelMode 即将=${mode}，enter 动画 reset 到 progress=0）"
+        )
         layoutCoordinator.syncZoneLayout()
         panelEnterAnimator.cancel()
         when (mode) {
@@ -141,7 +146,14 @@ internal class EdgeGestureSessionCoordinator(
         }
         if (mode != OverlayPanelMode.NONE) {
             runAfterLayout {
-                if (gestureSession.panelMode() != mode) return@runAfterLayout
+                if (gestureSession.panelMode() != mode) {
+                    EdgeDiag.log(
+                        "enter",
+                        "闸门拦截：期望 mode=$mode 但当前 panelMode=${gestureSession.panelMode()} " +
+                            "→ 跳过 onLayoutReady/startEnter（面板会停在 progress=0，表现为完全不可见）"
+                    )
+                    return@runAfterLayout
+                }
                 layoutCoordinator.syncZoneLayout()
                 if (mode == OverlayPanelMode.TASK_SWITCHER) {
                     taskSwitcherController.onLayoutReady()
@@ -149,16 +161,29 @@ internal class EdgeGestureSessionCoordinator(
                 if (mode == OverlayPanelMode.QUICK_LAUNCHER) {
                     quickLauncherController.onLayoutReady()
                 }
+                EdgeDiag.log(
+                    "enter",
+                    "startEnter mode=$mode active=${gestureSession.isActive()} " +
+                        "viewSize=${view.width}x${view.height} attached=${view.isAttachedToWindow}"
+                )
                 panelEnterAnimator.startEnter(
                     panelMode = mode,
                     onShellEnterEnded = { shellCoordinator.onPanelEnterAnimationEnded() },
-                    onQuickLauncherEnterEnded = { quickLauncherController.onPanelEnterAnimationEnded() }
+                    onQuickLauncherEnterEnded = {
+                        EdgeDiag.log(
+                            "enter",
+                            "快速启动器进场动画结束 progress=${panelEnterAnimator.progress} " +
+                                "panelMode=${gestureSession.panelMode()}"
+                        )
+                        quickLauncherController.onPanelEnterAnimationEnded()
+                    }
                 )
             }
         }
     }
 
     override fun onSessionEnd() {
+        EdgeDiag.logStack("session", "onSessionEnd（面板窗口会被解除全屏直触/摘除）")
         panelEnterAnimator.cancel()
         adjustPanelController.onSessionEnd()
         panelEnterAnimator.resetToComplete()
@@ -177,6 +202,7 @@ internal class EdgeGestureSessionCoordinator(
     }
 
     override fun onLeaveOpenFingerTrackingFinished() {
+        EdgeDiag.log("leaveOpen", "onLeaveOpenFingerTrackingFinished → 重算触摸/窗口需求")
         notifyPresentationTouchRequirementChanged()
     }
 

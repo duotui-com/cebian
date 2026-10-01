@@ -11,6 +11,7 @@ import com.slideindex.app.launcher.QuickLauncherItem
 import com.slideindex.app.launcher.QuickLauncherItemCodec
 import com.slideindex.app.launcher.QuickLauncherItemType
 import com.slideindex.app.launcher.QuickLauncherPanelDefaults
+import com.slideindex.app.launcher.resolveFolderItems
 import com.slideindex.app.settings.toMinimalAppSettings
 import com.slideindex.app.ui.GestureExecuteShellCommandScreen
 import com.slideindex.app.ui.GestureOpenLinkScreen
@@ -32,7 +33,9 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
         QuickLauncherEditorScreen(
             viewModel = viewModel,
             onBack = { ctx.navigateBackTo(AppNavKey.ExtensionHub) },
-            onAdd = { panelId -> ctx.navigate(AppNavKey.QuickLauncherAdd(panelId)) },
+            onAdd = { panelId, folderIndex ->
+                ctx.navigate(AppNavKey.QuickLauncherAdd(panelId, folderIndex))
+            },
         )
     }
 
@@ -42,17 +45,28 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
         val settings = gestureSettings.toMinimalAppSettings()
         QuickLauncherAddPickerScreen(
             panelId = key.panelId,
+            folderIndex = key.folderIndex,
             settings = settings,
             onBack = { ctx.navigateBackTo(AppNavKey.QuickLauncher) },
-            onToggleItem = { item, added -> viewModel.toggleQuickLauncherPanelItem(key.panelId, item, added) },
-            onAddItem = { item -> viewModel.addQuickLauncherPanelItem(key.panelId, item) },
-            onPickApp = { ctx.navigate(AppNavKey.QuickLauncherPickApp(key.panelId)) },
-            onMyShortcuts = { ctx.navigate(AppNavKey.QuickLauncherMyShortcuts(key.panelId)) },
-            onPresetShortcuts = { ctx.navigate(AppNavKey.QuickLauncherPresetShortcuts(key.panelId)) },
-            onOpenExecuteShellCommand = { cmd -> ctx.navigate(AppNavKey.QuickLauncherShellCommand(key.panelId, cmd)) },
+            onToggleItem = { item, added ->
+                viewModel.toggleQuickLauncherPanelItem(key.panelId, item, added, key.folderIndex)
+            },
+            onAddItem = { item -> viewModel.addQuickLauncherPanelItem(key.panelId, item, key.folderIndex) },
+            onPickApp = { ctx.navigate(AppNavKey.QuickLauncherPickApp(key.panelId, folderIndex = key.folderIndex)) },
+            onMyShortcuts = { ctx.navigate(AppNavKey.QuickLauncherMyShortcuts(key.panelId, folderIndex = key.folderIndex)) },
+            onPresetShortcuts = { ctx.navigate(AppNavKey.QuickLauncherPresetShortcuts(key.panelId, folderIndex = key.folderIndex)) },
+            onOpenExecuteShellCommand = { cmd ->
+                ctx.navigate(
+                    AppNavKey.QuickLauncherShellCommand(
+                        panelId = key.panelId,
+                        initialCommand = cmd,
+                        folderIndex = key.folderIndex,
+                    ),
+                )
+            },
             onOpenCreateFolder = { ctx.navigate(AppNavKey.QuickLauncherCreateFolder(key.panelId)) },
-            onOpenOpenLink = { ctx.navigate(AppNavKey.QuickLauncherOpenLink(key.panelId)) },
-            onOpenSimulateKeyEvent = { ctx.navigate(AppNavKey.QuickLauncherSimulateKeyEvent(key.panelId)) },
+            onOpenOpenLink = { ctx.navigate(AppNavKey.QuickLauncherOpenLink(key.panelId, folderIndex = key.folderIndex)) },
+            onOpenSimulateKeyEvent = { ctx.navigate(AppNavKey.QuickLauncherSimulateKeyEvent(key.panelId, folderIndex = key.folderIndex)) },
         )
     }
 
@@ -65,6 +79,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                         panelId = key.panelId,
                         packageName = app.packageName,
                         fromCreateFolder = key.fromCreateFolder,
+                        folderIndex = key.folderIndex,
                     ),
                 )
             },
@@ -84,7 +99,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                 if (key.fromCreateFolder) {
                     viewModel.addFolderDraftItem(item)
                 } else {
-                    viewModel.addQuickLauncherPanelItem(key.panelId, item)
+                    viewModel.addQuickLauncherPanelItem(key.panelId, item, key.folderIndex)
                 }
                 ctx.backStack.removeLastOrNull()
             },
@@ -100,7 +115,11 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
             QuickLauncherPanelDefaults.effectivePanels(settings.quickLauncherPanels).find { it.id == key.panelId }
                 ?: QuickLauncherPanelDefaults.defaultPanel()
         }
-        val sourceItems = if (key.fromCreateFolder) folderDraft?.items.orEmpty() else panel.items
+        val sourceItems = if (key.fromCreateFolder) {
+            folderDraft?.items.orEmpty()
+        } else {
+            panel.items.resolveFolderItems(key.folderIndex)
+        }
         val configuredShortcutKeys = remember(sourceItems) {
             sourceItems.filter { it.type == QuickLauncherItemType.SHORTCUT }.mapNotNull { item ->
                 QuickLauncherItemCodec.shortcutItemKey(item)
@@ -114,6 +133,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                     AppNavKey.QuickLauncherPickApp(
                         panelId = key.panelId,
                         fromCreateFolder = key.fromCreateFolder,
+                        folderIndex = key.folderIndex,
                     ),
                 )
             },
@@ -122,7 +142,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                 if (key.fromCreateFolder) {
                     viewModel.toggleFolderDraftItem(item, added)
                 } else {
-                    viewModel.toggleQuickLauncherPanelItem(key.panelId, item, added)
+                    viewModel.toggleQuickLauncherPanelItem(key.panelId, item, added, key.folderIndex)
                 }
             },
         )
@@ -137,7 +157,11 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
             QuickLauncherPanelDefaults.effectivePanels(settings.quickLauncherPanels).find { it.id == key.panelId }
                 ?: QuickLauncherPanelDefaults.defaultPanel()
         }
-        val sourceItems = if (key.fromCreateFolder) folderDraft?.items.orEmpty() else panel.items
+        val sourceItems = if (key.fromCreateFolder) {
+            folderDraft?.items.orEmpty()
+        } else {
+            panel.items.resolveFolderItems(key.folderIndex)
+        }
         val configuredShortcutKeys = remember(sourceItems) {
             sourceItems.filter { it.type == QuickLauncherItemType.SHORTCUT }.mapNotNull { item ->
                 QuickLauncherItemCodec.shortcutItemKey(item)
@@ -150,7 +174,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                 if (key.fromCreateFolder) {
                     viewModel.toggleFolderDraftItem(item, added)
                 } else {
-                    viewModel.toggleQuickLauncherPanelItem(key.panelId, item, added)
+                    viewModel.toggleQuickLauncherPanelItem(key.panelId, item, added, key.folderIndex)
                 }
             },
         )
@@ -173,7 +197,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                 if (key.fromCreateFolder) {
                     viewModel.addFolderDraftItem(item)
                 } else {
-                    viewModel.addQuickLauncherPanelItem(key.panelId, item)
+                    viewModel.addQuickLauncherPanelItem(key.panelId, item, key.folderIndex)
                 }
                 ctx.backStack.removeLastOrNull()
             },
@@ -200,7 +224,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                 if (key.fromCreateFolder) {
                     viewModel.addFolderDraftItem(item)
                 } else {
-                    viewModel.addQuickLauncherPanelItem(key.panelId, item)
+                    viewModel.addQuickLauncherPanelItem(key.panelId, item, key.folderIndex)
                 }
                 ctx.backStack.removeLastOrNull()
             },
@@ -222,7 +246,7 @@ fun NavEntryBuilder.quickLauncherNavEntries(ctx: MainNavContext) {
                 if (key.fromCreateFolder) {
                     viewModel.addFolderDraftItem(item)
                 } else {
-                    viewModel.addQuickLauncherPanelItem(key.panelId, item)
+                    viewModel.addQuickLauncherPanelItem(key.panelId, item, key.folderIndex)
                 }
                 ctx.backStack.removeLastOrNull()
             },

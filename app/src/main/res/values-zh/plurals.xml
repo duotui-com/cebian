@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="search_engine_grid_columns_value">
+        <item quantity="other">%d 列</item>
+    </plurals>
+    <plurals name="search_engine_grid_rows_value">
+        <item quantity="other">%d 行</item>
+    </plurals>
+    <plurals name="search_engine_settings_summary">
+        <item quantity="other">%d 个引擎</item>
+    </plurals>
+    <plurals name="image_search_engine_settings_summary">
+        <item quantity="other">%1$d 个分享目标 · %2$d 个聚合引擎</item>
+    </plurals>
+    <plurals name="search_engine_import_preview_count">
+        <item quantity="other">将新增 %1$d 个，跳过重复 %2$d 个</item>
+    </plurals>
+    <plurals name="search_engine_import_success">
+        <item quantity="other">已导入 %1$d 个引擎（%2$s）</item>
+    </plurals>
+    <plurals name="float_ball_style_slideshow_hint">
+        <item quantity="other">已选择 %d 张图片，每 3 秒切换</item>
+    </plurals>
+    <plurals name="share_image_ocr_history_entry_desc_count">
+        <item quantity="other">%d 条记录，点击查看</item>
+    </plurals>
+    <plurals name="floating_pointer_edge_side_summary">
+        <item quantity="other">%1$d 个区域 · %2$s</item>
+    </plurals>
+    <plurals name="apps_per_row_value_label">
+        <item quantity="other">%d 列</item>
+    </plurals>
+    <plurals name="settings_backup_import_success">
+        <item quantity="other">已导入 %d 项设置</item>
+    </plurals>
+    <plurals name="settings_backup_preview_count">
+        <item quantity="other">将覆盖 %d 项设置。</item>
+    </plurals>
+    <plurals name="otp_autofill_stats_summary">
+        <item quantity="other">共 %1$d 次尝试，成功率 %2$d%%</item>
+    </plurals>
+    <plurals name="shell_panel_history_entry_desc_count">
+        <item quantity="other">查看最近 %d 条执行记录</item>
+    </plurals>
+    <plurals name="clipboard_history_count">
+        <item quantity="other">共 %d 条记录</item>
+    </plurals>
+    <plurals name="stash_entry_count">
+        <item quantity="other">共 %d 条内容</item>
+    </plurals>
+    <plurals name="stash_clipboard_entry_summary_stash">
+        <item quantity="other">暂存 %d 条</item>
+    </plurals>
+    <plurals name="image_search_engine_aggregated_section">
+        <item quantity="other">聚合搜索引擎（%d 个可见）</item>
+    </plurals>
+    <plurals name="missing_permissions_entry_desc_count">
+        <item quantity="other">%d 个功能缺少安卓权限</item>
+    </plurals>
+    <plurals name="search_panel_settings_index_count">
+        <item quantity="other">当前已加载 %d 项</item>
+    </plurals>
+    <plurals name="honeycomb_launcher_entry_summary">
+        <item quantity="other">已配置 %d 项</item>
+    </plurals>
+    <plurals name="quick_launcher_entry_summary_panels">
+        <item quantity="other">%d 个启动面板</item>
+    </plurals>
+    <plurals name="quick_launcher_panel_pick_summary">
+        <item quantity="other">%1$d 列 × %2$d 行 · %3$d 项</item>
+    </plurals>
+    <plurals name="search_panel_file_folder_count">
+        <item quantity="other">已添加 %d 个</item>
+    </plurals>
+    <plurals name="clipboard_history_float_record_count">
+        <item quantity="other">%d 条记录</item>
+    </plurals>
+    <plurals name="clipboard_float_meta_chars">
+        <item quantity="other">%d字</item>
+    </plurals>
+    <plurals name="clipboard_float_meta_lines">
+        <item quantity="other">%d行</item>
+    </plurals>
+    <plurals name="clipboard_float_app_blacklist_desc">
+        <item quantity="other">已屏蔽 %1$d 个应用 · 粘贴成功 %2$d 次 · 失败 %3$d 次</item>
+    </plurals>
+    <plurals name="clipboard_lsposed_whitelist_desc">
+        <item quantity="other">已加入 %1$d 个应用</item>
+    </plurals>
+    <plurals name="notification_history_group_summary">
+        <item quantity="other">%d 条通知</item>
+    </plurals>
+    <plurals name="fingertip_ring_slot_count_value">
+        <item quantity="other">%d 个槽位</item>
+    </plurals>
+    <plurals name="universal_copy_selected">
+        <item quantity="other">已选 %d 项</item>
+    </plurals>
+    <plurals name="universal_copy_copied">
+        <item quantity="other">已复制 %d 项</item>
+    </plurals>
+    <plurals name="freezer_refreeze_done">
+        <item quantity="other">已冻结 %d 个应用</item>
+    </plurals>
+    <plurals name="freezer_unfreeze_all_done">
+        <item quantity="other">已解冻 %d 个应用</item>
+    </plurals>
+    <plurals name="freezer_import_frozen_done">
+        <item quantity="other">已导入 %d 个应用</item>
+    </plurals>
+    <plurals name="holographic_launcher_entry_summary_hidden">
+        <item quantity="other">已隐藏 %d 个应用</item>
+    </plurals>
+    <plurals name="quick_launcher_folder_items_count">
+        <item quantity="other">%d 个快捷项</item>
+    </plurals>
+    <plurals name="shortcut_custom_count_summary">
+        <item quantity="other">%d 个自定义直达快捷方式</item>
+    </plurals>
+    <plurals name="shortcut_item_count">
+        <item quantity="other">%d 项</item>
+    </plurals>
+    <plurals name="widget_group_count">
+        <item quantity="other">%d 个小组件</item>
+    </plurals>
+</resources>

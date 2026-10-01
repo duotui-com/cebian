@@ -125,8 +125,8 @@ if (-not [string]::IsNullOrWhiteSpace($ApkPath)) {
 }
 
 if ($Variant -eq "all" -or $Variant -eq "full") {
-    Verify-ReleaseApk -Path (Join-Path $ProjectRoot "app/build/outputs/apk/full/release/cebian-$expectedName-full.apk") -ResolvedVariant "full"
+    Verify-ReleaseApk -Path (Join-Path $ProjectRoot "app/build/outputs/apk/full/release/xgesture-$expectedName-full.apk") -ResolvedVariant "full"
 }
 if ($Variant -eq "all" -or $Variant -eq "lite") {
-    Verify-ReleaseApk -Path (Join-Path $ProjectRoot "app/build/outputs/apk/lite/release/cebian-$expectedName-lite.apk") -ResolvedVariant "lite"
+    Verify-ReleaseApk -Path (Join-Path $ProjectRoot "app/build/outputs/apk/lite/release/xgesture-$expectedName-lite.apk") -ResolvedVariant "lite"
 }

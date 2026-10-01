@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SRC_STRINGS = ROOT / "app/src/main/res/values/strings.xml"
 OUT_STRINGS = ROOT / "app/src/main/res/values-ar/strings.xml"
-CONTRIB = Path(r"d:\Downloads\Telegram Desktop\string边栏_1.10.3.apk.xml")
+CONTRIB = Path(r"d:\Downloads\Telegram Desktop\stringX手势_1.10.3.apk.xml")
 EN_STRINGS = ROOT / "app/src/main/res/values-en/strings.xml"
 
 # Reviewed overrides (community file → corrected Arabic)

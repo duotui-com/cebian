@@ -53,7 +53,7 @@
   },
   {
     "name": "settings_backup_default_filename",
-    "ja": "cebian-backup-%1$d.zip"
+    "ja": "XGesture-backup-%1$d.zip"
   },
   {
     "name": "settings_backup_entry_title",
@@ -185,11 +185,11 @@
   },
   {
     "name": "onboarding_welcome_title",
-    "ja": "Cebian へようこそ"
+    "ja": "XGesture へようこそ"
   },
   {
     "name": "onboarding_welcome_body",
-    "ja": "Cebian はエッジジェスチャ、シェイクアクション、通知ツールでスマートフォンを拡張します。次にいくつかのシステム権限が必要です。"
+    "ja": "XGesture はエッジジェスチャ、シェイクアクション、通知ツールでスマートフォンを拡張します。次にいくつかのシステム権限が必要です。"
   },
   {
     "name": "onboarding_overlay_title",
@@ -209,7 +209,7 @@
   },
   {
     "name": "onboarding_accessibility_body",
-    "ja": "Cebian はエッジジェスチャ、サイドバーパネル、システム操作（戻る、ホーム、最近）のためにアクセシビリティサービスを使用します。"
+    "ja": "XGesture はエッジジェスチャ、サイドバーパネル、システム操作（戻る、ホーム、最近）のためにアクセシビリティサービスを使用します。"
   },
   {
     "name": "onboarding_grant_accessibility",
@@ -253,7 +253,7 @@
   },
   {
     "name": "onboarding_core_permissions_body",
-    "ja": "Cebian はエッジジェスチャ認識、フローティングトリガーバー、安定したバックグラウンド動作のために以下の権限が必要です。システム設定で付与してください。"
+    "ja": "XGesture はエッジジェスチャ認識、フローティングトリガーバー、安定したバックグラウンド動作のために以下の権限が必要です。システム設定で付与してください。"
   },
   {
     "name": "onboarding_permission_overlay_short",
@@ -305,7 +305,7 @@
   },
   {
     "name": "privacy_policy_body",
-    "ja": "Cebian は端末内処理を基本としています。\n\n• 通知と OTP: 読み取り、フィルタリング、抽出、表示はすべて端末内のみ。デフォルトではアップロードしません。\n• OTP 記録と通知履歴: アプリ専用ストレージに保存し、デフォルトではシステムバックアップから除外。設定バックアップで任意エクスポート可能。\n• LSPosed / Shizuku: ご自身で有効にする任意の拡張機能。\n• 個人を特定できる情報の収集や開発者サーバーへの送信は行いません。\n\nフォアグラウンドサービス（特殊用途）: OverlayService はエッジジェスチャとシェイク検出を維持するため subtype overlay_sidebar を使用 — 広告や無関係なバックグラウンド処理ではありません。\n\nご質問: プロジェクトリポジトリで GitHub Issue を開いてください。"
+    "ja": "XGesture は端末内処理を基本としています。\n\n• 通知と OTP: 読み取り、フィルタリング、抽出、表示はすべて端末内のみ。デフォルトではアップロードしません。\n• OTP 記録と通知履歴: アプリ専用ストレージに保存し、デフォルトではシステムバックアップから除外。設定バックアップで任意エクスポート可能。\n• LSPosed / Shizuku: ご自身で有効にする任意の拡張機能。\n• 個人を特定できる情報の収集や開発者サーバーへの送信は行いません。\n\nフォアグラウンドサービス（特殊用途）: OverlayService はエッジジェスチャとシェイク検出を維持するため subtype overlay_sidebar を使用 — 広告や無関係なバックグラウンド処理ではありません。\n\nご質問: プロジェクトリポジトリで GitHub Issue を開いてください。"
   },
   {
     "name": "otp_autofill_stats_title",
@@ -365,7 +365,7 @@
   },
   {
     "name": "otp_autofill_stats_help_pipeline",
-    "ja": "入力順序: LSPosed システムインジェクトが有効な場合、最初に実行されます。失敗または無効の場合、Cebian アクセシビリティが入力欄を探してコードを書き込みます。"
+    "ja": "入力順序: LSPosed システムインジェクトが有効な場合、最初に実行されます。失敗または無効の場合、XGesture アクセシビリティが入力欄を探してコードを書き込みます。"
   },
   {
     "name": "otp_autofill_stats_help_strategies",
@@ -557,7 +557,7 @@
   },
   {
     "name": "tile_gesture_switch",
-    "ja": "Cebian"
+    "ja": "XGesture"
   },
   {
     "name": "shortcut_toggle_gesture",
@@ -581,7 +581,7 @@
   },
   {
     "name": "shortcut_panel_open_failed",
-    "ja": "パネルを開けませんでした。Cebian が有効か確認してください。"
+    "ja": "パネルを開けませんでした。XGesture が有効か確認してください。"
   },
   {
     "name": "about_section_title",
