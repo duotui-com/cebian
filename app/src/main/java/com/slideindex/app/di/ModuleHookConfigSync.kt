@@ -1,7 +1,9 @@
 package com.slideindex.app.di
 
 import android.content.Context
+import com.slideindex.app.overlay.FloatBallScreenMetrics
 import com.slideindex.app.overlay.PanelSide
+import com.slideindex.app.overlay.TakeoverExtraRects
 import com.slideindex.app.settings.AppSettings
 import com.slideindex.app.settings.SettingsRepository
 import com.slideindex.app.settings.edgeTriggerWidthDp
@@ -80,7 +82,32 @@ class ModuleHookConfigSync @Inject constructor(
           .append('*').append(handle.edgeWidthDp)
       }
     }
+    // 悬浮球 / 双贴边线条的**接管矩形指纹**。
+    //
+    // 这些矩形是按下发那一刻的球位、停靠侧、球径、线条开关与键盘避让算出来的比例矩形；
+    // 少了这一段签名，球线换位/拖动后签名不变 → distinctUntilChanged 把这次发射吞掉 →
+    // 模块手里还是旧侧的矩形，而球的新位置通常正好落在该侧两条触钮手柄之间的竖直空隙里
+    //（没有任何矩形覆盖）→ 模块直接放行 → 只剩系统返回手势。真机复现：球线换位后必现。
+    append('|').append(extraRectsFingerprint(settings))
   }
+
+  /**
+   * [TakeoverExtraRects] 生成结果的指纹。
+   *
+   * 不逐字段枚举，直接拿生成出来的 data class 文本——这样球的位置、停靠侧、球径、
+   * 线条开关与长度、键盘避让、横竖屏 任一变化都会改变签名，不会漏字段。
+   * 纯函数那半在 `TakeoverExtraRects.fingerprint`（有单测锁住）。
+   */
+  private fun extraRectsFingerprint(settings: AppSettings): String = runCatching {
+    val (screenWidthPx, screenHeightPx) = FloatBallScreenMetrics.sizePx(context)
+    TakeoverExtraRects.fingerprint(
+      settings = settings,
+      screenWidthPx = screenWidthPx,
+      screenHeightPx = screenHeightPx,
+      density = context.resources.displayMetrics.density,
+      isLandscape = OverlaySuppression.isLandscape(context),
+    )
+  }.getOrDefault("")
 
   private companion object {
     const val SYNC_DEBOUNCE_MS = 300L

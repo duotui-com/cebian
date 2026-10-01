@@ -1,6 +1,6 @@
-# 参与贡献 Cebian（边栏）
+# 参与贡献 XGesture（X手势）
 
-感谢你愿意帮助改进 **边栏（Cebian）**！本文说明如何贡献翻译与代码。
+感谢你愿意帮助改进 **X手势（XGesture）**！本文说明如何贡献翻译与代码。
 
 **语言：** [English](../CONTRIBUTING.md) · **简体中文** · [日本語](contributing_ja.md)
 
@@ -8,9 +8,9 @@
 
 ## 翻译 App 界面（推荐 Weblate）
 
-贡献 **应用内 UI 文案** 最简单的方式是使用 [Weblate](https://hosted.weblate.org/engage/cebian/)：
+贡献 **应用内 UI 文案** 最简单的方式是使用 [Weblate](https://hosted.weblate.org/engage/XGesture/)：
 
-[![翻译状态](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻译状态](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
 1. 打开 Weblate 项目页（无需会 Git）。
 2. 选择语言（如 English、日本語，或申请新语言）。
@@ -30,16 +30,16 @@
 - **不要修改** string 的 `name` 属性，只改 `<string>` 内的正文。
 - **占位符必须保留**：`%1$s`、`%1$d`、`%2$s` 等，类型不能改错。
 - 保留原文中的 **HTML/XML 实体** 和 `\n`。
-- **品牌名一般不译**：Cebian、Shizuku、LSPosed、Miuix 等（若源文已本地化则跟随源文）。
+- **品牌名一般不译**：XGesture、Shizuku、LSPosed、Miuix 等（若源文已本地化则跟随源文）。
 - 界面文案宜简洁自然，避免生硬直译。
 
 ### 通过 Pull Request 翻译（备选）
 
 ```text
-app/src/main/res/values/strings.xml       # 源语言（中文）
-app/src/main/res/values-en/strings.xml    # 英文
+app/src/main/res/values/strings.xml       # 源语言（英文）
+app/src/main/res/values-zh/strings.xml    # 简体中文
 app/src/main/res/values-ja/strings.xml    # 日文
-app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再翻译
+app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values/（英文源）再翻译
 ```
 
 1. Fork 仓库并建分支。
@@ -51,7 +51,7 @@ app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再�
 
 ## 贡献代码
 
-1. Fork 并克隆：`git clone https://github.com/qpst4/cebian.git`
+1. Fork 并克隆：`git clone https://github.com/qpst4/XGesture.git`
 2. 从 `main` 创建功能分支。
 3. 改动尽量聚焦；风格与现有 Kotlin / Compose 一致。
 4. 本地执行：`.\gradlew.bat compileLiteDebugKotlin`（改 UI/字符串建议跑 `lintLiteDebug`）。
@@ -67,8 +67,8 @@ app/src/main/res/values-xx/strings.xml    # 新语言：可复制 values-en 再�
 
 ## 社区
 
-- [GitHub Issues](https://github.com/qpst4/cebian/issues) — Bug 与功能建议
-- [GitHub Discussions](https://github.com/qpst4/cebian/discussions) — 讨论与提问
+- [GitHub Issues](https://github.com/qpst4/XGesture/issues) — Bug 与功能建议
+- [GitHub Discussions](https://github.com/qpst4/XGesture/discussions) — 讨论与提问
 - QQ 群：**1042783385**
 
 ---

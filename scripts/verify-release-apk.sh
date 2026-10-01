@@ -157,8 +157,8 @@ if [[ -n "$APK_PATH" ]]; then
 fi
 
 if [[ "$TARGET" == "all" || "$TARGET" == "full" ]]; then
-  verify_one_apk "app/build/outputs/apk/full/release/cebian-${expected_name}-full.apk" "full"
+  verify_one_apk "app/build/outputs/apk/full/release/xgesture-${expected_name}-full.apk" "full"
 fi
 if [[ "$TARGET" == "all" || "$TARGET" == "lite" ]]; then
-  verify_one_apk "app/build/outputs/apk/lite/release/cebian-${expected_name}-lite.apk" "lite"
+  verify_one_apk "app/build/outputs/apk/lite/release/xgesture-${expected_name}-lite.apk" "lite"
 fi

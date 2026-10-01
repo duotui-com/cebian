@@ -181,7 +181,7 @@
   },
   {
     "name": "xposed_module_description",
-    "ja": "Cebian：OTP 自動入力（android スコープを有効化）"
+    "ja": "XGesture：OTP 自動入力（android スコープを有効化）"
   },
   {
     "name": "otp_records_title",

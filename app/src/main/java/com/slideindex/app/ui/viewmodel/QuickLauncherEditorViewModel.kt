@@ -1,8 +1,8 @@
 package com.slideindex.app.ui.viewmodel
 
 import android.content.Context
-import android.graphics.Bitmap
 import androidx.lifecycle.viewModelScope
+import com.slideindex.app.activity.ActivityShortcut
 import com.slideindex.app.data.AppInfo
 import com.slideindex.app.data.AppRepository
 import com.slideindex.app.launcher.QuickLauncherDefaults
@@ -12,8 +12,8 @@ import com.slideindex.app.launcher.QuickLauncherPanelDefaults
 import com.slideindex.app.launcher.QuickLauncherPanelMutator
 import com.slideindex.app.settings.QuickLauncherDisplaySettings
 import com.slideindex.app.settings.SettingsRepository
+import com.slideindex.app.shell.ShellCommand
 import com.slideindex.app.ui.feedback.UserMessageBus
-import com.slideindex.app.util.QuickLauncherIconResolver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +33,12 @@ data class QuickLauncherEditorUiState(
     val defaultColumns: Int = 3,
     val defaultRows: Int = 4,
     val appsByPackage: Map<String, AppInfo> = emptyMap(),
-    val iconBitmaps: Map<Int, Bitmap?> = emptyMap(),
+    /**
+     * 预览网格解析 Shell 命令 / 应用内直达图标要用到这两个列表；
+     * 缺了会把动作退化成通用矢量图标。
+     */
+    val shellCommands: List<ShellCommand> = emptyList(),
+    val activityShortcuts: List<ActivityShortcut> = emptyList(),
     val isGridInteractionActive: Boolean = false,
     val isLoading: Boolean = false,
 ) {
@@ -57,7 +62,6 @@ class QuickLauncherEditorViewModel @Inject constructor(
     private val _selectedPanelIndex = MutableStateFlow(0)
     private val _isGridInteractionActive = MutableStateFlow(false)
     private val _appsByPackage = MutableStateFlow<Map<String, AppInfo>>(emptyMap())
-    private val _iconBitmaps = MutableStateFlow<Map<Int, Bitmap?>>(emptyMap())
     private var defaultsSeeded = false
 
     val uiState: StateFlow<QuickLauncherEditorUiState> = combine(
@@ -65,8 +69,7 @@ class QuickLauncherEditorViewModel @Inject constructor(
         _selectedPanelIndex,
         _isGridInteractionActive,
         _appsByPackage,
-        _iconBitmaps,
-    ) { currentSettings, selectedIndex, gridActive, appsMap, icons ->
+    ) { currentSettings, selectedIndex, gridActive, appsMap ->
         val rawPanels = currentSettings.quickLauncherPanels
         val effectivePanels = QuickLauncherPanelDefaults.effectivePanels(rawPanels)
         val safeIndex = selectedIndex.coerceIn(0, (effectivePanels.size - 1).coerceAtLeast(0))
@@ -78,7 +81,8 @@ class QuickLauncherEditorViewModel @Inject constructor(
             defaultColumns = currentSettings.quickLauncherColumnsPerPage,
             defaultRows = currentSettings.quickLauncherRowsPerPage,
             appsByPackage = appsMap,
-            iconBitmaps = icons,
+            shellCommands = currentSettings.shellCommands,
+            activityShortcuts = currentSettings.activityShortcuts,
             isGridInteractionActive = gridActive,
             isLoading = false,
         )
@@ -100,14 +104,12 @@ class QuickLauncherEditorViewModel @Inject constructor(
             val cached = appRepository.getCachedApps()
             if (cached.isNotEmpty()) {
                 _appsByPackage.value = cached.associateBy { it.packageName }
-                refreshIcons()
             }
             val loaded = withContext(Dispatchers.IO) {
                 appRepository.loadApps(force = false)
             }
             _appsByPackage.value = loaded.associateBy { it.packageName }
             seedDefaultsIfNeeded(loaded)
-            refreshIcons()
         }
     }
 
@@ -125,28 +127,8 @@ class QuickLauncherEditorViewModel @Inject constructor(
         defaultsSeeded = true
     }
 
-    fun refreshIcons() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val state = uiState.value
-            val currentItems = state.currentPanelItems
-            val appsMap = state.appsByPackage
-            val currentSettings = settingsRepository.readSnapshot()
-            val resolved = currentItems.mapIndexed { index, item ->
-                index to QuickLauncherIconResolver.iconBitmap(
-                    item = item,
-                    appsByPackage = appsMap,
-                    context = appContext,
-                    activityShortcuts = currentSettings.activityShortcuts,
-                    shellCommands = currentSettings.shellCommands,
-                )
-            }.toMap()
-            _iconBitmaps.value = resolved
-        }
-    }
-
     fun selectPanel(index: Int) {
         _selectedPanelIndex.value = index
-        refreshIcons()
     }
 
     fun setGridInteractionActive(active: Boolean) {
@@ -159,7 +141,6 @@ class QuickLauncherEditorViewModel @Inject constructor(
                 QuickLauncherPanelDefaults.effectivePanels(panels),
             )
         }
-        refreshIcons()
     }
 
     fun setDisplaySettings(display: QuickLauncherDisplaySettings) {

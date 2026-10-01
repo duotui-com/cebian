@@ -1,7 +1,7 @@
-# XposedSmsCode-beta 移植分析（面向边栏 / Cebian）
+# XposedSmsCode-beta 移植分析（面向X手势 / XGesture）
 
 本文档记录 `D:\AndroidDev\Projects\XposedSmsCode-beta` 的架构勘察结论、与
-`D:\AndroidDev\Projects\cebian` 现有 OTP 能力的差距，以及分阶段移植方案。
+`D:\AndroidDev\Projects\XGesture` 现有 OTP 能力的差距，以及分阶段移植方案。
 
 ## 1. 结论摘要
 
@@ -9,8 +9,8 @@
    缺失 5 个共享库（`smscode/core/*`、`magisk-xposed-kit`、`magisk-ui-kit`、
    `build-logic`、`smscode/rules`）。hook 侧大量类只是"薄适配层"，真正的逻辑
    （`io.github.magisk317.smscode.rule.*`、`runtime.verification.*` 等）都在缺失的
-   共享库里。因此**逐文件 1:1 抄源码无法完成**，可行做法是"按能力重实现并适配边栏架构"。
-2. **边栏已经做过一轮同源移植**：`core/common/.../otp/*`、`app/.../xposed/hook/Sms*`、
+   共享库里。因此**逐文件 1:1 抄源码无法完成**，可行做法是"按能力重实现并适配X手势架构"。
+2. **X手势已经做过一轮同源移植**：`core/common/.../otp/*`、`app/.../xposed/hook/Sms*`、
    `feature/otp/*` 里已带 `Portions derived from XposedSmsCode` 头注释。已有能力：
    LSPosed 短信捕获、关键字 + 官方/用户规则提取、记录、剪贴板、无障碍与 Xposed 注
    入自动填充、统计、规则编辑。**这些不需要重做**。
@@ -43,11 +43,11 @@
 - `hook/.../SmsHandlerHook.kt`（34 KB）依赖 `io.github.magisk317.smscode.verification.*`。
 
 结论：这些类的**行为**可以从调用点、参数、注释完整读出，但**代码不能照搬**；
-在边栏里应按同样行为重新实现，并复用边栏已有的桥接/设置/通知体系。
+在X手势里应按同样行为重新实现，并复用X手势已有的桥接/设置/通知体系。
 
 ## 3. XposedSmsCode-beta 功能清单与实现位置
 
-| 功能 | 主要实现位置 | 边栏现状 |
+| 功能 | 主要实现位置 | X手势现状 |
 | :--- | :--- | :--- |
 | 验证码短信拦截与解析（关键字 + 官方/用户规则） | `hook/.../SmsHandlerHook.kt`、`CodeWorker.kt`、`runtime/.../SmsCodeUtils.kt` | ✅ 已有（`VerificationCodeExtractor` + 规则） |
 | 复制验证码到剪贴板 | `hook/.../CopyToClipboardAction.kt` | ✅ 已有（`OtpClipboardHelper`） |
@@ -69,7 +69,7 @@
 
 ## 4. 关键架构差异（决定移植方式）
 
-| 维度 | XposedSmsCode-beta | 边栏 Cebian |
+| 维度 | XposedSmsCode-beta | X手势 XGesture |
 | :--- | :--- | :--- |
 | Hook API | LibXposed API 102（`XposedModule` 子类 + `XposedRuntimeInstaller`） | LibXposed API 102（`SlideIndexLibXposedModule`）**一致** |
 | Hook 进程 | `system_server` + `com.android.phone` + `providers.telephony` | 同样三个（分别装输入/短信 hook） |
@@ -81,7 +81,7 @@
 
 因此移植原则：
 
-1. **行为对齐、结构不照搬**：沿用边栏的 Hilt / DataStore / 广播契约 / Miux 组件。
+1. **行为对齐、结构不照搬**：沿用X手势的 Hilt / DataStore / 广播契约 / Miux 组件。
 2. **Hook 侧策略走既有快照通道**：需要电话进程"同步决策"的开关（拦截 / 已读 / 删除），
    应扩展 `ModuleHookSnapshot`（app 写、hook 读），而不是引入 Xposed 远程偏好。
 3. **纯逻辑下沉到 `:core:common`**：可单测、不依赖 Android 运行时的策略（黑名单匹配、
@@ -164,7 +164,7 @@
 → 上游 `SystemInputInjectorHook.resolveActionAutoInput()`（共享库）→ system_server 侧注入；
 结果经 `AutoInputResultBroadcastContract`（共享库）回传，`KillMeAction` 与通知自动取消都挂在它上面。
 
-**边栏（cebian）的对应链路**
+**X手势（XGesture）的对应链路**
 
 - 入口：`SmsHandlerHook` 只 hook `InboundSmsHandler` 三个类的 `dispatchIntent`；不做多接收器索引处理。
 - 拦截 / 已读 / 删除：本轮下沉到电话进程与短信存储进程（`SmsPolicyRuntime` + `SmsProviderHook`）。
@@ -177,15 +177,15 @@
 
 **结论：链路结构不一致。** 差异与性质：
 
-| 环节 | 上游 | 边栏 | 性质 |
+| 环节 | 上游 | X手势 | 性质 |
 | :--- | :--- | :--- | :--- |
 | 动作执行宿主 | 全部在电话进程（hook） | 判定与副作用在 App 进程，仅拦截/已读/删除在 hook | **明确差异**（架构） |
-| 自动填充触发方 | 电话进程解析完直接触发 | App 进程收到短信广播后再请求注入 | **明确差异**，可靠性差一档：App 进程被冻结/强停时上游仍能填，边栏只能靠广播唤醒 + 无障碍兜底 |
+| 自动填充触发方 | 电话进程解析完直接触发 | App 进程收到短信广播后再请求注入 | **明确差异**，可靠性差一档：App 进程被冻结/强停时上游仍能填，X手势只能靠广播唤醒 + 无障碍兜底 |
 | 按前台应用屏蔽自动填充 | `AutoInputAction.packageBlockedChecker` → `AppInfo.blocked` | **无**（只有"跳过自身包"） | **明确差异** |
 | 填充事件记录维度 | 写 `auto_input_event`：前台应用包名 / 码长 / 时间 | 统计只有总数、成功失败、最近策略与原因 | **明确差异** |
 | 通知自动取消与结果联动 | 由自动输入结果驱动（并联动 KillMe） | 通知用 `setTimeoutAfter` 独立计时；KillMe 不移植 | 换实现（KillMe 不做） |
 | 注入器防伪 | 实现位于共享库 | 自己实现：callerUid 校验（仅放行 system/phone/自身）+ probe 自检 | 无法核对等价性 |
-| 策略集与重试细节 | `AutoInputActionHelper`（共享库） | 上述策略名与优先级为边栏自有定义 | 无法核对等价性 |
+| 策略集与重试细节 | `AutoInputActionHelper`（共享库） | 上述策略名与优先级为X手势自有定义 | 无法核对等价性 |
 
 可核对范围受限于缺失共享库：`AutoInputActionHelper`、`AutoInputBroadcastHelper`、
 `AutoInputBlockedPackageHelper`、上游 `SystemInputInjectorHook`、`AutoInputResultBroadcastContract`、
@@ -193,7 +193,7 @@
 因此"逐行一致"这一结论**无法给出**，只能给出上表的差异与不可核对项。
 
 **事实声明**：本轮（含上一轮）**没有改动任何自动填充逻辑**，只改了包含它的两个 UI 文件里的状态行与入口。
-边栏的自动填充是更早那轮移植的产物。
+X手势的自动填充是更早那轮移植的产物。
 
 ## 6. 分阶段实施计划
 
@@ -206,7 +206,7 @@
 
 ## 7. 风险与许可
 
-- **许可**：XposedSmsCode 为 GPL-3.0，边栏为 AGPL-3.0，二者兼容（结论文件保持 AGPL-3.0）。
+- **许可**：XposedSmsCode 为 GPL-3.0，X手势为 AGPL-3.0，二者兼容（结论文件保持 AGPL-3.0）。
   已移植文件沿用现有做法，在文件头标注来源与许可。
 - **数据缺口**：官方规则库来自缺失的 `smscode/rules` submodule，本地无副本；
   只能①由上游仓库补齐后导入，或②沿用现有 `OtpKeywords.DEFAULT_KEYWORDS_REGEX` 与

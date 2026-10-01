@@ -35,10 +35,32 @@ class HookConfigReader(
     if (cachedValue != null && now - lastLoadAtMs < ModuleHookBridgeContract.SNAPSHOT_TTL_MS) {
       return cachedValue
     }
-    // 磁盘读不到时保留内存里那份。电话进程既写不了也读不到 /data/system/slideindex，又读不到 app 的
-    // 设备保护目录，唯一来源就是广播下发；如果这里把 cached 清掉，策略会在 TTL 到期后凭空消失
-    //（现象：「短信安全」的拦截 / 标记已读 / 提取后删除静默失效，状态回执里 config=fail）。
-    return loadFromDisk() ?: cachedValue
+    // 盘上那份**只有比内存里更新时才允许替换**。
+    //
+    // 为什么必须比：历史遗留的 [/data/system/slideindex] 快照 app 早已写不动，
+    // 内容会永久停在某个旧状态（例如"两侧接管关闭"时的 groups=4）。而它是本进程唯一
+    // 读得到的快照（外部私有目录 / 设备保护目录 system_server 都读不到）。原来无条件
+    // `cached = parsed`，于是每次 TTL（2s）到期都会用这份旧快照把广播刚下发的新配置顶掉：
+    // 现象就是「开关关→开之后只有两三秒生效，之后又变回系统手势」。
+    val fromDisk = loadFromDisk()
+    return preferNewer(fromDisk, cachedValue)
+  }
+
+  /** 取 `updatedAtMs` 更新的一份并记为缓存；相同时间戳时以调用方传入的第一份（盘上那份）为准。 */
+  private fun preferNewer(
+    disk: ModuleHookSnapshot?,
+    memory: ModuleHookSnapshot?,
+  ): ModuleHookSnapshot? {
+    val best = when {
+      disk == null -> memory
+      memory == null -> disk
+      else -> if (disk.updatedAtMs >= memory.updatedAtMs) disk else memory
+    }
+    if (best != null && best !== memory) {
+      cached = best
+      log("hook config kept newest: groups=${best.takeoverGroups} updatedAt=${best.updatedAtMs}")
+    }
+    return best
   }
 
   fun applyBroadcast(json: String?) {
@@ -74,26 +96,24 @@ class HookConfigReader(
   }
 
   private fun loadFromDisk(): ModuleHookSnapshot? {
-    // 读取顺序：app 导出的外部快照 → 本进程目录（system_server 可写）→ 设备保护目录。
-    // 外部那份是冷启动恢复的主要来源：app 写它不需要权限，模块侧读得到。
+    // 读取顺序：app 导出的外部快照 → 设备保护目录（system_server 多读不到，试一下无害）
+    // → 历史遗留的 /data/system/slideindex（**仅在内存里没有任何快照时**兜底）。
     val fromExternal = runCatching {
       readText(File(ModuleHookBridgeContract.APP_EXTERNAL_SNAPSHOT_PATH))
     }.getOrNull()
-    val fromSystem = if (fromExternal == null) {
-      runCatching { readText(systemSnapshotFile()) }.getOrNull()
-    } else {
-      null
-    }
-    val fromApp = if (fromExternal == null && fromSystem == null) {
+    val fromApp = if (fromExternal == null) {
       runCatching { readText(File(ModuleHookBridgeContract.APP_SNAPSHOT_PATH)) }.getOrNull()
     } else {
       null
     }
-    val parsed = ModuleHookSnapshot.parse(fromExternal ?: fromSystem ?: fromApp)
+    // 遗留目录只在冷启动（内存里还没有任何配置）时用一次，避免它每 2 秒把广播下发的配置顶掉。
+    val fromLegacySystem = if (fromExternal == null && fromApp == null && cached == null) {
+      runCatching { readText(systemSnapshotFile()) }.getOrNull()
+    } else {
+      null
+    }
     lastLoadAtMs = SystemClock.elapsedRealtime()
-    // 只在真的解析出配置时覆盖缓存，避免"读不到文件"把已下发的配置顶掉。
-    if (parsed != null) cached = parsed
-    return parsed
+    return ModuleHookSnapshot.parse(fromExternal ?: fromApp ?: fromLegacySystem)
   }
 
   private fun readText(file: File): String? {

@@ -237,7 +237,7 @@ class SystemInputFilterHook {
             param.result = false
           }
         },
-        id = "cebian_input_filter_event_${method.parameterTypes.joinToString { it.simpleName }}",
+        id = "xgesture_input_filter_event_${method.parameterTypes.joinToString { it.simpleName }}",
       )
     }
   }
@@ -261,7 +261,7 @@ class SystemInputFilterHook {
             applyFilterEnabled(true)
           }
         },
-        id = "cebian_input_filter_enable_${idSuffix}_${
+        id = "xgesture_input_filter_enable_${idSuffix}_${
           method.parameterTypes.joinToString { it.simpleName }
         }",
       )
@@ -287,7 +287,7 @@ class SystemInputFilterHook {
             }
           }
         },
-        id = "cebian_input_filter_start",
+        id = "xgesture_input_filter_start",
       )
     }
   }

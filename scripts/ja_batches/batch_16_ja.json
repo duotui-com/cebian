@@ -369,7 +369,7 @@
   },
   {
     "name": "clipboard_float_a11y_hint",
-    "ja": "キーボード検出とフィールドへの貼り付けには Cebian アクセシビリティの有効化が必要です。"
+    "ja": "キーボード検出とフィールドへの貼り付けには XGesture アクセシビリティの有効化が必要です。"
   },
   {
     "name": "clipboard_float_show_chip_title",

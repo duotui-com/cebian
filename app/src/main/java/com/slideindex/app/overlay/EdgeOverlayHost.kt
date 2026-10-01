@@ -8,6 +8,7 @@ package com.slideindex.app.overlay
 import android.content.Context
 import android.view.MotionEvent
 import com.slideindex.app.di.AppDependencies
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.gesture.GestureAnglesPreviewStore
 import com.slideindex.app.monitoring.OverlayPerformanceMonitorBinding
 import com.slideindex.app.settings.AppSettings
@@ -185,6 +186,10 @@ class EdgeOverlayHost(
      * 所以每一步都必须自己吞异常，不能因为某一步失败就漏掉后面的窗口。
      */
     private fun teardownOverlayWindows() {
+        EdgeDiag.logStack(
+            "host",
+            "teardownOverlayWindows：拆掉整个浮层宿主（面板/触钮全没，且在重挂前不会再出现）"
+        )
         runCatching { floatBallController?.stop() }
         floatBallController = null
         runCatching { cornerGestureHost?.stop() }

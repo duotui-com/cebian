@@ -66,7 +66,7 @@
   },
   {
     "name": "settings_backup_default_filename",
-    "text": "cebian-backup-%1$d.zip",
+    "text": "XGesture-backup-%1$d.zip",
     "source": "en"
   },
   {
@@ -231,12 +231,12 @@
   },
   {
     "name": "onboarding_welcome_title",
-    "text": "Welcome to Cebian",
+    "text": "Welcome to XGesture",
     "source": "en"
   },
   {
     "name": "onboarding_welcome_body",
-    "text": "Cebian enhances your phone with edge gestures, shake actions, and notification tools. A few system permissions are required next.",
+    "text": "XGesture enhances your phone with edge gestures, shake actions, and notification tools. A few system permissions are required next.",
     "source": "en"
   },
   {
@@ -261,7 +261,7 @@
   },
   {
     "name": "onboarding_accessibility_body",
-    "text": "Cebian uses an accessibility service for edge gestures, sidebar panels, and system actions (Back, Home, Recents).",
+    "text": "XGesture uses an accessibility service for edge gestures, sidebar panels, and system actions (Back, Home, Recents).",
     "source": "en"
   },
   {
@@ -316,7 +316,7 @@
   },
   {
     "name": "onboarding_core_permissions_body",
-    "text": "Cebian requires the following permissions to support edge gesture recognition, floating trigger bars, and reliable background operations. Please grant them in system settings.",
+    "text": "XGesture requires the following permissions to support edge gesture recognition, floating trigger bars, and reliable background operations. Please grant them in system settings.",
     "source": "en"
   },
   {
@@ -381,7 +381,7 @@
   },
   {
     "name": "privacy_policy_body",
-    "text": "Cebian is designed around on-device processing.\n\n• Notifications and OTP: read, filtered, extracted, and displayed locally only. Nothing is uploaded by default.\n• OTP records and notification history: stored in app-private storage and excluded from system backup by default; optional export in settings backup.\n• LSPosed / Shizuku: optional enhancements that you enable yourself.\n• We do not collect personally identifiable information or send this data to developer servers.\n\nForeground service (special use): OverlayService keeps edge gestures and shake detection alive with subtype overlay_sidebar\\u2014not for ads or unrelated background work.\n\nQuestions: open a GitHub Issue on the project repository.",
+    "text": "XGesture is designed around on-device processing.\n\n• Notifications and OTP: read, filtered, extracted, and displayed locally only. Nothing is uploaded by default.\n• OTP records and notification history: stored in app-private storage and excluded from system backup by default; optional export in settings backup.\n• LSPosed / Shizuku: optional enhancements that you enable yourself.\n• We do not collect personally identifiable information or send this data to developer servers.\n\nForeground service (special use): OverlayService keeps edge gestures and shake detection alive with subtype overlay_sidebar\\u2014not for ads or unrelated background work.\n\nQuestions: open a GitHub Issue on the project repository.",
     "source": "en"
   },
   {
@@ -456,7 +456,7 @@
   },
   {
     "name": "otp_autofill_stats_help_pipeline",
-    "text": "Fill order: when LSPosed system inject is enabled, it runs first. If it fails or is disabled, Cebian accessibility looks for an input field and writes the code.",
+    "text": "Fill order: when LSPosed system inject is enabled, it runs first. If it fails or is disabled, XGesture accessibility looks for an input field and writes the code.",
     "source": "en"
   },
   {
@@ -696,7 +696,7 @@
   },
   {
     "name": "tile_gesture_switch",
-    "text": "Cebian",
+    "text": "XGesture",
     "source": "en"
   },
   {
@@ -726,7 +726,7 @@
   },
   {
     "name": "shortcut_panel_open_failed",
-    "text": "Could not open panel. Make sure Cebian is enabled.",
+    "text": "Could not open panel. Make sure XGesture is enabled.",
     "source": "en"
   },
   {

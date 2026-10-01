@@ -2,7 +2,7 @@
 
 > **给 AI 工具与维护者：** 本仓库采用 **Tag 驱动的全自动云端闭环流水线（Tag-Driven Release CI）**。发版时只需**更新日志、升版本号并推送 Tag**，云端 GitHub Actions 会自动完成构建、签名、校验、发布 GitHub Release、回填 `update.json` 与 CDN 缓存刷新。
 
-远程仓库：`qpst4/cebian`
+远程仓库：`qpst4/XGesture`
 
 ---
 
@@ -10,8 +10,8 @@
 
 | 产物 | 文件名 | 用途 |
 |------|--------|------|
-| **Full 胖包** | `cebian-{版本}-full.apk` | GitHub Release；新用户装完即用（内置完整 Native 引擎包） |
-| **Lite 轻量包** | `cebian-{版本}-lite.apk` | **应用内更新**默认指向此包（轻量，不含内置引擎） |
+| **Full 胖包** | `xgesture-{版本}-full.apk` | GitHub Release；新用户装完即用（内置完整 Native 引擎包） |
+| **Lite 轻量包** | `xgesture-{版本}-lite.apk` | **应用内更新**默认指向此包（轻量，不含内置引擎） |
 | **引擎 zip** | `*-engine-arm64-vN.zip` | **仅引擎变更时**上传；纯 App 发版不必每次附带 |
 
 `applicationId` 始终为 `com.slideindex.app`，full / lite 可互相覆盖安装。
@@ -96,12 +96,12 @@ gh run watch
 
 ### 同版本覆盖时的必做步骤
 
-1. 准备好 **即将上传** 的 `cebian-{版本}-lite.apk`（与 Full 同源构建为佳）。
+1. 准备好 **即将上传** 的 `xgesture-{版本}-lite.apk`（与 Full 同源构建为佳）。
 2. 用该 Lite 文件更新清单（自动计算字节数、可从 CHANGELOG 生成 notes）：
 
 ```bash
 python scripts/update-release-manifest.py -v {版本号} \
-  --apk-file path/to/cebian-{版本}-lite.apk \
+  --apk-file path/to/xgesture-{版本}-lite.apk \
   --purge-jsdelivr --verify-remote
 ```
 
@@ -110,15 +110,15 @@ python scripts/update-release-manifest.py -v {版本号} \
 
 ```bash
 gh release upload v{版本号} --clobber \
-  path/to/cebian-{版本}-full.apk \
-  path/to/cebian-{版本}-lite.apk
+  path/to/xgesture-{版本}-full.apk \
+  path/to/xgesture-{版本}-lite.apk
 ```
 
 5. 可选：用 `--verify-only` 对照远端是否已与当前 Lite 大小一致（需先 push `update.json`）：
 
 ```bash
 python scripts/update-release-manifest.py -v {版本号} \
-  --apk-file path/to/cebian-{版本}-lite.apk --verify-only
+  --apk-file path/to/xgesture-{版本}-lite.apk --verify-only
 ```
 
 **顺序建议：** 先更新并 push `update.json`，再 `upload --clobber`，避免用户短暂拉到新包旧 `apkSize`。若已先上传附件，务必立即补步骤 2–3。

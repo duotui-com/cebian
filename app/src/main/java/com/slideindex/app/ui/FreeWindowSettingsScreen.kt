@@ -36,7 +36,7 @@ fun FreeWindowSettingsScreen(
     onLongPressDurationChange: (Int) -> Unit,
     onLaunchPolicyChange: (Int) -> Unit,
     onOpenMode: () -> Unit,
-    onOpenPreview: () -> Unit
+    onOpenLayoutEditor: () -> Unit
 ) {
     val selectedMode = settings.resolvedFreeWindowMode()
     val selectedPolicy = settings.resolvedLaunchPolicy()
@@ -138,9 +138,15 @@ fun FreeWindowSettingsScreen(
                         SettingNavigationRow(
                             icon = { label -> Icon(Icons.Outlined.AspectRatio, contentDescription = label) },
                             title = stringResource(R.string.free_window_adjust_layout),
-                            subtitle = stringResource(R.string.free_window_adjust_layout_desc),
+                            subtitle = stringResource(
+                                R.string.free_window_layout_summary,
+                                (settings.freeWindowWidthFraction * 100).roundToInt(),
+                                (settings.freeWindowHeightFraction * 100).roundToInt(),
+                                (settings.freeWindowLandWidthFraction * 100).roundToInt(),
+                                (settings.freeWindowLandHeightFraction * 100).roundToInt(),
+                            ),
                             enabled = settings.freeWindowEnabled,
-                            onClick = onOpenPreview
+                            onClick = onOpenLayoutEditor
                         )
                     }
                 )

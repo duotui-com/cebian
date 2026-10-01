@@ -1,14 +1,13 @@
 package com.slideindex.app.external
 
 import android.content.Context
-import android.net.Uri
 import com.slideindex.app.R
 
 object ExternalInvocationCatalog {
     const val PACKAGE_NAME = "com.slideindex.app"
-    const val SCHEME = "cebian"
-    const val HOST = "open"
-    const val QUERY_PARAM = "q"
+    const val SCHEME = AppLinks.SCHEME
+    const val HOST = AppLinks.HOST
+    const val QUERY_PARAM = AppLinks.QUERY_PARAM
 
     data class DeeplinkEntry(
         val titleRes: Int,
@@ -98,12 +97,7 @@ object ExternalInvocationCatalog {
     )
 
     fun deeplinkUri(path: String): String =
-        Uri.Builder()
-            .scheme(SCHEME)
-            .authority(HOST)
-            .appendPath(path)
-            .build()
-            .toString()
+        AppLinks.uriString(path)
 
     fun adbViewCommand(uri: String): String =
         "adb shell am start -a android.intent.action.VIEW -d \"$uri\""

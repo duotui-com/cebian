@@ -1,5 +1,6 @@
 package com.slideindex.app.gesture
 
+import com.slideindex.app.diagnostic.EdgeDiag
 import com.slideindex.app.overlay.OverlayPanelMode
 import com.slideindex.app.overlay.PanelSide
 import com.slideindex.app.service.OverlayService
@@ -188,13 +189,18 @@ class GestureSession(
                     sessionContinuousPick.taskSwitcherActive() ||
                     sessionContinuousPick.shellActive()
                 ) {
+                    EdgeDiag.log("leaveOpen", "跳过收尾：continuousPick 仍活跃 → panel=$sessionPanelMode")
                     return
                 }
-                if (!active && !sessionMoveTimeActionFired) return
+                if (!active && !sessionMoveTimeActionFired) {
+                    EdgeDiag.log("leaveOpen", "跳过收尾：已非按住且未锁定 → panel=$sessionPanelMode")
+                    return
+                }
                 active = false
                 sessionMoveTimeActionFired = false
                 callbacks.cancelDelayed(longPressCheckRunnable)
                 callbacks.onRequestInvalidate()
+                EdgeDiag.log("leaveOpen", "结束手指跟踪并保留 panel=$sessionPanelMode")
                 callbacks.onLeaveOpenFingerTrackingFinished()
             }
             else -> Unit
@@ -285,6 +291,7 @@ class GestureSession(
         sessionActiveHandleId = handleId
         applyActiveHandleDistances()
         active = true
+        EdgeDiag.marker("触钮 DOWN side=$side handle=$handleId raw=($rawX,$rawY)")
         sessionIndexMode = false
         sessionAdjustMode = null
         sessionAdjustLayoutAnchorRawY = 0f
@@ -467,6 +474,7 @@ class GestureSession(
 
                 val gestureStartRawY = pathRecognizer.gestureStartRawY()
                 val classification = pathRecognizer.classifyOnUp(rawX, rawY, classifyOptions()) ?: run {
+                    EdgeDiag.log("onUp", "分类失败(null) → endSession，本次手势不触发任何动作")
                     endSession()
                     return
                 }
@@ -481,6 +489,12 @@ class GestureSession(
                 }
 
                 val action = sessionSettings.actionFor(side, classification.trigger, sessionActiveHandleId)
+                EdgeDiag.log(
+                    "onUp",
+                    "trigger=${classification.trigger} resolvedMode=$mode action=${action.type} " +
+                        "inward=${classification.inwardDelta} vertical=${classification.verticalDelta} " +
+                        "handle=$sessionActiveHandleId"
+                )
                 if (mode == GestureTriggerMode.CONTINUOUS && !sessionIndexMode &&
                     (sessionMoveTimeActionFired || action.supportsContinuousTracking(classification.trigger))
                 ) {
@@ -525,6 +539,11 @@ class GestureSession(
     internal fun openPanel(mode: OverlayPanelMode) {
         sessionPanelMode = mode
         sessionIndexMode = false
+        EdgeDiag.log(
+            "panel",
+            "openPanel mode=$mode active=$active moveTimeFired=$sessionMoveTimeActionFired " +
+                "panelId=$sessionQuickLauncherPanelId"
+        )
         callbacks.onSessionStart(mode)
         callbacks.onRequestInvalidate()
     }
@@ -533,6 +552,11 @@ class GestureSession(
         sessionQuickLauncherPanelId = QuickLauncherPanelDefaults.resolvePanelId(
             sessionSettings.quickLauncherPanels,
             action.panelId
+        )
+        EdgeDiag.log(
+            "panel",
+            "openQuickLauncherPanel actionPanelId='${action.panelId}' → resolved='$sessionQuickLauncherPanelId' " +
+                "panels=${sessionSettings.quickLauncherPanels.size}"
         )
         openPanel(OverlayPanelMode.QUICK_LAUNCHER)
     }
@@ -610,12 +634,20 @@ class GestureSession(
 
     fun endSession() {
         if (!active && sessionPanelMode == OverlayPanelMode.NONE && sessionAdjustMode == null) return
+        EdgeDiag.log("reset", "endSession panel=$sessionPanelMode active=$active")
         forceReset(notifySessionEnd = true)
     }
 
     fun forceReset(notifySessionEnd: Boolean = true) {
         val shouldNotify = notifySessionEnd &&
             (active || sessionPanelMode != OverlayPanelMode.NONE || sessionAdjustMode != null)
+        if (shouldNotify || sessionPanelMode != OverlayPanelMode.NONE || active) {
+            EdgeDiag.logStack(
+                "reset",
+                "forceReset notify=$notifySessionEnd before: panel=$sessionPanelMode active=$active " +
+                    "moveTimeFired=$sessionMoveTimeActionFired adjust=$sessionAdjustMode"
+            )
+        }
 
         active = false
         sessionIndexMode = false

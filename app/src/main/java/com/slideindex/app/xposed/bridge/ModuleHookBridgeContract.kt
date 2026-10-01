@@ -138,6 +138,6 @@ object ModuleHookBridgeContract {
   /** 模块侧配置缓存 TTL。 */
   const val SNAPSHOT_TTL_MS = 2_000L
 
-  /** 模块侧反向请求快照的最小间隔。 */
-  const val SNAPSHOT_REQUEST_THROTTLE_MS = 30_000L
+  /** 模块侧反向请求快照的最小间隔。被旧配置顶掉/广播丢失后靠它自愈，别设太长。 */
+  const val SNAPSHOT_REQUEST_THROTTLE_MS = 5_000L
 }

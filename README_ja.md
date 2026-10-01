@@ -1,15 +1,15 @@
 <div align="center">
 
-<img src="art/logo.svg" width="96" alt="Cebian（边栏）" />
+<img src="art/logo.svg" width="96" alt="XGesture（X手势）" />
 
-# 📱 Cebian（边栏）— Android 究極のジェスチャー＆片手生産性ツール
+# 📱 XGesture（X手势）— Android 究極のジェスチャー＆片手生産性ツール
 
 **Samsung OHO+、FooView、Quick Cursor のオープンソース統合版**  
 *エッジジェスチャー · 片手カーソル · フローティングボール OCR・逆画像検索 · シェイク/伏せ/バックタップ · 通知＆OTP · アプリ凍結 · フリーフォーム · Shizuku & LSPosed*
 
 [English](README.md) | [简体中文](README_zh.md) | **日本語**
 
-[![Release](https://img.shields.io/github/v/release/qpst4/cebian?style=flat-square&color=6340e6)](https://github.com/qpst4/cebian/releases)
+[![Release](https://img.shields.io/github/v/release/qpst4/XGesture?style=flat-square&color=6340e6)](https://github.com/qpst4/XGesture/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%2012%2B-brightgreen?style=flat-square)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple?style=flat-square)](https://kotlinlang.org)
@@ -21,18 +21,18 @@
 
 <br />
 
-<img src="art/screenshots/hero_showcase.webp" width="96%" alt="Cebian 全景プレビュー" />
+<img src="art/screenshots/hero_showcase.webp" width="96%" alt="XGesture 全景プレビュー" />
 
 </div>
 
 ---
 
-**Cebian（边栏）** は、Android 12 以降の全メーカー端末向けに設計された、システムレベルのジェスチャー＆片手生産性強化ツールです。アクセシビリティサービスを基盤に、**Shizuku、Root（KernelSU / Magisk / APatch）**、および任意の **LSPosed** による複数の権限昇格モードを統合し、大型スマートフォンの片手操作の課題を解決します。
+**XGesture（X手势）** は、Android 12 以降の全メーカー端末向けに設計された、システムレベルのジェスチャー＆片手生産性強化ツールです。アクセシビリティサービスを基盤に、**Shizuku、Root（KernelSU / Magisk / APatch）**、および任意の **LSPosed** による複数の権限昇格モードを統合し、大型スマートフォンの片手操作の課題を解決します。
 
 画面端の多角度マルチセグメントスワイプ、片手フローティングポインター、多機能フローティングボール、端末のシェイク、伏せ置き、背面タップなどで **50 種以上のシステムアクション** を簡単に起動できます。**100% ローカルオフライン OCR**、分かち書き（CppJieba）、逆画像検索の集約を深く統合し、任意のアプリ上に高効率なオーバーレイランチャー、アプリ凍結室、OTP 認証コード抽出、通知管理、各 OEM のフリーフォーム小窓を提供。クラウドアップロードや広告は一切なく、プライバシー最優先です。
 
 - **パッケージ名：** `com.slideindex.app`
-- **現在のバージョン：** 1.25.5（versionCode 64）
+- **現在のバージョン：** 1.31.0（versionCode 66）
 - **システム要件：** Android 12+（API 31+）
 - **ライセンス：** [AGPL-3.0 License](LICENSE)
 
@@ -42,15 +42,15 @@
 
 <div align="center">
 
-[![Download Full APK](https://img.shields.io/badge/Full%20版をダウンロード-オフラインエンジン内蔵-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/cebian/releases/latest)
-[![Download Lite APK](https://img.shields.io/badge/Lite%20版をダウンロード-軽量パッケージ-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/cebian/releases/latest)
+[![Download Full APK](https://img.shields.io/badge/Full%20版をダウンロード-オフラインエンジン内蔵-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
+[![Download Lite APK](https://img.shields.io/badge/Lite%20版をダウンロード-軽量パッケージ-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
 
 </div>
 
 | ビルド | 用途 | 説明 |
 | :--- | :--- | :--- |
-| **Full 版** (`cebian-*-full.apk`) | **新規ユーザー推奨** | オフライン OCR、Jieba 分かち書き、オフライン翻訳 Native エンジンを内蔵し、すぐに使える |
-| **Lite 版** (`cebian-*-lite.apk`) | 小さいサイズ / オンライン更新 | コアジェスチャーと基本機能のみ。サイズが小さく、拡張エンジンは必要に応じてダウンロード |
+| **Full 版** (`xgesture-*-full.apk`) | **新規ユーザー推奨** | オフライン OCR、Jieba 分かち書き、オフライン翻訳 Native エンジンを内蔵し、すぐに使える |
+| **Lite 版** (`xgesture-*-lite.apk`) | 小さいサイズ / オンライン更新 | コアジェスチャーと基本機能のみ。サイズが小さく、拡張エンジンは必要に応じてダウンロード |
 
 > [!TIP]
 > 両バージョンの `applicationId` は `com.slideindex.app` で共通。直接上書きインストールでき、設定は保持されます。
@@ -130,11 +130,11 @@
 | **アプリ凍結室** | 拡張 → 凍結室 | Shizuku / Root でバックグラウンドアプリを一括凍結/解凍。ジェスチャーから再凍結も可能 |
 | **検索パネル** | 拡張 → 検索パネル | アプリ、連絡先、ファイル、システム設定、Web 検索、逆画像検索の統合検索 |
 | **Activity ショートカット** | 拡張 → Activity ショートカット | 非表示システム設定、非エクスポート Activity、App Shortcuts、URI ディープリンク |
-| **外部呼び出し** | 拡張 → 外部呼び出し | `cebian://` Deeplink と Intent Action（Tasker / MacroDroid 等向け） |
+| **外部呼び出し** | 拡張 → 外部呼び出し | `xgesture://` Deeplink と Intent Action（Tasker / MacroDroid 等向け） |
 | **Shell コマンド** | 拡張 → Shell コマンド | コマンドパネル、テンプレート変数、カスタムアイコン。Shizuku / Root で実行 |
 | **Widget パネル** | 拡張 → Widget パネル | デスクトップ Widget を浮遊表示。ぼかし背景と複数選択をサポート |
 | **フローティングポインター** | 拡張 → フローティングポインター | 仮想ジョイスティック制御のリングポインター。ホバー選択、ラジアルアクション、ジェスチャー録画再生 |
-| **クリップボード履歴** | ジェスチャー「クリップボードパネル」 | テキスト/画像履歴検索、エッジ浮遊ウィンドウ、ページング。Shizuku バックグラウンド監視と `cebian://` 外部プロトコル |
+| **クリップボード履歴** | ジェスチャー「クリップボードパネル」 | テキスト/画像履歴検索、エッジ浮遊ウィンドウ、ページング。Shizuku バックグラウンド監視と `xgesture://` 外部プロトコル |
 | **設定バックアップ** | 拡張 → 設定バックアップ | 全設定とアセットを ZIP でエクスポート/インポート。機密データは独立暗号化 |
 
 #### 📸 主要 UI プレビュー
@@ -176,33 +176,33 @@
 
 ## 🔗 外部呼び出し
 
-他のアプリ、Tasker、MacroDroid、`adb` から Cebian パネルを起動できます。アプリ内：**拡張 → クイック操作 → 外部呼び出し** で参照・コピー可能。
+他のアプリ、Tasker、MacroDroid、`adb` から XGesture パネルを起動できます。アプリ内：**拡張 → クイック操作 → 外部呼び出し** で参照・コピー可能。
 
 > **前提条件：** 検索パネル、収納夹、クリップボードパネルにはサイドバーとアクセシビリティサービスが必要。通知フィルターには通知リスナー権限が必要。
 
 ### Deeplink（推奨）
 
-形式：`cebian://open/<path>?q=<任意のキーワード>`
+形式：`xgesture://open/<path>?q=<任意のキーワード>`
 
 | 機能 | URI | 説明 |
 | :--- | :--- | :--- |
-| 通知フィルター | `cebian://open/notification-history` | 通知フィルターを開く |
-| 通知フィルター（検索入力） | `cebian://open/notification-history?q=キーワード` | 検索語を事前入力 |
-| 収納夹 | `cebian://open/stash` | 収納夹パネルを開く |
-| 収納夹（検索入力） | `cebian://open/stash?q=キーワード` | 検索語を事前入力 |
-| クリップボード | `cebian://open/clipboard` | クリップボードパネルを開く |
-| クリップボード（検索入力） | `cebian://open/clipboard?q=キーワード` | 検索語を事前入力 |
-| 検索パネル | `cebian://open/search-panel` | 検索パネルを開く |
-| 検索パネル（キーワード入力） | `cebian://open/search-panel?q=キーワード` | キーワードを事前入力 |
+| 通知フィルター | `xgesture://open/notification-history` | 通知フィルターを開く |
+| 通知フィルター（検索入力） | `xgesture://open/notification-history?q=キーワード` | 検索語を事前入力 |
+| 収納夹 | `xgesture://open/stash` | 収納夹パネルを開く |
+| 収納夹（検索入力） | `xgesture://open/stash?q=キーワード` | 検索語を事前入力 |
+| クリップボード | `xgesture://open/clipboard` | クリップボードパネルを開く |
+| クリップボード（検索入力） | `xgesture://open/clipboard?q=キーワード` | 検索語を事前入力 |
+| 検索パネル | `xgesture://open/search-panel` | 検索パネルを開く |
+| 検索パネル（キーワード入力） | `xgesture://open/search-panel?q=キーワード` | キーワードを事前入力 |
 
 例：
 
 ```bash
 # 検索パネルを開く
-adb shell am start -a android.intent.action.VIEW -d "cebian://open/search-panel"
+adb shell am start -a android.intent.action.VIEW -d "xgesture://open/search-panel"
 
 # キーワードを事前入力して検索パネルを開く
-adb shell am start -a android.intent.action.VIEW -d "cebian://open/search-panel?q=天気"
+adb shell am start -a android.intent.action.VIEW -d "xgesture://open/search-panel?q=天気"
 ```
 
 ### Intent Action（上級者向け）
@@ -241,13 +241,13 @@ Android には革新的なジェスチャー＆生産性ツールが数多く生
 - **Quick Cursor**：エッジからの片手カーソルで大型画面の操作を救った。
 - **FooView (FV)**：フローティングボール OCR、多エンジン画像検索、浮遊小窓の統合度を押し上げた。
 
-### なぜ Cebian か？
+### なぜ XGesture か？
 これらの名作に深く敬意を払いながらも、現代の Android ユーザーにはまだ残る課題があります：
 - **メーカー壁の打破**：OHO+ は最高級のジェスチャーツールの一つだが、Samsung Galaxy に限定。Xiaomi、OPPO、vivo、Pixel、Meizu など非 Samsung ユーザーが同等の体験を求めている。
-- **オープンソース＆プライバシー最優先**：商用ツールにはクローズドコンポーネントやクラウド API が含まれることが多い。Cebian は **100% AGPL-3.0 完全オープンソース** で、**ローカルオフラインモデル（PaddleOCR ONNX / ML Kit）** を内蔵。
+- **オープンソース＆プライバシー最優先**：商用ツールにはクローズドコンポーネントやクラウド API が含まれることが多い。XGesture は **100% AGPL-3.0 完全オープンソース** で、**ローカルオフラインモデル（PaddleOCR ONNX / ML Kit）** を内蔵。
 - **オールインワン統合**：3〜4 個の独立ツールを常駐させる必要なく、エッジジェスチャー、片手ポインター、フローティングボール OCR を深く連携。Miuix のダンピングアニメーションで統一された体験を提供。
 
-| 比較項目 | **Cebian（边栏）** | **Samsung OHO+** | **Quick Cursor** | **FooView** |
+| 比較項目 | **XGesture（X手势）** | **Samsung OHO+** | **Quick Cursor** | **FooView** |
 | :--- | :---: | :---: | :---: | :---: |
 | **オープンソース** | ✅ **AGPL-3.0（100% FOSS）** | ❌ プロプライエタリ | ❌ プロプライエタリ | ❌ プロプライエタリ |
 | **対応端末** | ✅ **全メーカー（Android 12+）** | ⚠️ Samsung Galaxy 限定 | ✅ 全機種 | ✅ 全機種 |
@@ -345,8 +345,8 @@ Android には革新的なジェスチャー＆生産性ツールが数多く生
 
 ### コマンド
 ```bash
-git clone https://github.com/qpst4/cebian.git
-cd cebian
+git clone https://github.com/qpst4/XGesture.git
+cd XGesture
 
 # Full Debug（オフラインエンジン内蔵）
 ./gradlew assembleFullDebug
@@ -359,9 +359,9 @@ cd cebian
 
 ## 🌍 翻訳に参加
 
-[![翻訳状況](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![翻訳状況](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
-[Weblate](https://hosted.weblate.org/engage/cebian/) で **アプリ UI の翻訳** に協力（Git 不要）。詳細は [貢献ガイド（日本語）](docs/contributing_ja.md#アプリ-ui-の翻訳weblate-推奨)。
+[Weblate](https://hosted.weblate.org/engage/XGesture/) で **アプリ UI の翻訳** に協力（Git 不要）。詳細は [貢献ガイド（日本語）](docs/contributing_ja.md#アプリ-ui-の翻訳weblate-推奨)。
 
 ---
 
@@ -369,14 +369,13 @@ cd cebian
 
 <div align="center">
 
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/cebian/discussions)
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/cebian/issues)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/discussions)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/issues)
 <br>
 [![Telegram](https://img.shields.io/badge/Telegram-Chat-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
-[![Telegram Releases](https://img.shields.io/badge/Telegram-Releases-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/cebian_channel)
 [![QQ Group](art/qq_group_badge.svg)](https://qm.qq.com/q/Zx4wd2LB4G)
 
-> Telegram：[チャット](https://t.me/+NtcG5HPiKXVmNTU1) · [リリース @cebian_channel](https://t.me/cebian_channel) · QQ：**1042783385**
+> Telegram：[チャット](https://t.me/+NtcG5HPiKXVmNTU1) · QQ：**1042783385**
 
 </div>
 
@@ -384,7 +383,7 @@ cd cebian
 
 ## 💖 スポンサー
 
-Cebian が日常で役立つと感じたら、開発者にコーヒー ☕ を一杯お願いします！
+XGesture が日常で役立つと感じたら、開発者にコーヒー ☕ を一杯お願いします！
 
 <div align="center">
   <img src="art/sponsor.png" width="220" alt="WeChat 寄付コード" />

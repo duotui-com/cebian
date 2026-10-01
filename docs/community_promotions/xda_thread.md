@@ -7,7 +7,7 @@
 
 ### Thread Title
 ```
-[APP][12+][AGPLv3] Cebian - Edge Gestures, Reachability Pointer & Local OCR (OHO+ & Quick Cursor Alternative)
+[APP][12+][AGPLv3] XGesture - Edge Gestures, Reachability Pointer & Local OCR (OHO+ & Quick Cursor Alternative)
 ```
 
 ---
@@ -16,14 +16,14 @@
 
 ```markdown
 [CENTER]
-[B][SIZE="5"]📱 Cebian (Sidebar)[/SIZE][/B]
+[B][SIZE="5"]📱 XGesture (Sidebar)[/SIZE][/B]
 [SIZE="3"][I]All-in-One Open-Source Gesture, Reachability Pointer & Productivity Suite for Android 12+[/I][/SIZE]
-[URL="https://github.com/qpst4/cebian"][B]GitHub Repository[/B][/URL] | [URL="https://github.com/qpst4/cebian/releases/latest"][B]Latest Releases[/B][/URL] | [URL="https://github.com/qpst4/cebian/blob/main/LICENSE"][B]AGPL-3.0 License[/B][/URL]
+[URL="https://github.com/qpst4/XGesture"][B]GitHub Repository[/B][/URL] | [URL="https://github.com/qpst4/XGesture/releases/latest"][B]Latest Releases[/B][/URL] | [URL="https://github.com/qpst4/XGesture/blob/main/LICENSE"][B]AGPL-3.0 License[/B][/URL]
 [/CENTER]
 
 Hey XDA,
 
-I wanted to share **Cebian**, a system-level gesture and productivity tool I've been developing. If you've missed Samsung's **One Hand Operation+ (OHO+)** after switching to Pixel, Xiaomi, Motorola, or Sony, or if you've been searching for an open-source, subscription-free alternative to **Quick Cursor** and **FooView**, this is built for you.
+I wanted to share **XGesture**, a system-level gesture and productivity tool I've been developing. If you've missed Samsung's **One Hand Operation+ (OHO+)** after switching to Pixel, Xiaomi, Motorola, or Sony, or if you've been searching for an open-source, subscription-free alternative to **Quick Cursor** and **FooView**, this is built for you.
 
 ---
 
@@ -54,10 +54,10 @@ I wanted to share **Cebian**, a system-level gesture and productivity tool I've 
 
 ### 📥 Download & Source
 
-* **GitHub**: https://github.com/qpst4/cebian
-* **Releases**: https://github.com/qpst4/cebian/releases
-  * `cebian-*-full.apk`: Out-of-the-box experience with bundled offline OCR & segmentation models.
-  * `cebian-*-lite.apk`: Smaller package size; extension engines download on demand.
+* **GitHub**: https://github.com/qpst4/XGesture
+* **Releases**: https://github.com/qpst4/XGesture/releases
+  * `xgesture-*-full.apk`: Out-of-the-box experience with bundled offline OCR & segmentation models.
+  * `xgesture-*-lite.apk`: Smaller package size; extension engines download on demand.
 
 Pull requests, OEM quirks reports, and feedback are warmly welcomed!
 ```

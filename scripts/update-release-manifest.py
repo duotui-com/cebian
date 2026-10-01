@@ -92,11 +92,11 @@ def get_changelog_bullet_notes(
     return "\n".join(out_lines)
 
 
-def purge_jsdelivr(repo: str = "qpst4/cebian") -> None:
+def purge_jsdelivr(repo: str = "qpst4/XGesture") -> None:
     purge_url = f"https://purge.jsdelivr.net/gh/{repo}@main/update.json"
     try:
         req = urllib.request.Request(
-            purge_url, headers={"User-Agent": "Cebian-Release-Bot"}
+            purge_url, headers={"User-Agent": "xgesture-Release-Bot"}
         )
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
@@ -117,7 +117,7 @@ def verify_remote_url(
         try:
             req = urllib.request.Request(
                 url,
-                headers={"User-Agent": "Cebian-Release-Bot", "Cache-Control": "no-cache"},
+                headers={"User-Agent": "xgesture-Release-Bot", "Cache-Control": "no-cache"},
             )
             with urllib.request.urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -148,7 +148,7 @@ def verify_remote_url(
 def verify_remote(
     version: str,
     apk_size: int,
-    repo: str = "qpst4/cebian",
+    repo: str = "qpst4/XGesture",
     jsdelivr_retries: int = 6,
     jsdelivr_retry_delay_sec: float = 10.0,
 ) -> None:
@@ -178,7 +178,7 @@ def main():
     parser.add_argument("--changelog", default="CHANGELOG.md", help="Path to CHANGELOG.md")
     parser.add_argument("--manifest", default="update.json", help="Path to update.json")
     parser.add_argument("--gradle-file", default="app/build.gradle.kts", help="Path to build.gradle.kts")
-    parser.add_argument("--repo", default="qpst4/cebian", help="GitHub repo in owner/name format")
+    parser.add_argument("--repo", default="qpst4/XGesture", help="GitHub repo in owner/name format")
     parser.add_argument("--purge-jsdelivr", action="store_true", help="Purge jsDelivr cache")
     parser.add_argument("--purge-only", action="store_true", help="Only purge jsDelivr cache and exit")
     parser.add_argument("--verify-remote", action="store_true", help="Verify raw & jsDelivr remote manifests")
@@ -240,7 +240,7 @@ def main():
         print("ERROR: Resolved update notes are empty.", file=sys.stderr)
         sys.exit(1)
 
-    apk_file_name = args.apk_file_name or f"cebian-{v}-lite.apk"
+    apk_file_name = args.apk_file_name or f"xgesture-{v}-lite.apk"
     apk_url = f"https://github.com/{args.repo}/releases/download/v{v}/{apk_file_name}"
 
     manifest_data = {

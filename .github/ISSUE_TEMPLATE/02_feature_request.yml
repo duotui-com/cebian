@@ -1,5 +1,5 @@
 name: "💡 Feature Request / 功能建议"
-description: "Suggest a new idea or feature for Cebian (提出新功能或交互改进建议)"
+description: "Suggest a new idea or feature for XGesture (提出新功能或交互改进建议)"
 labels: ["enhancement"]
 body:
   - type: markdown
@@ -17,7 +17,7 @@ body:
     id: solution
     attributes:
       label: "Proposed Solution / 建议的解决方案"
-      description: "你期望 Cebian 如何实现或改进此功能？"
+      description: "你期望 XGesture 如何实现或改进此功能？"
     validations:
       required: true
   - type: textarea

@@ -100,6 +100,10 @@ internal object SettingsPreferenceKeys {
     val FREE_WINDOW_HEIGHT = floatPreferencesKey("free_window_height_fraction")
     val FREE_WINDOW_LEFT = floatPreferencesKey("free_window_left_fraction")
     val FREE_WINDOW_TOP = floatPreferencesKey("free_window_top_fraction")
+    val FREE_WINDOW_LAND_WIDTH = floatPreferencesKey("free_window_land_width_fraction")
+    val FREE_WINDOW_LAND_HEIGHT = floatPreferencesKey("free_window_land_height_fraction")
+    val FREE_WINDOW_LAND_LEFT = floatPreferencesKey("free_window_land_left_fraction")
+    val FREE_WINDOW_LAND_TOP = floatPreferencesKey("free_window_land_top_fraction")
     val APP_LAUNCH_POLICY = intPreferencesKey("app_launch_policy_id")
     val LONG_PRESS_LAUNCH_DURATION = intPreferencesKey("long_press_launch_duration_ms")
     val HIDDEN_APP_PACKAGES = stringSetPreferencesKey("hidden_app_packages")
@@ -173,6 +177,10 @@ internal object SettingsPreferenceKeys {
     val HOLOGRAPHIC_DIM_PERCENT = intPreferencesKey("holographic_dim_percent")
     val SHELL_COMMANDS = stringSetPreferencesKey("shell_commands")
     val ACTIVITY_SHORTCUTS = stringSetPreferencesKey("activity_shortcuts")
+    /** 桌面图标长按菜单的展示顺序（shortcutId，以 [LauncherShortcutMenuCodec] 分隔符拼接）。 */
+    val LAUNCHER_SHORTCUT_MENU_ORDER = stringPreferencesKey("launcher_shortcut_menu_order")
+    /** 桌面图标长按菜单里被用户关闭的条目（shortcutId）。 */
+    val LAUNCHER_SHORTCUT_MENU_DISABLED = stringSetPreferencesKey("launcher_shortcut_menu_disabled")
     val KEYBOARD_TRIGGER_BEHAVIOR_PORTRAIT = stringPreferencesKey("keyboard_trigger_behavior_portrait")
     val KEYBOARD_TRIGGER_BEHAVIOR_LANDSCAPE = stringPreferencesKey("keyboard_trigger_behavior_landscape")
     val KEYBOARD_TRIGGER_NARROW_PERCENT_PORTRAIT = intPreferencesKey("keyboard_trigger_narrow_percent_portrait")

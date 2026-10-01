@@ -1,15 +1,15 @@
 <div align="center">
 
-<img src="art/logo.svg" width="96" alt="Cebian" />
+<img src="art/logo.svg" width="96" alt="XGesture" />
 
-# 📱 Cebian — The Ultimate Android Gesture & One-Handed Productivity Suite
+# 📱 XGesture — The Ultimate Android Gesture & One-Handed Productivity Suite
 
 **All-in-One Open-Source Alternative to Samsung One Hand Operation+ (OHO+), Quick Cursor & FooView**  
 *Edge Panels · Reachability Floating Cursor · Floating Ball OCR & Reverse Image Search · Shake & Back-Tap Gestures · Notification & OTP Manager · App Freezer · Freeform Window · Shizuku & LSPosed*
 
 **English** | [简体中文](README_zh.md) | [日本語](README_ja.md)
 
-[![Release](https://img.shields.io/github/v/release/qpst4/cebian?style=flat-square&color=6340e6)](https://github.com/qpst4/cebian/releases)
+[![Release](https://img.shields.io/github/v/release/qpst4/XGesture?style=flat-square&color=6340e6)](https://github.com/qpst4/XGesture/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%2012%2B-brightgreen?style=flat-square)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple?style=flat-square)](https://kotlinlang.org)
@@ -21,18 +21,18 @@
 
 <br />
 
-<img src="art/screenshots/hero_showcase.webp" width="96%" alt="Cebian Full Showcase" />
+<img src="art/screenshots/hero_showcase.webp" width="96%" alt="XGesture Full Showcase" />
 
 </div>
 
 ---
 
-**Cebian** is a universal system-level gesture and single-handed productivity suite designed for all Android 12+ devices across all OEMs. Built on Accessibility Services with flexible multi-privilege modes (**Shizuku, Root / KernelSU / Magisk**, and optional **LSPosed** integration), it brings desktop-grade control and effortless reachability to modern large-screen phones.
+**XGesture** is a universal system-level gesture and single-handed productivity suite designed for all Android 12+ devices across all OEMs. Built on Accessibility Services with flexible multi-privilege modes (**Shizuku, Root / KernelSU / Magisk**, and optional **LSPosed** integration), it brings desktop-grade control and effortless reachability to modern large-screen phones.
 
 Easily trigger **50+ system actions** via customizable multi-angle screen-edge swipes, reachability floating pointers, multi-functional floating ball, device shaking, desk-flipping, or back-tap gestures. Deeply integrates **100% offline on-device OCR**, word segmentation (CppJieba), and reverse image search aggregation—delivering high-efficiency overlay launchers, app freezing, OTP verification code extraction, notification management, and OEM freeform windows on top of any app, completely free from ads and cloud trackers.
 
 - **Package Name:** `com.slideindex.app`
-- **Current Version:** 1.25.5 (versionCode 64)
+- **Current Version:** 1.31.0 (versionCode 66)
 - **Requirements:** Android 12+ (API 31+)
 - **License:** [AGPL-3.0 License](LICENSE)
 
@@ -42,15 +42,15 @@ Easily trigger **50+ system actions** via customizable multi-angle screen-edge s
 
 <div align="center">
 
-[![Download Full APK](https://img.shields.io/badge/Download%20Full%20APK-Built--in%20Offline%20Engines-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/cebian/releases/latest)
-[![Download Lite APK](https://img.shields.io/badge/Download%20Lite%20APK-Compact%20Size-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/cebian/releases/latest)
+[![Download Full APK](https://img.shields.io/badge/Download%20Full%20APK-Built--in%20Offline%20Engines-238636?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
+[![Download Lite APK](https://img.shields.io/badge/Download%20Lite%20APK-Compact%20Size-0969DA?style=for-the-badge&logo=android&logoColor=white)](https://github.com/qpst4/XGesture/releases/latest)
 
 </div>
 
 | Variant | Scenario | Description |
 | :--- | :--- | :--- |
-| **Full Package** (`cebian-*-full.apk`) | **Recommended for new users** | Out-of-the-box experience with built-in offline OCR, Jieba segmentation, and offline translation native engines |
-| **Lite Package** (`cebian-*-lite.apk`) | Compact size / on-demand updates | Retains core gestures and fundamental features with smaller package size; download extension engines on demand |
+| **Full Package** (`xgesture-*-full.apk`) | **Recommended for new users** | Out-of-the-box experience with built-in offline OCR, Jieba segmentation, and offline translation native engines |
+| **Lite Package** (`xgesture-*-lite.apk`) | Compact size / on-demand updates | Retains core gestures and fundamental features with smaller package size; download extension engines on demand |
 
 > [!TIP]
 > Both packages share the same `applicationId` (`com.slideindex.app`), allowing direct overwriting installation without losing configurations.
@@ -130,7 +130,7 @@ The app features four main navigation tabs: 🏠 **Home** · 📳 **Motion** · 
 | **App Freezer** | Extensions → App Freezer | Batch freeze and unfreeze background apps via Shizuku / Root with quick re-freeze gesture |
 | **Search Panel** | Extensions → Search Panel | Unified search for apps, contacts, files, system settings, web queries, and reverse image search |
 | **Activity Shortcuts** | Extensions → Activity Shortcuts | Hidden system settings, non-exported activity launcher, App Shortcuts, and URI deep links |
-| **External Invocation** | Extensions → External Invocation | `cebian://` deeplinks and intent actions for Tasker, MacroDroid, and other automations |
+| **External Invocation** | Extensions → External Invocation | `xgesture://` deeplinks and intent actions for Tasker, MacroDroid, and other automations |
 | **Shell Commands** | Extensions → Shell Commands | Command panels, template variable substitution, and custom icons via Shizuku / Root |
 | **Widget Panel** | Extensions → Widget Panel | Floating desktop widget host with adjustable blur background and multi-selection |
 | **Floating Pointer** | Extensions → Floating Pointer | Virtual joystick-controlled ring pointer with hover selection, radial actions, and gesture macro replay |
@@ -176,33 +176,33 @@ The app features four main navigation tabs: 🏠 **Home** · 📳 **Motion** · 
 
 ## 🔗 External Invocation
 
-Open Cebian panels from other apps, Tasker, MacroDroid, or `adb`. In-app reference: **Extensions → Shortcuts & actions → External Invocation** (tap to copy).
+Open XGesture panels from other apps, Tasker, MacroDroid, or `adb`. In-app reference: **Extensions → Shortcuts & actions → External Invocation** (tap to copy).
 
 > **Prerequisites:** Search panel, stash, and clipboard require the sidebar and accessibility service. Notification hub requires notification listener access.
 
 ### Deeplinks (recommended)
 
-Format: `cebian://open/<path>?q=<optional query>`
+Format: `xgesture://open/<path>?q=<optional query>`
 
 | Feature | URI | Notes |
 | :--- | :--- | :--- |
-| Notification hub | `cebian://open/notification-history` | Open notification hub |
-| Notification hub (prefill) | `cebian://open/notification-history?q=keyword` | Open with search prefill |
-| Stash | `cebian://open/stash` | Open stash panel |
-| Stash (prefill) | `cebian://open/stash?q=keyword` | Open with search prefill |
-| Clipboard | `cebian://open/clipboard` | Open clipboard panel |
-| Clipboard (prefill) | `cebian://open/clipboard?q=keyword` | Open with search prefill |
-| Search panel | `cebian://open/search-panel` | Open search panel |
-| Search panel (prefill) | `cebian://open/search-panel?q=keyword` | Open with query prefill |
+| Notification hub | `xgesture://open/notification-history` | Open notification hub |
+| Notification hub (prefill) | `xgesture://open/notification-history?q=keyword` | Open with search prefill |
+| Stash | `xgesture://open/stash` | Open stash panel |
+| Stash (prefill) | `xgesture://open/stash?q=keyword` | Open with search prefill |
+| Clipboard | `xgesture://open/clipboard` | Open clipboard panel |
+| Clipboard (prefill) | `xgesture://open/clipboard?q=keyword` | Open with search prefill |
+| Search panel | `xgesture://open/search-panel` | Open search panel |
+| Search panel (prefill) | `xgesture://open/search-panel?q=keyword` | Open with query prefill |
 
 Examples:
 
 ```bash
 # Open search panel
-adb shell am start -a android.intent.action.VIEW -d "cebian://open/search-panel"
+adb shell am start -a android.intent.action.VIEW -d "xgesture://open/search-panel"
 
 # Open search panel with prefill
-adb shell am start -a android.intent.action.VIEW -d "cebian://open/search-panel?q=weather"
+adb shell am start -a android.intent.action.VIEW -d "xgesture://open/search-panel?q=weather"
 ```
 
 ### Intent actions (advanced)
@@ -241,13 +241,13 @@ Android has seen legendary tools that shaped mobile navigation and productivity:
 - **Quick Cursor** introduced thumb-friendly screen reachability via intuitive floating cursors.
 - **FooView (FV)** pioneered floating-ball universal OCR, search aggregation, and floating window shortcuts.
 
-### Why Cebian?
+### Why XGesture?
 While we deeply admire these pioneering tools, modern Android users frequently face fragmentation:
 - **Vendor Lock-in**: OHO+ is one of the most beloved gesture tools ever created, but it remains exclusive to Samsung One UI. Non-Samsung users on Pixel, Xiaomi, Motorola, Sony, etc., have long sought a genuine alternative.
-- **Open Source & Privacy-First**: Proprietary utilities often carry cloud-dependent OCR and closed ecosystems. Cebian is **100% AGPL-3.0 open-source**, bundling **offline on-device OCR (PaddleOCR ONNX / ML Kit)** that respects user privacy.
-- **Unified Navigation**: Rather than running multiple separate tools for edge gestures, single-handed pointers, and floating OCR, Cebian brings them together into a unified, coherent experience with fluid Miuix animations.
+- **Open Source & Privacy-First**: Proprietary utilities often carry cloud-dependent OCR and closed ecosystems. XGesture is **100% AGPL-3.0 open-source**, bundling **offline on-device OCR (PaddleOCR ONNX / ML Kit)** that respects user privacy.
+- **Unified Navigation**: Rather than running multiple separate tools for edge gestures, single-handed pointers, and floating OCR, XGesture brings them together into a unified, coherent experience with fluid Miuix animations.
 
-| Dimension | **Cebian (This App)** | **Samsung OHO+** | **Quick Cursor** | **FooView** |
+| Dimension | **XGesture (This App)** | **Samsung OHO+** | **Quick Cursor** | **FooView** |
 | :--- | :---: | :---: | :---: | :---: |
 | **Open Source & License** | ✅ **AGPL-3.0 (100% FOSS)** | ❌ Proprietary (Closed) | ❌ Proprietary (Closed) | ❌ Proprietary (Closed) |
 | **Device Compatibility** | ✅ **Universal (Any Android 12+)** | ⚠️ Samsung Galaxy only | ✅ Universal | ✅ Universal |
@@ -362,8 +362,8 @@ The app adopts a **Multi-Module layered architecture** following **MVVM + UDF** 
 ### Build Commands
 ```bash
 # Clone the repository
-git clone https://github.com/qpst4/cebian.git
-cd cebian
+git clone https://github.com/qpst4/XGesture.git
+cd XGesture
 
 # Build Full Debug APK (with built-in offline engines)
 ./gradlew assembleFullDebug
@@ -376,9 +376,9 @@ cd cebian
 
 ## 🌍 Help Translate
 
-[![Translation status](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![Translation status](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
-Contribute **in-app UI translations** on [Weblate](https://hosted.weblate.org/engage/cebian/) — no Git required. See [CONTRIBUTING.md](CONTRIBUTING.md#translating-the-app-weblate--recommended).
+Contribute **in-app UI translations** on [Weblate](https://hosted.weblate.org/engage/XGesture/) — no Git required. See [CONTRIBUTING.md](CONTRIBUTING.md#translating-the-app-weblate--recommended).
 
 ---
 
@@ -388,14 +388,13 @@ Welcome to join the community discussions and provide feedback or feature reques
 
 <div align="center">
 
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/cebian/discussions)
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/cebian/issues)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/discussions)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qpst4/XGesture/issues)
 <br>
 [![Telegram Chat](https://img.shields.io/badge/Telegram-Chat-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+NtcG5HPiKXVmNTU1)
-[![Telegram Releases](https://img.shields.io/badge/Telegram-Releases-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/cebian_channel)
 [![QQ Group](art/qq_group_badge.svg)](https://qm.qq.com/q/Zx4wd2LB4G)
 
-> Telegram: [chat group](https://t.me/+NtcG5HPiKXVmNTU1) (Cebian · 边栏) · [release channel @cebian_channel](https://t.me/cebian_channel) · QQ Group: **1042783385**
+> Telegram: [chat group](https://t.me/+NtcG5HPiKXVmNTU1) (XGesture · X手势) · QQ Group: **1042783385**
 
 </div>
 
@@ -403,7 +402,7 @@ Welcome to join the community discussions and provide feedback or feature reques
 
 ## 💖 Sponsor & Support
 
-If you find **Cebian** helpful in your daily workflow, consider buying the developer a cup of coffee ☕! Your generous support is the greatest motivation for ongoing development and OEM adaptations.
+If you find **XGesture** helpful in your daily workflow, consider buying the developer a cup of coffee ☕! Your generous support is the greatest motivation for ongoing development and OEM adaptations.
 
 <div align="center">
   <img src="art/sponsor.png" width="220" alt="WeChat Reward Code" />

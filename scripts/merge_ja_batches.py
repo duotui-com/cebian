@@ -27,7 +27,7 @@ def merge_strings() -> None:
         name = item["name"]
         text = item.get("ja") or item.get("text", "")
         if name == "app_name":
-            text = "Cebian"
+            text = "XGesture"
         lines.append(f'    <string name="{name}">{escape_xml(text)}</string>')
     lines.append("</resources>")
     lines.append("")

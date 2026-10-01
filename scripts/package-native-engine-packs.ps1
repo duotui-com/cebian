@@ -41,7 +41,7 @@ function New-EngineZip {
         [string[]]$AssetPaths = @()
     )
 
-    $staging = Join-Path $env:TEMP "cebian-pack-$Name"
+    $staging = Join-Path $env:TEMP "xgesture-pack-$Name"
     if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
     $libTarget = Join-Path $staging "lib\arm64-v8a"
     New-Item -ItemType Directory -Force -Path $libTarget | Out-Null

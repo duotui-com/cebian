@@ -471,7 +471,7 @@ internal class QuickLauncherOverlayController(
         ) {
             quickLauncherOpeningGestureActive = false
         }
-        // leave-open 面板需要可聚焦，否则 Back 会落到下层 Activity（尤其 cebian 自身）。
+        // leave-open 面板需要可聚焦，否则 Back 会落到下层 Activity（尤其 XGesture 自身）。
         if (!host.gestureSession().quickLauncherContinuousPickActive() &&
             !host.gestureSession().isMoveTimeActionLocked()
         ) {

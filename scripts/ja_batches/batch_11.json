@@ -391,7 +391,7 @@
   },
   {
     "name": "gesture_action_quick_tools_overlay_permission",
-    "text": "Requires Cebian enabled",
+    "text": "Requires XGesture enabled",
     "source": "en"
   },
   {
@@ -401,7 +401,7 @@
   },
   {
     "name": "gesture_action_widget_popup_overlay_permission",
-    "text": "Requires Cebian enabled",
+    "text": "Requires XGesture enabled",
     "source": "en"
   },
   {
@@ -411,7 +411,7 @@
   },
   {
     "name": "gesture_action_stash_panel_permission",
-    "text": "Requires Cebian enabled",
+    "text": "Requires XGesture enabled",
     "source": "en"
   },
   {
@@ -421,7 +421,7 @@
   },
   {
     "name": "gesture_action_clipboard_panel_permission",
-    "text": "Requires Cebian enabled",
+    "text": "Requires XGesture enabled",
     "source": "en"
   },
   {
@@ -436,7 +436,7 @@
   },
   {
     "name": "gesture_action_clipboard_float_permission",
-    "text": "Requires Cebian enabled and overlay permission",
+    "text": "Requires XGesture enabled and overlay permission",
     "source": "en"
   },
   {
@@ -476,7 +476,7 @@
   },
   {
     "name": "gesture_action_clipboard_pick_permission",
-    "text": "Requires Cebian enabled",
+    "text": "Requires XGesture enabled",
     "source": "en"
   },
   {
@@ -541,7 +541,7 @@
   },
   {
     "name": "trigger_mode_default_slot_desc",
-    "text": "Follow Cebian default (%1$s)",
+    "text": "Follow XGesture default (%1$s)",
     "source": "en"
   },
   {

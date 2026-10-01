@@ -409,7 +409,7 @@
   },
   {
     "name": "service_notification_title",
-    "ja": "Cebian 実行中"
+    "ja": "XGesture 実行中"
   },
   {
     "name": "service_notification_text",
@@ -569,15 +569,15 @@
   },
   {
     "name": "secure_settings_title",
-    "ja": "Cebian 常駐"
+    "ja": "XGesture 常駐"
   },
   {
     "name": "secure_settings_desc",
-    "ja": "システムが Cebian を無効化した場合に自動復元（WRITE_SECURE_SETTINGS が必要）"
+    "ja": "システムが XGesture を無効化した場合に自動復元（WRITE_SECURE_SETTINGS が必要）"
   },
   {
     "name": "secure_settings_enabled_summary",
-    "ja": "Cebian 常駐オン"
+    "ja": "XGesture 常駐オン"
   },
   {
     "name": "secure_settings_grant_success",
@@ -617,7 +617,7 @@
   },
   {
     "name": "permission_accessibility_title",
-    "ja": "Cebian"
+    "ja": "XGesture"
   },
   {
     "name": "permission_accessibility_desc",
@@ -625,7 +625,7 @@
   },
   {
     "name": "permission_accessibility_grant",
-    "ja": "Cebian を有効化"
+    "ja": "XGesture を有効化"
   },
   {
     "name": "settings_section_service",
@@ -649,7 +649,7 @@
   },
   {
     "name": "hidden_apps_desc",
-    "ja": "非表示のアプリは Cebian パネルに表示されませんが、ホーム画面などからは開けます。"
+    "ja": "非表示のアプリは XGesture パネルに表示されませんが、ホーム画面などからは開けます。"
   },
   {
     "name": "excluded_apps_entry_title",
@@ -701,7 +701,7 @@
   },
   {
     "name": "accessibility_service_name",
-    "ja": "Cebian"
+    "ja": "XGesture"
   },
   {
     "name": "accessibility_service_desc",
@@ -717,6 +717,6 @@
   },
   {
     "name": "gesture_hint_style_capsule_desc",
-    "ja": "Cebian とともに拡大する角丸カプセル"
+    "ja": "XGesture とともに拡大する角丸カプセル"
   }
 ]

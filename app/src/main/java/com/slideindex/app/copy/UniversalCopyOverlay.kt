@@ -284,7 +284,7 @@ object UniversalCopyOverlay {
 
     private fun copyToClipboard(context: Context, text: String) {
         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
-        cm.setPrimaryClip(ClipData.newPlainText("Cebian", text))
+        cm.setPrimaryClip(ClipData.newPlainText("XGesture", text))
     }
 
     private fun openPickPanel(context: Context, text: String) {

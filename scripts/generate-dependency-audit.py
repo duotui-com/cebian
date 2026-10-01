@@ -243,7 +243,7 @@ def main() -> None:
 
     lines: list[str] = []
     today = date.today().isoformat()
-    lines.append(f"# Cebian 全量依赖审计 ({today})")
+    lines.append(f"# XGesture 全量依赖审计 ({today})")
     lines.append("")
     lines.append("> 范围：Gradle 全模块解析依赖 + 版本目录 + 插件/工具链 + GitHub Actions + 原生引擎包。")
     lines.append("> 传递依赖来自 `lite/fullReleaseRuntimeClasspath` 等可解析配置的 **实际解析结果**。")

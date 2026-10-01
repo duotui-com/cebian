@@ -1,7 +1,7 @@
 # 验证码功能：逐文件清单 + 精简重构方案
 
 分析对象：`D:\AndroidDev\Projects\XposedSmsCode-beta`（本地可读 179 个 kt / 22,472 行，其中 hook 37、runtime 72、app 23（内含测试 8）、core 47）。
-分析目标：①逐文件判定移植状态；②把边栏验证码页精简重构，核心 hook 能力直接照上游移植。
+分析目标：①逐文件判定移植状态；②把X手势验证码页精简重构，核心 hook 能力直接照上游移植。
 
 状态含义：✅ 已移植等价能力 ｜ 🔁 换实现（能力在、做法不同）｜ ❌ 未移植 ｜ ⛔ 决定不做 ｜ 🔧 支撑代码（入口/契约/桥接/工具）｜ ❓ 未核对（本次未通读，不猜）
 
@@ -9,18 +9,18 @@
 
 ### 1.1 hook（37）
 
-- `xp/LibXposedEntry.kt`、`xp/XposedRuntimeInstaller.kt`（9.6KB）：模块入口与运行时安装 ｜🔧 边栏入口是 `SlideIndexLibXposedModule`；**`XposedRuntimeInstaller` 的首次加载/去重逻辑未通读** ❓
-- `xp/CorePrefsBridge.kt`、`code/SmsCodeVerificationPrefs.kt`、`code/SmsHookRuntimeContext.kt`、`code/SmsVerificationBridge.kt`、`code/ParseResult.kt`：偏好桥与共享库适配 ｜🔁 边栏用配置快照 + 自有广播契约（`ModuleHookSnapshot` / `OtpAutoInputBroadcastContract`）
-- `xp/hook/code/SmsHandlerHook.kt`（34KB，主 hook）：挂 `dispatchIntent` + 一批同类方法与多接收器索引 ｜🔁 边栏只挂三个类的 `dispatchIntent` before；**细节未通读** ❓
-- `code/SmsHookConstructorInitializer.kt`：hook 构造期初始化/取 context ｜❓ 未通读（边栏用 `LibXposedReflect` 从 `mContext` 取）
-- `code/SmsDispatchIntentHandler.kt`、`code/SmsDispatchIntentProcessor.kt`：分发放行判定 + 黑名单/解析组合 ｜🔁 边栏在 hook before 里做"策略→returnEarly"；无冲突仲裁/entitlement 门禁
-- `code/CodeWorker.kt`、`code/SmsCodeActionDispatcher.kt`：解析编排 + **动作派发管线** ｜❌ 结构未移植：边栏没有动作管线，动作分散在 App 进程；本轮只把拦截/已读/删除下沉到 hook
+- `xp/LibXposedEntry.kt`、`xp/XposedRuntimeInstaller.kt`（9.6KB）：模块入口与运行时安装 ｜🔧 X手势入口是 `SlideIndexLibXposedModule`；**`XposedRuntimeInstaller` 的首次加载/去重逻辑未通读** ❓
+- `xp/CorePrefsBridge.kt`、`code/SmsCodeVerificationPrefs.kt`、`code/SmsHookRuntimeContext.kt`、`code/SmsVerificationBridge.kt`、`code/ParseResult.kt`：偏好桥与共享库适配 ｜🔁 X手势用配置快照 + 自有广播契约（`ModuleHookSnapshot` / `OtpAutoInputBroadcastContract`）
+- `xp/hook/code/SmsHandlerHook.kt`（34KB，主 hook）：挂 `dispatchIntent` + 一批同类方法与多接收器索引 ｜🔁 X手势只挂三个类的 `dispatchIntent` before；**细节未通读** ❓
+- `code/SmsHookConstructorInitializer.kt`：hook 构造期初始化/取 context ｜❓ 未通读（X手势用 `LibXposedReflect` 从 `mContext` 取）
+- `code/SmsDispatchIntentHandler.kt`、`code/SmsDispatchIntentProcessor.kt`：分发放行判定 + 黑名单/解析组合 ｜🔁 X手势在 hook before 里做"策略→returnEarly"；无冲突仲裁/entitlement 门禁
+- `code/CodeWorker.kt`、`code/SmsCodeActionDispatcher.kt`：解析编排 + **动作派发管线** ｜❌ 结构未移植：X手势没有动作管线，动作分散在 App 进程；本轮只把拦截/已读/删除下沉到 hook
 - `code/SmsBlockEvaluator.kt`、`runtime/common/utils/SmsBlacklistUtils.kt`：拦截判定 ｜✅ 本轮已移植（`SmsPolicyRuntime.shouldBlock` + `SmsBlacklistMatcher`）
 - `code/action/Action.kt`、`CallableAction.kt`、`RunnableAction.kt`：动作抽象 ｜❌ 无对应（动作框架本身未移植）
-- `code/action/impl/AutoInputAction.kt`：自动填充动作 ｜🔁 边栏由 App 进程触发；**缺按前台应用屏蔽**（`AppInfo.blocked`）
+- `code/action/impl/AutoInputAction.kt`：自动填充动作 ｜🔁 X手势由 App 进程触发；**缺按前台应用屏蔽**（`AppInfo.blocked`）
 - `code/action/impl/CopyToClipboardAction.kt` ｜✅ `OtpClipboardHelper`
 - `code/action/impl/ToastAction.kt` ｜✅ 本轮 `OtpCodeAlertPresenter`
-- `code/action/impl/NotifyAction.kt`、`code/AutoCancelReceiver.kt`、`code/CopyCodeReceiver.kt`、`code/CodeNotificationBroadcastContract.kt` ｜🔁 边栏 `OtpCodeAlertPresenter` + `OtpCodeCopyReceiver`（App 侧发通知；**无 phone-owned 路径**）
+- `code/action/impl/NotifyAction.kt`、`code/AutoCancelReceiver.kt`、`code/CopyCodeReceiver.kt`、`code/CodeNotificationBroadcastContract.kt` ｜🔁 X手势 `OtpCodeAlertPresenter` + `OtpCodeCopyReceiver`（App 侧发通知；**无 phone-owned 路径**）
 - `code/action/impl/OperateSmsAction.kt` ｜✅ 本轮已移植（provider 侧置已读/删除）
 - `code/action/impl/RecordSmsAction.kt` ｜🔁 本轮补了分类记录，但写入在 App 侧
 - `code/action/impl/SmsParseAction.kt` ｜🔁 `VerificationCodeExtractor` + `OtpCaptureDeduplicator`（App 侧）
@@ -29,17 +29,17 @@
 - `code/helper/InputHelper.kt` ｜🔁 `OtpAutoInputOrchestrator` + `SystemInputInjectorHook`
 - `code/SmsInboxObserver.kt`、`code/ObservedSmsHandler.kt`（14KB）｜❌ 未移植（收件箱兜底扫描 + 路由修复）；`ObservedSmsHandler` 细节 ❓
 - `xp/hook/mms/MmsMessagesHook.kt` ｜⛔ 不做（可选并入兜底扫描的文本源）
-- `xp/hook/telephony/SmsProviderHook.kt` ｜🔧 上游此文件只做诊断/心跳；边栏 provider hook 承担采集与策略
+- `xp/hook/telephony/SmsProviderHook.kt` ｜🔧 上游此文件只做诊断/心跳；X手势 provider hook 承担采集与策略
 - `xp/hook/me/ModuleUtilsHook.kt` ｜❓ 行为在缺失共享库中
 - `xp/helper/ModuleConflictArbiter.kt`、`RelayConflictNoticeHelper.kt` ｜⛔ 不做
 
 ### 1.2 app（15 个 main）
 
-- `ui/app/SmsCodeApplication.kt`（15KB）、`AppShellRuntimeBridge.kt`、`XposedServiceBridge.kt`、`AppIpcTokenStore.kt` ｜🔧 边栏对应 `SlideIndexApp` + `ModuleHookBridgeReceiver` + injector 的 callerUid 校验
+- `ui/app/SmsCodeApplication.kt`（15KB）、`AppShellRuntimeBridge.kt`、`XposedServiceBridge.kt`、`AppIpcTokenStore.kt` ｜🔧 X手势对应 `SlideIndexApp` + `ModuleHookBridgeReceiver` + injector 的 callerUid 校验
 - `ui/app/PhoneProcessRestartCoordinator.kt` ｜❌ 未移植（更新后重启电话/短信相关进程）
-- `service/AutoInputAccessibilityService.kt` ｜🔁 边栏 `SlideIndexAccessibilityService` + `OtpAutoInputNodeHelper`
-- `receiver/AutoInputResultHandler.kt`（8.5KB）、`AutoInputResultReceiver.kt` ｜🔁 边栏 `OtpAutoInputOrchestrator` 处理结果与统计；无 KillMe/通知取消联动；细节 ❓
-- `receiver/CodeNotificationReceiver.kt`、`CodeNotificationReceiverConfig.kt` ｜🔁 边栏 App 自建渠道与文案
+- `service/AutoInputAccessibilityService.kt` ｜🔁 X手势 `SlideIndexAccessibilityService` + `OtpAutoInputNodeHelper`
+- `receiver/AutoInputResultHandler.kt`（8.5KB）、`AutoInputResultReceiver.kt` ｜🔁 X手势 `OtpAutoInputOrchestrator` 处理结果与统计；无 KillMe/通知取消联动；细节 ❓
+- `receiver/CodeNotificationReceiver.kt`、`CodeNotificationReceiverConfig.kt` ｜🔁 X手势 App 自建渠道与文案
 - `receiver/KillSelfControlReceiver.kt` ｜⛔ 不做
 - `receiver/SecretCodeReceiver.kt` ｜❌ 未移植（秘钥码触发入口）
 - `entitlement/MobileEntitlementActivity.kt` ｜⛔ 不做
@@ -47,18 +47,18 @@
 
 ### 1.3 runtime（57 个 main）
 
-- 常量：`Const`、`NotificationConst`、`PermConst`、`PrefConst`、`TransitionConst`、`CodeNotificationOwner` ｜🔧 对应边栏 `SettingsPreferenceKeys` / 通知渠道 / `PermissionHelper`
-- `PrefRestoreTypeRegistry.kt` ｜🔁 对应边栏备份的域映射（`mapPreferenceKeyToDomain`）；**恢复类型注册的完整语义未核对** ❓
-- 偏好与桥：`HookPrefsReader.kt`（19KB）、`HookPreferenceMirror.kt`、`HookCacheInvalidator.kt`、`AppPreferences.kt`、`AppPreferenceTransactions.kt`、`XscPreferenceHooks.kt`（10KB）、`data/prefs/PrefsProvider.kt`、`runtime/AppPrefsFacade.kt` ｜🔁 边栏用 `ModuleHookSnapshot` 快照 + 广播；❓ 上游跨进程偏好语义细节未通读
+- 常量：`Const`、`NotificationConst`、`PermConst`、`PrefConst`、`TransitionConst`、`CodeNotificationOwner` ｜🔧 对应X手势 `SettingsPreferenceKeys` / 通知渠道 / `PermissionHelper`
+- `PrefRestoreTypeRegistry.kt` ｜🔁 对应X手势备份的域映射（`mapPreferenceKeyToDomain`）；**恢复类型注册的完整语义未核对** ❓
+- 偏好与桥：`HookPrefsReader.kt`（19KB）、`HookPreferenceMirror.kt`、`HookCacheInvalidator.kt`、`AppPreferences.kt`、`AppPreferenceTransactions.kt`、`XscPreferenceHooks.kt`（10KB）、`data/prefs/PrefsProvider.kt`、`runtime/AppPrefsFacade.kt` ｜🔁 X手势用 `ModuleHookSnapshot` 快照 + 广播；❓ 上游跨进程偏好语义细节未通读
 - 工具：`SmsCodeUtils.kt` ｜✅（提取/规则合并已移植）；`SmsBlacklistUtils.kt` ｜✅；`TtlValueCache.kt`、`XLog.kt`、`ModuleUtils.kt`、`ProviderCallerGuard.kt`、`RuntimeDiagnosticsBridge.kt` ｜🔧/🔁（`ProviderCallerGuard` 的调用方校验语义 ❓）
-- 数据层：`data/db/AppDatabase.kt`（20KB）、`DBManager.kt`（16KB）、`DBProvider.kt`（**40KB**）、`dao/RoomDaos.kt`（11KB）｜🔁 边栏用 JSON 仓储；❓ DBProvider 的跨进程读写契约未通读
+- 数据层：`data/db/AppDatabase.kt`（20KB）、`DBManager.kt`（16KB）、`DBProvider.kt`（**40KB**）、`dao/RoomDaos.kt`（11KB）｜🔁 X手势用 JSON 仓储；❓ DBProvider 的跨进程读写契约未通读
 - 实体：`SmsCodeRule.kt` ｜✅；`SmsMsg.kt` ｜🔁（记录模型）；`AppInfo.kt` ｜❌（按应用配置：blocked/forwarding/notifyTemplate）；`AutoInputEvent.kt` ｜❌（填充事件记录）；`NotifyRouteRule.kt` ｜❓ 全仓无调用方（预留表）
-- `data/log/RuntimeLogProvider.kt` ｜🔁 边栏有自己的诊断日志；"运行时日志保留天数"未移植
-- `data/update/*`（4 个）｜⛔/🔁 边栏有自有更新器
-- `feature/backup/BackupManager.kt`、`BackupTypes.kt` ｜🔁 边栏有设置备份；**独立的规则表导入/导出未移植** ❌
+- `data/log/RuntimeLogProvider.kt` ｜🔁 X手势有自己的诊断日志；"运行时日志保留天数"未移植
+- `data/update/*`（4 个）｜⛔/🔁 X手势有自有更新器
+- `feature/backup/BackupManager.kt`、`BackupTypes.kt` ｜🔁 X手势有设置备份；**独立的规则表导入/导出未移植** ❌
 - `feature/store/EntityStoreManager.kt`、`EntityType.kt` ｜🔁/❌（文件化实体存储；`CODE_RULE_TEMPLATE` 规则模板 ❌、`PREV_SMS_MSG` 上一条短信 ❌、`BLOCKED_APP` ❌）
 - `forwarder/*`（7 个）｜⛔ 不做（转发已分流到"信驿 Relay"）
-- `runtime/*Facade*.kt`（10 个）｜🔧 内部胶水层，边栏架构不同
+- `runtime/*Facade*.kt`（10 个）｜🔧 内部胶水层，X手势架构不同
 
 ### 1.4 core（32 个 main）
 
@@ -66,9 +66,9 @@
 - `common/utils/PackageUtils.kt` ｜🔧
 - `ui/block/AppInfoHelper.kt`、`SortType.kt` + `ui/home/AppConfigScreen.kt`（17KB）、`AppConfigViewModel.kt`（17KB）、`appconfig/*`（2 个）｜❌ 未移植（按应用配置页）
 - `ui/home/ComposeSettingsScreen.kt`（**92KB**）、`settings/*`（2 个）｜❓ 设置面全集未按 UI 行为核对（此前只按偏好键核对）
-- `ui/home/SettingsViewModel.kt`（31KB）、`MainActivity.kt`（44KB）、`MainScreen.kt`（34KB）、`OverviewScreen.kt`（19KB）、`overview/*`（2 个）、`LauncherActivity.kt` ｜🔁 边栏自有主页/设置；❓ 行为细节未核对
-- `ui/record/CodeRecordScreen.kt`（53KB）、`CodeRecordScreenMaterial/Miuix.kt`、`CodeRecordViewModel.kt` ｜🔁 边栏有记录页；上游的**四类筛选/清空/批量操作**是否齐 ❓
-- `ui/smscoderule/SmsCodeRuleScreens.kt`（25KB）、`SmsCodeRuleScreensMaterial/Miuix.kt` ｜🔁 边栏有规则页；上游存在 `builtinRuleEditorId`（**内置规则可编辑**）与导入导出 ❓/❌
+- `ui/home/SettingsViewModel.kt`（31KB）、`MainActivity.kt`（44KB）、`MainScreen.kt`（34KB）、`OverviewScreen.kt`（19KB）、`overview/*`（2 个）、`LauncherActivity.kt` ｜🔁 X手势自有主页/设置；❓ 行为细节未核对
+- `ui/record/CodeRecordScreen.kt`（53KB）、`CodeRecordScreenMaterial/Miuix.kt`、`CodeRecordViewModel.kt` ｜🔁 X手势有记录页；上游的**四类筛选/清空/批量操作**是否齐 ❓
+- `ui/smscoderule/SmsCodeRuleScreens.kt`（25KB）、`SmsCodeRuleScreensMaterial/Miuix.kt` ｜🔁 X手势有规则页；上游存在 `builtinRuleEditorId`（**内置规则可编辑**）与导入导出 ❓/❌
 - `ui/privacy/PrivacyPolicyPage.kt`、`ui/faq/FaqScreen.kt`、`ui/theme/*`（3 个）、`ui/nav/*`（2 个）、`ui/performance/*`（2 个）｜🔁/🔧（隐私页、FAQ、主题；性能埋点不适用）
 
 ### 1.5 十二个"未核对"文件的核对结果（二次核对）
@@ -77,18 +77,18 @@
 
 | 文件 | 核对结论 |
 | :--- | :--- |
-| `SmsHookConstructorInitializer.kt`（全读） | 电话进程初始化编排：runtime、冲突仲裁、通知渠道初始化、**CopyCodeReceiver 注册**、模块激活标记、心跳、**收件箱观察者注册**。边栏对应 `SmsPolicyRuntime.register` + 各 hook install；缺心跳与收件箱观察者 |
-| `PrefRestoreTypeRegistry.kt`（全读） | 备份恢复的偏好类型表 = 上游全部可恢复设置。逐项比对后新增两个小缺口：**短信去重开关**（`KEY_DEDUPLICATE_SMS`，边栏固定去重无开关）、**运行时日志保留天数** |
-| `ProviderCallerGuard.kt`（全读） | 上游 DBProvider 的调用方白名单。边栏不用 provider 通道 → **不适用**（等价保护是 injector 的 callerUid 校验） |
+| `SmsHookConstructorInitializer.kt`（全读） | 电话进程初始化编排：runtime、冲突仲裁、通知渠道初始化、**CopyCodeReceiver 注册**、模块激活标记、心跳、**收件箱观察者注册**。X手势对应 `SmsPolicyRuntime.register` + 各 hook install；缺心跳与收件箱观察者 |
+| `PrefRestoreTypeRegistry.kt`（全读） | 备份恢复的偏好类型表 = 上游全部可恢复设置。逐项比对后新增两个小缺口：**短信去重开关**（`KEY_DEDUPLICATE_SMS`，X手势固定去重无开关）、**运行时日志保留天数** |
+| `ProviderCallerGuard.kt`（全读） | 上游 DBProvider 的调用方白名单。X手势不用 provider 通道 → **不适用**（等价保护是 injector 的 callerUid 校验） |
 | `XposedRuntimeInstaller.kt`（提取） | 安装运行时：CoreRuntime、HookPolicy、匿名安装 ID、HookBridge（含**跨进程门 `claimRuntimeGate`**、心跳、content URI）、日志 sink 与**日志脱敏**。缺：跨进程门（已决定不做）、心跳、日志脱敏/保留 |
-| `SmsHandlerHook.kt`（提取） | 除 `dispatchIntent` 外另挂一批同类方法；引入 **`SmsDispatchChainBlockDeduplicator`（分发链去重）** 与 **`InboundSmsBlocker`（专用入库拦截器）**，并在电话进程初始化通知渠道、注册 CopyCodeReceiver 与收件箱观察者。边栏缺：hook 侧去重、专用入库拦截器、收件箱观察者 |
-| `ObservedSmsHandler.kt`（提取） | 收件箱记录处置：去重、**回填短信库 sim_slot/sub_id（多卡归属修复）**、解析 company/package。这补全了"路由修复"的确切含义：修的是**已入库短信的卡槽归属**；边栏只把槽位用于显示 |
+| `SmsHandlerHook.kt`（提取） | 除 `dispatchIntent` 外另挂一批同类方法；引入 **`SmsDispatchChainBlockDeduplicator`（分发链去重）** 与 **`InboundSmsBlocker`（专用入库拦截器）**，并在电话进程初始化通知渠道、注册 CopyCodeReceiver 与收件箱观察者。X手势缺：hook 侧去重、专用入库拦截器、收件箱观察者 |
+| `ObservedSmsHandler.kt`（提取） | 收件箱记录处置：去重、**回填短信库 sim_slot/sub_id（多卡归属修复）**、解析 company/package。这补全了"路由修复"的确切含义：修的是**已入库短信的卡槽归属**；X手势只把槽位用于显示 |
 | `HookPrefsReader.kt`（提取） | hook 读取的偏好全集（开关/自动输入/延迟间隔/提醒/记录四类/通知开关与归属/日志/entitlement）。与快照 `otp` 段比对：**缺 `deduplicateSms`、`codeNotificationOwner`**，其余已有或已决定不做 |
-| `DBProvider.kt`（提取） | 暴露 `sms_msg`、`sms_code_rule`、`app_info`（含按包名）、`auto_input_event`，另有 `prefs_cache`、`rules_cache` 供 hook 读偏好与规则。边栏**不适用**（改快照+广播）；也印证上游"规则下发"走 `rules_cache` |
+| `DBProvider.kt`（提取） | 暴露 `sms_msg`、`sms_code_rule`、`app_info`（含按包名）、`auto_input_event`，另有 `prefs_cache`、`rules_cache` 供 hook 读偏好与规则。X手势**不适用**（改快照+广播）；也印证上游"规则下发"走 `rules_cache` |
 | `SettingsViewModel.kt`（提取） | 主题/UI/图标/测试/备份恢复/更新等模块自身管理，无新验证码能力 |
 | `ComposeSettingsScreen.kt`（提取） | 设置面与 `PrefConst` 一致，未发现清单外能力 |
-| `CodeRecordScreen.kt`（提取动作） | 记录页有**多选批量删除（带撤销）、清空、导出记录到文件（SAF）、类型筛选、复制**；边栏只有搜索/排序/单条删除/复制 → 新增缺口：**批量删除 + 清空 + 导出记录** |
-| `SmsCodeRuleScreens.kt`（提取动作） | 内置规则可编辑（`builtinRuleEditorId`）、复制、刷新；边栏以"复制为我的规则"覆盖其意图 |
+| `CodeRecordScreen.kt`（提取动作） | 记录页有**多选批量删除（带撤销）、清空、导出记录到文件（SAF）、类型筛选、复制**；X手势只有搜索/排序/单条删除/复制 → 新增缺口：**批量删除 + 清空 + 导出记录** |
+| `SmsCodeRuleScreens.kt`（提取动作） | 内置规则可编辑（`builtinRuleEditorId`）、复制、刷新；X手势以"复制为我的规则"覆盖其意图 |
 
 **二次核对新增的小缺口**：①记录页 批量删除/清空/导出记录；②短信去重开关；③运行时日志保留天数与日志脱敏；④hook 侧 分发链去重 + 专用入库拦截器；⑤收件箱观察 + 短信库卡槽回填。前三项属 App 侧、成本低；后两项属 hook 侧，只在需要"更彻底兜住漏掉的短信"时才值得做。
 
@@ -102,7 +102,7 @@
 | 自动填充 + 自动确认/回车 | hook 触发 → system_server 注入 | `AutoInputAction` + 上游 `SystemInputInjectorHook` | 🔁 功能有，触发方在 App；**要按你的要求改成 hook 触发** |
 | 拦截短信 | hook | `SmsBlockEvaluator` + 黑名单 | ✅ 本轮已移植 |
 | 通知 / Toast 提醒 | hook（通知建议下沉） | `NotifyAction`（phone-owned 优先）+ `ToastAction` | 🔁 现为 App 侧发 |
-| LSPosed 状态 | App | 上游无（边栏自研） | ✅ 已有三行，可按需收敛成一行 |
+| LSPosed 状态 | App | 上游无（X手势自研） | ✅ 已有三行，可按需收敛成一行 |
 | 输入延迟 / 间隔 | hook 下发、注入器执行 | `KEY_AUTO_INPUT_CODE_DELAY/INTERVAL` | ✅ 已有 |
 | 标记已读 / 提取后删除 | hook | `OperateSmsAction` | ✅ 本轮已移植 |
 
@@ -193,7 +193,7 @@
 
 ### 已取消（原第二批剩余）
 
-hook 侧动作管线（把复制 / Toast / 通知 / 自动填充 / 记录搬到电话进程）：按用户判断**取消**——边栏是常驻手势应用，App 被冻结的场景基本不存在，而搬迁会引入"同一条验证码被处理两次"与跨进程去重门的成本。保留的能力是「重启电话进程」按钮（更新后免整机重启）。
+hook 侧动作管线（把复制 / Toast / 通知 / 自动填充 / 记录搬到电话进程）：按用户判断**取消**——X手势是常驻手势应用，App 被冻结的场景基本不存在，而搬迁会引入"同一条验证码被处理两次"与跨进程去重门的成本。保留的能力是「重启电话进程」按钮（更新后免整机重启）。
 
 ### 已完成（第三批：验证码页由 Tab 改为一页四入口）
 

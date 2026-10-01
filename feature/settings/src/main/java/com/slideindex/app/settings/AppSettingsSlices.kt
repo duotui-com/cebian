@@ -114,6 +114,10 @@ data class LauncherSettings(
     val holographicLauncher: HolographicLauncherSettings = HolographicLauncherSettings(),
     val shellCommands: List<com.slideindex.app.shell.ShellCommand> = emptyList(),
     val activityShortcuts: List<com.slideindex.app.activity.ActivityShortcut> = emptyList(),
+    /** 桌面图标长按菜单顺序；空表示用默认顺序。 */
+    val launcherShortcutMenuOrder: List<String> = emptyList(),
+    /** 桌面图标长按菜单里被关闭的条目。 */
+    val launcherShortcutMenuDisabled: Set<String> = emptySet(),
 )
 
 /** 边缘手势接力指针：指针、摇杆、轮盘与边缘动作。 */
@@ -420,10 +424,16 @@ data class SearchPanelSettings(
 data class FreeWindowSettings(
     val freeWindowEnabled: Boolean = false,
     val freeWindowModeId: Int = FreeWindowMode.detectDefault().id,
+    // 竖屏预置
     val freeWindowWidthFraction: Float = 0.8f,
     val freeWindowHeightFraction: Float = 0.55f,
     val freeWindowLeftFraction: Float = 0.1f,
     val freeWindowTopFraction: Float = 0.15f,
+    // 横屏预置（与竖屏完全独立，运行时按当前显示方向二选一）
+    val freeWindowLandWidthFraction: Float = 0.68f,
+    val freeWindowLandHeightFraction: Float = 0.4f,
+    val freeWindowLandLeftFraction: Float = 0.16f,
+    val freeWindowLandTopFraction: Float = 0.05f,
 )
 
 /** 小部件面板尺寸、模糊与页面。 */

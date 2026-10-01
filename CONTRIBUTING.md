@@ -1,6 +1,6 @@
-# Contributing to Cebian
+# Contributing to XGesture
 
-Thank you for helping improve **Cebian (边栏)**! This document covers how to contribute translations and code.
+Thank you for helping improve **XGesture (X手势)**! This document covers how to contribute translations and code.
 
 **Languages:** [English](CONTRIBUTING.md) · [简体中文](docs/contributing_zh.md) · [日本語](docs/contributing_ja.md)
 
@@ -8,9 +8,9 @@ Thank you for helping improve **Cebian (边栏)**! This document covers how to c
 
 ## Translating the app (Weblate — recommended)
 
-The easiest way to help with **in-app UI text** is [Weblate](https://hosted.weblate.org/engage/cebian/):
+The easiest way to help with **in-app UI text** is [Weblate](https://hosted.weblate.org/engage/XGesture/):
 
-[![Translation status](https://hosted.weblate.org/widget/cebian/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/cebian/)
+[![Translation status](https://hosted.weblate.org/widget/XGesture/app-strings/svg-badge.svg)](https://hosted.weblate.org/engage/XGesture/)
 
 1. Open the project on Weblate (no Git knowledge required).
 2. Pick a language (e.g. English, 日本語, or request a new one).
@@ -30,7 +30,7 @@ The easiest way to help with **in-app UI text** is [Weblate](https://hosted.webl
 - **Do not rename** string keys (`name="..."`). Only change the text inside `<string>`.
 - **Keep placeholders** exactly as in the source: `%1$s`, `%1$d`, `%2$s`, etc.
 - **Keep HTML/XML entities** and `\n` where present.
-- **Do not translate** brand names: Cebian, Shizuku, LSPosed, Miuix, OCR engine names unless already localized in the source.
+- **Do not translate** brand names: XGesture, Shizuku, LSPosed, Miuix, OCR engine names unless already localized in the source.
 - Prefer natural, concise UI wording over literal word-for-word translation.
 
 ### Translating via pull request (alternative)
@@ -38,10 +38,10 @@ The easiest way to help with **in-app UI text** is [Weblate](https://hosted.webl
 If you prefer Git:
 
 ```text
-app/src/main/res/values/strings.xml       # Source (Chinese)
-app/src/main/res/values-en/strings.xml    # English
+app/src/main/res/values/strings.xml       # Source (English)
+app/src/main/res/values-zh/strings.xml    # Simplified Chinese
 app/src/main/res/values-ja/strings.xml    # Japanese
-app/src/main/res/values-xx/strings.xml    # New locale: copy values-en, translate
+app/src/main/res/values-xx/strings.xml    # New locale: copy values/ (English source), translate
 ```
 
 1. Fork the repo and create a branch.
@@ -53,7 +53,7 @@ app/src/main/res/values-xx/strings.xml    # New locale: copy values-en, translat
 
 ## Contributing code
 
-1. Fork and clone: `git clone https://github.com/qpst4/cebian.git`
+1. Fork and clone: `git clone https://github.com/qpst4/XGesture.git`
 2. Create a feature branch from `main`.
 3. Make focused changes; match existing Kotlin / Compose style.
 4. Run locally: `.\gradlew.bat compileLiteDebugKotlin` (or `lintLiteDebug` for UI/string changes).
@@ -69,8 +69,8 @@ app/src/main/res/values-xx/strings.xml    # New locale: copy values-en, translat
 
 ## Community
 
-- [GitHub Issues](https://github.com/qpst4/cebian/issues) — bugs and feature requests
-- [GitHub Discussions](https://github.com/qpst4/cebian/discussions) — questions and ideas
+- [GitHub Issues](https://github.com/qpst4/XGesture/issues) — bugs and feature requests
+- [GitHub Discussions](https://github.com/qpst4/XGesture/discussions) — questions and ideas
 - QQ group: **1042783385**
 
 ---
