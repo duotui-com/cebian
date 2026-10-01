@@ -365,6 +365,9 @@ fun ExtensionHubSettings.toMinimalAppSettings(): AppSettings = AppSettings(
     clipboard = ClipboardSettings(
         clipboardBackgroundMonitoring = clipboardBackgroundMonitoring,
         clipboardBackgroundMonitoringMode = clipboardBackgroundMonitoringMode,
+        clipboardMonitoringChannel = clipboardMonitoringChannel,
+        clipboardMonitoringCapture = clipboardMonitoringCapture,
+        clipboardLsposedWhitelist = clipboardLsposedWhitelist,
     ),
     privilegeMode = privilegeMode,
 )

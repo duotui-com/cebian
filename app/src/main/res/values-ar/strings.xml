@@ -2917,7 +2917,7 @@
     <string name="stash_search_empty">لا توجد محتويات مخزنة مؤقتًا مطابقة</string>
     <string name="stash_clipboard_entry_title">التخزين المؤقت والحافظة</string>
     <string name="stash_clipboard_entry_summary">%1$s · %2$s</string>
-    <string name="stash_clipboard_entry_summary_clipboard_off">مراقبة الحافظة معطلة</string>
+    <string name="stash_clipboard_entry_summary_clipboard_off">مراقبة معطلة</string>
     <string name="stash_clipboard_settings_title">التخزين المؤقت والحافظة</string>
     <string name="stash_clipboard_section_clipboard">الحافظة</string>
     <string name="stash_clipboard_section_history">سجل الحافظة</string>
@@ -3009,9 +3009,10 @@
     <string name="clipboard_monitor_notification_root_unavailable">Root غير متاح، تم إيقاف المراقبة</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_title">تم قطع اتصال Shizuku</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_text">تم إيقاف مراقبة الحافظة، يرجى التحقق من Shizuku</string>
-    <string name="stash_clipboard_entry_summary_clipboard_shizuku">الحافظة · مراقبة Shizuku</string>
-    <string name="stash_clipboard_entry_summary_clipboard_root">الحافظة · مراقبة Root</string>
-    <string name="stash_clipboard_entry_summary_clipboard_not_ready">الحافظة · المراقبة غير جاهزة</string>
+    <string name="stash_clipboard_entry_summary_clipboard_shizuku">مراقبة Shizuku</string>
+    <string name="stash_clipboard_entry_summary_clipboard_lsposed">مراقبة LSPosed</string>
+    <string name="stash_clipboard_entry_summary_clipboard_root">مراقبة Root</string>
+    <string name="stash_clipboard_entry_summary_clipboard_not_ready">المراقبة غير جاهزة</string>
     <string name="clipboard_clear_history">مسح سجل الحافظة</string>
     <string name="clipboard_clear_history_confirm_title">مسح سجل الحافظة؟</string>
     <string name="clipboard_clear_history_confirm_message">سيتم حذف جميع سجلات الحافظة، ولا يمكن التراجع عن هذه العملية.</string>
@@ -3657,6 +3658,10 @@
     <string name="clipboard_monitoring_lsposed_state_clipboard_missing">خطاف السماح غير مثبَّت</string>
     <string name="clipboard_monitoring_lsposed_pill_clipboard_missing">غير جاهز</string>
     <string name="clipboard_monitoring_lsposed_detail_clipboard_missing">الوحدة محمَّلة، لكن خطاف قائمة السماح للحافظة لم يُثبَّت. قد يكون تنفيذ النظام الحالي غير متوافق.</string>
+    <string name="clipboard_monitoring_lsposed_state_whitelist_stale">قائمة السماح غير متزامنة</string>
+    <string name="clipboard_monitoring_lsposed_pill_whitelist_stale">غير متزامنة</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_stale">الوحدة تحتفظ بـ %1$d تطبيقًا فقط، بينما الإعداد المحلي %2$d: لم يصل الإعداد إلى system_server (أعد تشغيل الهاتف أو افتح هذا التطبيق من جديد لإعادة الإرسال).</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_synced">قائمة السماح متزامنة مع الوحدة: %1$d تطبيقًا (محليًا %2$d).</string>
     <string name="clipboard_monitoring_page_title">مراقبة الحافظة في الخلفية</string>
     <string name="clipboard_monitoring_status_section">حالة المراقبة في الخلفية</string>
     <string name="clipboard_monitoring_master_desc">يُضاف المحتوى المنسوخ إلى سجل الحافظة تلقائيًا</string>

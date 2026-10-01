@@ -2937,7 +2937,7 @@
     <string name="stash_search_empty">一致するストッシュ項目がありません</string>
     <string name="stash_clipboard_entry_title">ストッシュとクリップボード</string>
     <string name="stash_clipboard_entry_summary">%1$s · %2$s</string>
-    <string name="stash_clipboard_entry_summary_clipboard_off">クリップボード監視オフ</string>
+    <string name="stash_clipboard_entry_summary_clipboard_off">監視オフ</string>
     <string name="stash_clipboard_settings_title">ストッシュとクリップボード</string>
     <string name="stash_clipboard_section_clipboard">クリップボード</string>
     <string name="stash_clipboard_section_history">クリップボード履歴</string>
@@ -3029,9 +3029,10 @@
     <string name="clipboard_monitor_notification_root_unavailable">Root 利用不可。監視を停止しました</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_title">Shizuku 切断</string>
     <string name="clipboard_monitor_notification_shizuku_disconnected_text">クリップボード監視を停止しました。Shizuku を確認してください</string>
-    <string name="stash_clipboard_entry_summary_clipboard_shizuku">クリップボード · Shizuku 監視</string>
-    <string name="stash_clipboard_entry_summary_clipboard_root">クリップボード · Root 監視</string>
-    <string name="stash_clipboard_entry_summary_clipboard_not_ready">クリップボード · 監視未準備</string>
+    <string name="stash_clipboard_entry_summary_clipboard_shizuku">Shizuku 監視</string>
+    <string name="stash_clipboard_entry_summary_clipboard_lsposed">LSPosed 監視</string>
+    <string name="stash_clipboard_entry_summary_clipboard_root">Root 監視</string>
+    <string name="stash_clipboard_entry_summary_clipboard_not_ready">監視未準備</string>
     <string name="clipboard_clear_history">クリップボード履歴を消去</string>
     <string name="clipboard_clear_history_confirm_title">クリップボード履歴を消去しますか？</string>
     <string name="clipboard_clear_history_confirm_message">すべてのクリップボード項目が削除されます。元に戻せません。</string>
@@ -3652,6 +3653,10 @@
     <string name="clipboard_monitoring_lsposed_state_clipboard_missing">許可リストのフック未適用</string>
     <string name="clipboard_monitoring_lsposed_pill_clipboard_missing">未準備</string>
     <string name="clipboard_monitoring_lsposed_detail_clipboard_missing">モジュールは読み込まれていますが、クリップボード許可リストのフックが適用されていません。現在のシステム実装と互換性がない可能性があります。</string>
+    <string name="clipboard_monitoring_lsposed_state_whitelist_stale">許可リスト未同期</string>
+    <string name="clipboard_monitoring_lsposed_pill_whitelist_stale">未同期</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_stale">モジュール側の許可リストは %1$d 件ですが、ローカル設定は %2$d 件です：設定が system_server に届いていません（スマートフォンを再起動するか、本アプリを開き直すと再送されます）。</string>
+    <string name="clipboard_monitoring_lsposed_detail_whitelist_synced">モジュールの許可リストは同期済み：%1$d 件（ローカル %2$d 件）。</string>
     <string name="clipboard_monitoring_page_title">クリップボードのバックグラウンド監視</string>
     <string name="clipboard_monitoring_status_section">バックグラウンド監視の状態</string>
     <string name="clipboard_monitoring_master_desc">コピーした内容が自動的にクリップボード履歴に入ります</string>
