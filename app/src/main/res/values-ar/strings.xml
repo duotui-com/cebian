@@ -881,8 +881,8 @@
     <string name="volume_panel_notification">الإشعارات</string>
     <string name="volume_panel_ring">رنين</string>
     <string name="volume_panel_media">الوسائط</string>
-    <string name="gesture_action_screen_translate">ترجمة الشاشة</string>
-    <string name="gesture_action_screen_translate_desc">تغطية النص المترجم في موضعه الأصلي (تبديل)</string>
+    <string name="gesture_action_screen_translate">ترجمة الشاشة (تجريبية)</string>
+    <string name="gesture_action_screen_translate_desc">تغطية النص المترجم في موضعه الأصلي (تبديل). يتطلب محرك الترجمة ونماذج اللغات، وقد لا يعمل بشكل موثوق</string>
     <string name="screen_translate_started">جارٍ الترجمة…</string>
     <string name="screen_translate_failed">فشل الترجمة</string>
     <string name="screen_translate_no_text">لم يتم العثور على نص قابل للترجمة</string>

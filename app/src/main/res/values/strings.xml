@@ -1598,8 +1598,8 @@
     <string name="volume_panel_notification">Notification</string>
     <string name="volume_panel_ring">Ring</string>
     <string name="volume_panel_media">Media</string>
-    <string name="gesture_action_screen_translate">Screen translate</string>
-    <string name="gesture_action_screen_translate_desc">Overlay translated text on screen in place</string>
+    <string name="gesture_action_screen_translate">Screen translate (experimental)</string>
+    <string name="gesture_action_screen_translate_desc">Overlay translated text on screen in place. Requires the translate engine and language models; may not work reliably</string>
     <string name="gesture_action_screen_search">Screen search</string>
     <string name="gesture_action_screen_search_desc">Find text on screen, highlight matches, auto-scroll</string>
     <string name="screen_search_keyword_hint">Keyword to find</string>

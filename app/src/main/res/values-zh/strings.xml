@@ -909,8 +909,8 @@
     <string name="volume_panel_notification">通知</string>
     <string name="volume_panel_ring">铃声</string>
     <string name="volume_panel_media">媒体</string>
-    <string name="gesture_action_screen_translate">屏幕翻译</string>
-    <string name="gesture_action_screen_translate_desc">在原位覆盖译文（开关式）</string>
+    <string name="gesture_action_screen_translate">屏幕翻译（实验性）</string>
+    <string name="gesture_action_screen_translate_desc">在原位覆盖译文（开关式）。需先安装翻译引擎与语言模型，可能不生效</string>
     <string name="screen_translate_started">正在翻译…</string>
     <string name="screen_translate_failed">翻译失败</string>
     <string name="screen_translate_no_text">未找到可翻译文本</string>

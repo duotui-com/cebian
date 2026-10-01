@@ -898,8 +898,8 @@
     <string name="volume_panel_notification">通知</string>
     <string name="volume_panel_ring">着信</string>
     <string name="volume_panel_media">メディア</string>
-    <string name="gesture_action_screen_translate">画面翻訳</string>
-    <string name="gesture_action_screen_translate_desc">翻訳テキストを画面上にその場でオーバーレイ表示</string>
+    <string name="gesture_action_screen_translate">画面翻訳（実験的）</string>
+    <string name="gesture_action_screen_translate_desc">翻訳テキストを画面上にその場でオーバーレイ表示。翻訳エンジンと言語モデルのインストールが必要で、動作しない場合があります</string>
     <string name="gesture_action_screen_search">画面検索</string>
     <string name="gesture_action_screen_search_desc">画面上のキーワードを検索してハイライト、自動スクロール</string>
     <string name="screen_search_keyword_hint">検索する文字を入力</string>
