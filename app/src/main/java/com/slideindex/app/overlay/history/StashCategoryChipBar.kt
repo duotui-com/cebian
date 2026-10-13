@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,7 @@ import com.slideindex.app.stash.StashCategory
 import com.slideindex.app.stash.StashCategoryFilter
 import com.slideindex.app.stash.stashFilterOrder
 import com.slideindex.app.stash.adjacentTo
+import kotlinx.coroutines.flow.first
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Text
 
@@ -62,9 +64,15 @@ internal fun StashCategoryChipBar(
     // 用滑动切换分类时，被选中的那一项可能在筛选条的可视范围外，把它滚进来。
     LaunchedEffect(selected, order) {
         val index = order.indexOf(selected)
-        if (index >= 0 && listState.layoutInfo.visibleItemsInfo.none { it.index == index }) {
-            listState.animateScrollToItem(index)
-        }
+        if (index < 0) return@LaunchedEffect
+        // 第一次组合时还没排版（可见项是空的）：此时直接滚会把「全部」白白顶出屏幕，等排好版再判断。
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.isNotEmpty() }.first { it }
+        val info = listState.layoutInfo
+        val item = info.visibleItemsInfo.firstOrNull { it.index == index }
+        val fullyVisible = item != null &&
+            item.offset >= info.viewportStartOffset &&
+            item.offset + item.size <= info.viewportEndOffset
+        if (!fullyVisible) listState.animateScrollToItem(index)
     }
     Box(
         modifier = modifier

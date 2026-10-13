@@ -483,8 +483,14 @@ internal fun HistoryPanelScreen(
     }
     // 只在闪念页签有 FAB（设计稿 `canAdd = ptab === 'stream'`）；编辑条开着时让位给它。
     val composerVisible = selectedTab == HistoryPanelTab.Stash && editTarget == null
+    // 面板内容现在是常驻组合：收起面板 / 切到剪贴板页签都不会把组合摘掉，话术大图预览得自己清，
+    // 不然下次打开（或者剪贴板页上）还盖着上一次的那张图。
+    LaunchedEffect(panelTargetVisible) {
+        if (!panelTargetVisible) stashPreview = null
+    }
     LaunchedEffect(selectedTab) {
         if (selectedTab != HistoryPanelTab.Stash) {
+            stashPreview = null
             composerOpen = false
             // 切页签只是把编辑条藏起来：草稿（正文/标签/已选图）留在 [EditSessionDraft] 里，
             // 切回闪念页再点同一条编辑还能接着改。
@@ -625,6 +631,10 @@ internal fun HistoryPanelScreen(
      * **系统返回**按焦点路由到它们（谁在上面就给谁），而**手势"返回"**走面板入口、不经过它们
      * （两种情况都还没纳入本次分层，真机如撞上再单独处理）。
      */
+    // 展开的卡片只在剪贴板页和「未分类」时间线里才看得见；话术列表里没有展开这回事。
+    // 否则在「未分类」里展开一张、切到「全部」再按返回，会去“收起”一张看不见的卡，面板纹丝不动。
+    val expandedCardsVisible = selectedTab != HistoryPanelTab.Stash ||
+        stashCategoryFilter == com.slideindex.app.stash.StashCategoryFilter.Uncategorized
     DisposableEffect(
         // ⚠️ 面板内容现在**常驻组合**（见 `OverlaySidePanelHost.attachPanelWindow`），这个 effect
         // 不再随"面板关掉"而 dispose —— 面板不可见时必须**显式摘掉**返回拦截器，
@@ -633,6 +643,7 @@ internal fun HistoryPanelScreen(
         activeSearchQuery,
         selectedTab,
         stashPreview,
+        expandedCardsVisible,
         composerOpen,
         editTarget,
         tagManagerOpen,
@@ -691,7 +702,7 @@ internal fun HistoryPanelScreen(
                 // `expandedEntryIds` 是 `Set`，写入用的是 `Set.plus`（LinkedHashSet，保留插入顺序），
                 // 所以 `last()` 就是"最后被展开的那张"。若以后换成无序集合，这里会退化成
                 // "收起其中一张"，届时需要改成有序结构（**别**改成"一次全收"：那就不是"只关自己"了）。
-                expandedEntryIds.isNotEmpty() -> {
+                expandedEntryIds.isNotEmpty() && expandedCardsVisible -> {
                     viewModel.toggleExpanded(expandedEntryIds.last())
                     Log.i(BackDecisionLogTag, "back decision consumed=true branch=interceptor:expanded")
                     true
@@ -1282,7 +1293,9 @@ internal fun HistoryPanelScreen(
                 .align(Alignment.BottomCenter)
                 .padding(
                     bottom = HistoryToastBottomPadding +
-                        if (bottomSheetHeight > 0.dp) bottomSheetHeight else 0.dp,
+                        (if (bottomSheetHeight > 0.dp) bottomSheetHeight else 0.dp) +
+                        // 暂存夹页的 FAB 抬到了分类条上面，提示条跟着再抬一截，别压住它。
+                        (if (selectedTab == HistoryPanelTab.Stash) StashCategoryBarHeight else 0.dp),
                 ),
         ) {
             HistoryToast(
@@ -2065,8 +2078,26 @@ private fun HistoryStashTabBody(
             .collect(onListScrolledChange)
     }
     val topEntryId = allEntries.firstOrNull()?.id
+    // 话术列表里刚存下的条目要滚到它所在的位置（分类内新条目排在末尾，不在最上面）。
+    var revealEntryId by remember { mutableStateOf<String?>(null) }
     // 换了分类，列表内容整个变了，回到顶部。
-    LaunchedEffect(categoryFilter) { listState.scrollToItem(0) }
+    LaunchedEffect(categoryFilter) {
+        revealEntryId = null
+        listState.scrollToItem(0)
+    }
+    // 条目进到当前列表之后才算得出位置；过滤链路比条目列表晚一拍到，所以条目和列表都当 key。
+    LaunchedEffect(revealEntryId, filteredEntries) {
+        val id = revealEntryId ?: return@LaunchedEffect
+        val index = filteredEntries.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            listState.animateScrollToItem(index)
+            revealEntryId = null
+        } else {
+            // 还没到，或者被搜索 / 标签筛掉了：等一小会儿，还不在就算了，免得以后筛选一变列表莫名其妙跳过去。
+            delay(1_500L)
+            if (revealEntryId == id) revealEntryId = null
+        }
+    }
     var previousTopId by remember { mutableStateOf<String?>(null) }
     var previousIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     // 刚存下的那条：闪一下高亮环（设计稿 `.item.flash` + `setTimeout(1500)`）。
@@ -2096,8 +2127,12 @@ private fun HistoryStashTabBody(
         previousTopId = topEntryId
         previousIds = allEntries.mapTo(HashSet()) { it.id }
         if (prevTop != null && topEntryId != prevTop && topEntryId !in prevIds) {
-            listState.animateScrollToItem(0)
-            flashEntryId = topEntryId
+            if (categoryFilter == com.slideindex.app.stash.StashCategoryFilter.Uncategorized) {
+                listState.animateScrollToItem(0)
+                flashEntryId = topEntryId
+            } else {
+                revealEntryId = topEntryId
+            }
         }
     }
     when {

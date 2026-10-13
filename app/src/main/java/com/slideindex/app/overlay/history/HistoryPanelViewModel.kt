@@ -102,9 +102,17 @@ class HistoryPanelViewModel(
     val stashCategories: StateFlow<List<StashCategory>> =
         stashCategoryRepository?.categories ?: MutableStateFlow(emptyList())
 
+    /**
+     * 选中的分类（编码串）。真身在进程级单例 [StashCategoryFilterState]（理由见那里）：
+     * 窗口被系统摘掉重建之后，选中的分类不会丢。
+     */
+    private val encodedCategoryFilter: StateFlow<String> =
+        snapshotFlow { StashCategoryFilterState.encoded.value }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, StashCategoryFilterState.encoded.value)
+
     /** 选中的分类；选中的分类已被删除（比如在管理页里）时回到「全部」。 */
     val stashCategoryFilter: StateFlow<StashCategoryFilter> = combine(
-        savedStateHandle.getStateFlow(KEY_STASH_CATEGORY, StashCategoryFilter.All.encode()),
+        encodedCategoryFilter,
         stashCategories,
     ) { encoded, categories ->
         val filter = StashCategoryFilter.decode(encoded)
@@ -283,7 +291,7 @@ class HistoryPanelViewModel(
     }
 
     fun setStashCategoryFilter(filter: StashCategoryFilter) {
-        savedStateHandle[KEY_STASH_CATEGORY] = filter.encode()
+        StashCategoryFilterState.set(filter)
     }
 
     fun setSelectedTab(tab: HistoryPanelTab) {
@@ -470,7 +478,6 @@ class HistoryPanelViewModel(
 
     companion object {
         private const val KEY_STASH_SEARCH = "stash_search"
-        private const val KEY_STASH_CATEGORY = "stash_category"
         private const val KEY_CLIPBOARD_SEARCH = "clipboard_search"
         private const val KEY_EXPANDED_IDS = "expanded_entry_ids"
         private const val KEY_IMAGE_INDICES = "selected_image_indices"

@@ -99,6 +99,23 @@ class StashCategoryFilterTest {
     }
 
     @Test
+    fun uncategorized_isSortedNewestFirst_evenWhenAReleasedOldEntrySitsAtTheFront() {
+        // 从分类里释放回来的老条目会被放到列表最前面（防止立刻被 200 条上限挤掉），
+        // 但闪念时间线必须按时间排，不然最上面会冒出一个「更早」的日期头。
+        val list = listOf(
+            entry("released-old", createdAt = 10),
+            entry("today", createdAt = 300),
+            entry("yesterday", createdAt = 200),
+            entry("phrase", categoryId = "A", createdAt = 500),
+        )
+
+        assertEquals(
+            listOf("today", "yesterday", "released-old"),
+            StashCategoryFilter.Uncategorized.apply(list).map { it.id }
+        )
+    }
+
+    @Test
     fun uncategorized_keepsTimelineOrder_evenWhenStarred() {
         // 「未分类」是按日期分组的闪念时间线：星标不能把老条目顶到最前面。
         val list = listOf(entry("p1"), pinned(entry("p2")), entry("p3"), pinned(entry("c1", categoryId = "A")))

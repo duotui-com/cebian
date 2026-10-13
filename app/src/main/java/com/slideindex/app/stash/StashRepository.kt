@@ -359,7 +359,7 @@ class StashRepository @Inject constructor(
      * - 文本块 `trim()` 后为空一律**丢弃**；图片块**按顺序**落盘成新文件，
      *   文件名用 `"${entryId}_edit_${序号}.png"` 且**绝不覆盖**已有文件（[nextEditImageFileName]）；
      * - 任何一张图存不下来、或整表写不进去 → 把本次已经写下的图片文件删掉、索引保持原样、返回 false；
-     * - `imageFileName` 指向**第一个图片块**（没有图片块则保留原值），`type` 升到
+     * - `imageFileName` 指向**第一个图片块**（没有图片块则清空），`type` 升到
      *   [StashEntryType.RICH]（卡片里的富图缩略图是 RICH 门控的，不升就等于"存了但看不见"）；
      * - `createdAtEpochMs` / `pinDisplay*` / `starred` / `htmlText` / `text` 之外的元数据一概不动
      *   （完成态、标签、提醒在 `StashMetaRepository`，本方法不碰）。
@@ -431,8 +431,9 @@ class StashRepository @Inject constructor(
                     }
                 }
                 if (rebuilt.isEmpty()) return@withCrossProcessWrite false
+                // 同 replaceBlocksInternal：没有图片块就清掉旧引用，别留「幽灵图」。
                 val firstImage = rebuilt.firstOrNull { it.kind == ClipboardBlockKind.IMAGE }?.fileName
-                    ?.takeIf { it.isNotBlank() } ?: entry.imageFileName
+                    ?.takeIf { it.isNotBlank() }
                 val next = current.toMutableList().also {
                     it[index] = entry.copy(
                         type = StashEntryType.RICH,
@@ -509,8 +510,10 @@ class StashRepository @Inject constructor(
             createdFiles.forEach { it.delete() }
             return false
         }
+        // 没有图片块了就把旧引用一起清掉：`allImageFileNames()` 在块里没图时会回退去读 imageFileName，
+        // 留着旧值就是一张删不掉的「幽灵图」（缩略图还在、文件永远不会被孤儿清理收走）。
         val firstImage = contentBlocks.firstOrNull { it.kind == ClipboardBlockKind.IMAGE }?.fileName
-            ?.takeIf { it.isNotBlank() } ?: entry.imageFileName
+            ?.takeIf { it.isNotBlank() }
         val next = current.toMutableList().also {
             it[index] = entry.copy(
                 // 不升 type 就是"存了但看不见"（与 appendImages 同一条理由）。
@@ -624,17 +627,26 @@ class StashRepository @Inject constructor(
         return File(audioDir, name).absolutePath
     }
 
-    suspend fun delete(id: String) {
+    /**
+     * 删一条。
+     *
+     * 默认**故意不删图片 / 语音文件**：撤销（[restore]）还要用它们，孤儿文件由 [pruneOrphanMedia]
+     * 在下次启动时按"还有没有条目引用"统一清掉（面板里的删除就是这条路）。
+     *
+     * 不给撤销的删除（管理页「删除话术」，对话框写明“不可撤销”）传 [purgeMedia] = true：
+     * 索引写成功之后立刻把这条的媒体文件一起删掉，不然它们会留到下次进程启动，
+     * 期间导出的备份（`stash/` 目录整个在备份里）里还带着这些本该已经删掉的图。
+     */
+    suspend fun delete(id: String, purgeMedia: Boolean = false) {
         withContext(Dispatchers.IO) {
             withCrossProcessWrite {
                 val current = readFromDisk()
-                if (current.none { it.id == id }) return@withCrossProcessWrite
+                val removed = current.firstOrNull { it.id == id } ?: return@withCrossProcessWrite
                 val next = current.filterNot { it.id == id }
-                writeToDisk(next)
+                val written = writeToDisk(next)
                 _entries.value = next
-                // ⚠️ 这里**故意不删图片文件**：撤销（[restore]）还要用它。
-                // 孤儿文件由 [pruneOrphanMedia] 在下次启动时按"还有没有条目引用"统一清掉。
-                //
+                // 索引没真写进去（读盘失败期间拒写）时不能删文件：磁盘上的索引还认着它们。
+                if (purgeMedia && written) deleteEntryMedia(removed)
                 // 顺手把它的元数据（标签 / 完成态 / 追加 / 来源）一起清掉。
                 // 另有一层兜底：`StashMetaRepository.pruneOrphans`（面板打开时按有效 id 收敛）。
                 forgetMeta(id)
@@ -740,8 +752,15 @@ class StashRepository @Inject constructor(
      * 改写一条“至多一段文字 + 至多一张图”的条目，并按结果重新判定 TEXT / IMAGE / RICH。
      * 含多段文字或多张图的复杂条目、以及文字和图片都被去掉的改写都不受理，返回 false，原条目不动。
      */
-    suspend fun updateContent(id: String, text: String?, image: StashImageEdit): Boolean =
-        mutateEntry(id) { old ->
+    suspend fun updateContent(id: String, text: String?, image: StashImageEdit): Boolean {
+        // 旧图要等新索引真的落盘之后才能删；新存下来的图在落盘失败时要收回 —— 交给 mutateEntry 的两个钩子。
+        var staleFile: String? = null
+        var createdFile: String? = null
+        return mutateEntry(
+            id,
+            onCommitted = { staleFile?.let { File(imageDir, it).delete() } },
+            onRolledBack = { createdFile?.let { File(imageDir, it).delete() } },
+        ) { old ->
             if (!old.isSimpleContent()) return@mutateEntry null
             val oldFile = old.allImageFileNames().firstOrNull()
             val body = text?.trim()?.takeIf { it.isNotEmpty() }
@@ -751,23 +770,49 @@ class StashRepository @Inject constructor(
                 // 换图必须换文件名：缩略图缓存按文件名做 key，沿用旧名会一直显示旧图。
                 is StashImageEdit.Replace ->
                     saveImage("${old.id}_${System.currentTimeMillis()}.png", image.bitmap)
+                        ?.also { createdFile = it }
                         ?: return@mutateEntry null
             }
             if (body == null && newFile == null) return@mutateEntry null
-            if (oldFile != null && oldFile != newFile) File(imageDir, oldFile).delete()
+            staleFile = oldFile?.takeIf { it != newFile }
             old.rebuilt(body, newFile, imageReplaced = image is StashImageEdit.Replace)
         }
+    }
 
-    /** 锁内重新读盘，对指定条目做一次改写；[transform] 返回 null 表示不改。 */
-    private suspend fun mutateEntry(id: String, transform: (StashEntry) -> StashEntry?): Boolean {
+    /**
+     * 锁内重新读盘，对指定条目做一次改写；[transform] 返回 null 表示不改。
+     *
+     * 索引真的写进磁盘后调 [onCommitted]（删旧文件之类只能在这时做）；
+     * 写盘失败 / 读盘失败期间被拒写时调 [onRolledBack]（收回刚新建的文件），并返回 false、不动内存里的列表。
+     */
+    private suspend fun mutateEntry(
+        id: String,
+        onCommitted: () -> Unit = {},
+        onRolledBack: () -> Unit = {},
+        transform: (StashEntry) -> StashEntry?,
+    ): Boolean {
         return withContext(Dispatchers.IO) {
             withCrossProcessWrite {
                 val current = readFromDisk()
                 val old = current.firstOrNull { it.id == id } ?: return@withCrossProcessWrite false
-                val updated = transform(old) ?: return@withCrossProcessWrite false
+                val updated = transform(old)
+                if (updated == null) {
+                    onRolledBack()
+                    return@withCrossProcessWrite false
+                }
                 val next = current.map { if (it.id == id) updated else it }
-                writeToDisk(next)
+                val written = try {
+                    writeToDisk(next)
+                } catch (t: Throwable) {
+                    Log.w(TAG, "mutateEntry: index write failed, rolled back", t)
+                    false
+                }
+                if (!written) {
+                    onRolledBack()
+                    return@withCrossProcessWrite false
+                }
                 _entries.value = next
+                onCommitted()
                 true
             }
         }
@@ -782,10 +827,7 @@ class StashRepository @Inject constructor(
                 type = StashEntryType.RICH,
                 text = body,
                 imageFileName = imageFile,
-                contentBlocks = listOf(
-                    ClipboardContentBlock.text(body),
-                    ClipboardContentBlock.image(imageFile)
-                ),
+                contentBlocks = orderedTextAndImage(body, imageFile),
                 htmlText = null,
                 pinDisplayWidthPx = pinWidth,
                 pinDisplayHeightPx = pinHeight
@@ -809,6 +851,21 @@ class StashRepository @Inject constructor(
                 pinDisplayHeightPx = pinHeight
             )
         }
+    }
+
+    /**
+     * 图文条目改写后的块顺序：沿用原来的先后。面板的编辑条能做出“图在前、文字在后”的条目，
+     * 管理页改写时不能悄悄翻成“文字在前”，不然微信里发出去的顺序就变了。
+     * 原来没有文字块（图片条目补文字）就文字在前，原来没有图片块（文字条目补图）就图在后。
+     */
+    private fun StashEntry.orderedTextAndImage(body: String, imageFile: String): List<ClipboardContentBlock> {
+        val old = resolvedContentBlocks()
+        val textIndex = old.indexOfFirst { it.kind == ClipboardBlockKind.TEXT }
+        val imageIndex = old.indexOfFirst { it.kind == ClipboardBlockKind.IMAGE }
+        val imageFirst = textIndex >= 0 && imageIndex in 0 until textIndex
+        val textBlock = ClipboardContentBlock.text(body)
+        val imageBlock = ClipboardContentBlock.image(imageFile)
+        return if (imageFirst) listOf(imageBlock, textBlock) else listOf(textBlock, imageBlock)
     }
 
     private fun sortOrderFor(categoryId: String?, current: List<StashEntry>): Int =
@@ -841,6 +898,9 @@ class StashRepository @Inject constructor(
      * 清一条条目的元数据。**它失败了也不该让删除本身失败**，所以整段吞掉。
      */
     private suspend fun forgetMeta(entryId: String) {
+        // 条目没了，它的提醒闹钟也得撤掉：面板里的删除早就先 cancel 了，这里是给没走面板的路径兜底
+        // （管理页删除 / 清空分类 / 设置里清空暂存夹 / 撤销“已存下”）。cancel 是幂等的。
+        runCatching { StashReminderScheduler.cancel(appContext, entryId) }
         runCatching { metaRepository.forget(entryId) }
     }
 
@@ -1119,12 +1179,14 @@ class StashRepository @Inject constructor(
         }
     }
 
-    private fun writeToDisk(entries: List<StashEntry>) {
+    /** 返回是否真的写进了磁盘（读盘失败期间会拒写，见 [indexUnreadable]）；写盘本身出错仍然抛异常。 */
+    private fun writeToDisk(entries: List<StashEntry>): Boolean {
         if (indexUnreadable) {
             Log.w(TAG, "skip write: index unreadable, refusing to wipe user data")
-            return
+            return false
         }
         indexFile.writeText(json.encodeToString(entries))
+        return true
     }
 
     /** 只淘汰超出 [MAX_ENTRIES] 的普通条目；带分类的话术不占名额、不被淘汰。 */

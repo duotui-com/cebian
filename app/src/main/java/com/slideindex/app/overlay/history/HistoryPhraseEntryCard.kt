@@ -116,7 +116,10 @@ internal fun HistoryPhraseEntryCard(
     val summaryText = remember(entry.id, entry.type, entry.text, richBlocks) {
         when (entry.type) {
             StashEntryType.TEXT -> entry.text.orEmpty()
-            StashEntryType.RICH -> entry.combinedText()
+            // exportText 比 combinedText 多一样东西：语音块的 `[语音 0:12]` 占位。
+            // 只录了音的条目（上游的 ＋ 记一条 能录，现在也能记进分类）否则就是一行没有字的空白，
+            // 点了还只会提示“没有可发送的内容”。微信发不了语音，占位至少让人看得出这条里有录音。
+            StashEntryType.RICH -> entry.exportText().ifBlank { entry.combinedText() }
             else -> ""
         }
     }
