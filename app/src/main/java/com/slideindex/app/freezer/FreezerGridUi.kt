@@ -19,9 +19,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +83,22 @@ fun FreezerGridUi(
     onAppLaunched: (() -> Unit)? = null,
     onManageApps: (() -> Unit)? = null,
     overlayMode: Boolean = false,
+    /**
+     * 多选态：点卡片 = 勾选/取消，**不再启动应用**；长按也走勾选（不在多选里再弹单项菜单）。
+     *
+     * 单项菜单本身没被搬走 —— 它留在普通态的长按上（见 `FreezerPanelContent` 顶栏的「选择」入口，
+     * 那才是进多选的正门）。这样「单独冻结一个应用」仍然是"长按 → 点冻结"两步，没有被多选拖累。
+     */
+    selectionMode: Boolean = false,
+    selectedPackages: Set<String> = emptySet(),
+    onToggleSelection: (String) -> Unit = {},
+    /**
+     * 网格自身滚动区底部要额外留出的空间（悬浮按钮压在内容之上时会盖住最后一行）。
+     *
+     * ⚠️ 必须加在**网格自己的 `contentPadding`** 上，不能靠外层列表尾部加 spacer：网格是嵌套滚动，
+     * 它的最后一行在它自己的滚动区里，外层留白再多也顶不上来（实测就是这么失败的）。
+     */
+    bottomInset: androidx.compose.ui.unit.Dp = 0.dp,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -151,7 +171,12 @@ fun FreezerGridUi(
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columnCount),
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                    contentPadding = PaddingValues(
+                        start = 4.dp,
+                        top = 8.dp,
+                        end = 4.dp,
+                        bottom = 8.dp + bottomInset,
+                    ),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
@@ -159,31 +184,43 @@ fun FreezerGridUi(
                         items = filteredApps,
                         key = { app -> "${app.packageName}_$freezeStateRevision" },
                     ) { app ->
-                        val frozen = FreezerOperations.isFrozen(context, app.packageName)
+                        val state = FreezerOperations.stateOf(context, app.packageName)
                         FreezerGridItem(
                             app = app,
-                            frozen = frozen,
+                            state = state,
+                            selectionMode = selectionMode,
+                            selected = app.packageName in selectedPackages,
                             onClick = {
-                                scope.launch {
-                                    if (!FreezerOperations.launchAndUnfreeze(
-                                            context,
-                                            appRepository,
-                                            settings,
-                                            app,
-                                        )
-                                    ) {
-                                        Toast.makeText(
-                                            context,
-                                            R.string.freezer_launch_failed,
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
-                                        return@launch
+                                if (selectionMode) {
+                                    onToggleSelection(app.packageName)
+                                } else {
+                                    scope.launch {
+                                        if (!FreezerOperations.launchAndRestore(
+                                                context,
+                                                appRepository,
+                                                settings,
+                                                app,
+                                            )
+                                        ) {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.freezer_launch_failed,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                            return@launch
+                                        }
+                                        onFreezeStateRevisionBump()
+                                        onAppLaunched?.invoke()
                                     }
-                                    onFreezeStateRevisionBump()
-                                    onAppLaunched?.invoke()
                                 }
                             },
-                            onLongClick = { actionTarget = app },
+                            onLongClick = {
+                                if (selectionMode) {
+                                    onToggleSelection(app.packageName)
+                                } else {
+                                    actionTarget = app
+                                }
+                            },
                         )
                     }
                 }
@@ -191,12 +228,12 @@ fun FreezerGridUi(
         }
 
         actionTarget?.let { app ->
-            val frozen = FreezerOperations.isFrozen(context, app.packageName)
+            val state = FreezerOperations.stateOf(context, app.packageName)
             val dismissMenu = { actionTarget = null }
             val menuActions = FreezerAppActionCallbacks(
                 onLaunchFreeWindow = {
                     scope.launch {
-                        if (!FreezerOperations.launchAndUnfreeze(
+                        if (!FreezerOperations.launchAndRestore(
                                 context,
                                 appRepository,
                                 settings,
@@ -218,7 +255,15 @@ fun FreezerGridUi(
                 },
                 onToggleFrozen = {
                     scope.launch {
-                        if (FreezerOperations.setFrozen(context, app.packageName, !frozen)) {
+                        if (FreezerOperations.setFrozen(context, app.packageName, !state.isFrozen)) {
+                            onFreezeStateRevisionBump()
+                        }
+                        dismissMenu()
+                    }
+                },
+                onTogglePaused = {
+                    scope.launch {
+                        if (FreezerOperations.setPaused(context, app.packageName, !state.isPaused)) {
                             onFreezeStateRevisionBump()
                         }
                         dismissMenu()
@@ -244,9 +289,9 @@ fun FreezerGridUi(
                         dismissMenu()
                     }
                 },
-                onUnfreezeAndRemoveFromList = {
+                onRestoreAndRemoveFromList = {
                     scope.launch {
-                        if (FreezerListOperations.unfreezeAndRemoveFromList(
+                        if (FreezerListOperations.restoreAndRemoveFromList(
                                 context = context,
                                 settingsRepository = settingsRepository,
                                 packageName = app.packageName,
@@ -262,14 +307,14 @@ fun FreezerGridUi(
             if (overlayMode) {
                 FreezerAppActionOverlayMenu(
                     app = app,
-                    frozen = frozen,
+                    state = state,
                     onDismiss = dismissMenu,
                     callbacks = menuActions,
                 )
             } else {
                 FreezerAppActionOverlayDialog(
                     app = app,
-                    frozen = frozen,
+                    state = state,
                     onDismiss = dismissMenu,
                     callbacks = menuActions,
                 )
@@ -281,35 +326,45 @@ fun FreezerGridUi(
 private data class FreezerAppActionCallbacks(
     val onLaunchFreeWindow: () -> Unit,
     val onToggleFrozen: () -> Unit,
+    val onTogglePaused: () -> Unit,
     val onAddToHome: () -> Unit,
     val onRemoveFromList: () -> Unit,
-    val onUnfreezeAndRemoveFromList: () -> Unit,
+    val onRestoreAndRemoveFromList: () -> Unit,
 )
 
 @Composable
 private fun FreezerAppActionOverlayDialog(
     app: AppInfo,
-    frozen: Boolean,
+    state: FreezerAppState,
     onDismiss: () -> Unit,
     callbacks: FreezerAppActionCallbacks,
 ) {
     val launchFreeWindowLabel = stringResource(R.string.task_switcher_menu_free_window)
     val freezeLabel = stringResource(
-        if (frozen) R.string.freezer_action_unfreeze else R.string.freezer_action_freeze,
+        if (state.isFrozen) R.string.freezer_action_unfreeze else R.string.freezer_action_freeze,
+    )
+    val pauseLabel = stringResource(
+        if (state.isPaused) R.string.freezer_action_unpause else R.string.freezer_action_pause,
     )
     val addToHomeLabel = stringResource(R.string.freezer_action_add_to_home)
     val removeFromListLabel = stringResource(R.string.freezer_remove_from_list)
     val unfreezeAndRemoveLabel = stringResource(R.string.freezer_unfreeze_and_remove)
+    val unpauseAndRemoveLabel = stringResource(R.string.freezer_unpause_and_remove)
     val cancelLabel = stringResource(R.string.cancel)
     val menuEntry = DropdownEntry(
         items = buildList {
             add(DropdownItem(text = launchFreeWindowLabel, onClick = callbacks.onLaunchFreeWindow))
             add(DropdownItem(text = freezeLabel, onClick = callbacks.onToggleFrozen))
+            add(DropdownItem(text = pauseLabel, onClick = callbacks.onTogglePaused))
             add(DropdownItem(text = addToHomeLabel, onClick = callbacks.onAddToHome))
-            if (frozen) {
-                add(DropdownItem(text = unfreezeAndRemoveLabel, onClick = callbacks.onUnfreezeAndRemoveFromList))
-            } else {
-                add(DropdownItem(text = removeFromListLabel, onClick = callbacks.onRemoveFromList))
+            when {
+                state.isFrozen -> add(
+                    DropdownItem(text = unfreezeAndRemoveLabel, onClick = callbacks.onRestoreAndRemoveFromList),
+                )
+                state.isPaused -> add(
+                    DropdownItem(text = unpauseAndRemoveLabel, onClick = callbacks.onRestoreAndRemoveFromList),
+                )
+                else -> add(DropdownItem(text = removeFromListLabel, onClick = callbacks.onRemoveFromList))
             }
         },
     )
@@ -327,27 +382,32 @@ private fun FreezerAppActionOverlayDialog(
 @Composable
 private fun FreezerAppActionOverlayMenu(
     app: AppInfo,
-    frozen: Boolean,
+    state: FreezerAppState,
     onDismiss: () -> Unit,
     callbacks: FreezerAppActionCallbacks,
 ) {
     val context = LocalContext.current
     val launchFreeWindowLabel = stringResource(R.string.task_switcher_menu_free_window)
     val freezeLabel = stringResource(
-        if (frozen) R.string.freezer_action_unfreeze else R.string.freezer_action_freeze,
+        if (state.isFrozen) R.string.freezer_action_unfreeze else R.string.freezer_action_freeze,
+    )
+    val pauseLabel = stringResource(
+        if (state.isPaused) R.string.freezer_action_unpause else R.string.freezer_action_pause,
     )
     val addToHomeLabel = stringResource(R.string.freezer_action_add_to_home)
     val removeFromListLabel = stringResource(R.string.freezer_remove_from_list)
     val unfreezeAndRemoveLabel = stringResource(R.string.freezer_unfreeze_and_remove)
+    val unpauseAndRemoveLabel = stringResource(R.string.freezer_unpause_and_remove)
     val cancelLabel = stringResource(R.string.cancel)
     val menuItems = buildList {
         add(launchFreeWindowLabel to callbacks.onLaunchFreeWindow)
         add(freezeLabel to callbacks.onToggleFrozen)
+        add(pauseLabel to callbacks.onTogglePaused)
         add(addToHomeLabel to callbacks.onAddToHome)
-        if (frozen) {
-            add(unfreezeAndRemoveLabel to callbacks.onUnfreezeAndRemoveFromList)
-        } else {
-            add(removeFromListLabel to callbacks.onRemoveFromList)
+        when {
+            state.isFrozen -> add(unfreezeAndRemoveLabel to callbacks.onRestoreAndRemoveFromList)
+            state.isPaused -> add(unpauseAndRemoveLabel to callbacks.onRestoreAndRemoveFromList)
+            else -> add(removeFromListLabel to callbacks.onRemoveFromList)
         }
     }
     var iconBitmap by remember(app.packageName) {
@@ -356,10 +416,10 @@ private fun FreezerAppActionOverlayMenu(
     LaunchedEffect(app.packageName) {
         iconBitmap = PickerAppIconBitmap.load(context, app.packageName)
     }
-    val iconColorFilter = if (frozen) {
-        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
-    } else {
+    val iconColorFilter = if (state.isActive) {
         null
+    } else {
+        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
     }
     val dropdownColors = DropdownDefaults.dropdownColors()
 
@@ -479,7 +539,9 @@ private fun FreezerOverlayMenuRow(
 @Composable
 private fun FreezerGridItem(
     app: AppInfo,
-    frozen: Boolean,
+    state: FreezerAppState,
+    selectionMode: Boolean,
+    selected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -490,15 +552,23 @@ private fun FreezerGridItem(
     LaunchedEffect(app.packageName) {
         iconBitmap = PickerAppIconBitmap.load(context, app.packageName)
     }
-    val grayscale = if (frozen) {
-        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
-    } else {
+    val grayscale = if (state.isActive) {
         null
+    } else {
+        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                } else {
+                    Color.Transparent
+                },
+            )
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
@@ -507,16 +577,54 @@ private fun FreezerGridItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        if (iconBitmap != null) {
-            Image(
-                bitmap = iconBitmap!!,
-                contentDescription = app.label,
-                modifier = Modifier.size(64.dp),
-                contentScale = ContentScale.Fit,
-                colorFilter = grayscale,
-            )
-        } else {
-            Box(modifier = Modifier.size(64.dp))
+        Box(modifier = Modifier.size(64.dp)) {
+            if (iconBitmap != null) {
+                Image(
+                    bitmap = iconBitmap!!,
+                    contentDescription = app.label,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = grayscale,
+                )
+            }
+            // 暂停与冻结都是灰度，靠角标区分：暂停图标仍在桌面，冻结图标已从桌面消失。
+            // 多选态下它让位给勾选圈 —— 64dp 里塞两枚角标会挤到一起。
+            if (state.isPaused && !selectionMode) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(20.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Pause,
+                        contentDescription = stringResource(R.string.freezer_status_paused),
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+            if (selectionMode) {
+                Icon(
+                    imageVector = if (selected) Icons.Default.CheckCircle else Icons.Outlined.Circle,
+                    contentDescription = stringResource(
+                        if (selected) {
+                            R.string.freezer_selection_selected
+                        } else {
+                            R.string.freezer_selection_unselected
+                        },
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(20.dp),
+                    tint = if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.outline
+                    },
+                )
+            }
         }
         Text(
             text = app.label,
@@ -524,10 +632,10 @@ private fun FreezerGridItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
-            color = if (frozen) {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            } else {
+            color = if (state.isActive) {
                 MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             },
             modifier = Modifier.padding(horizontal = 2.dp),
         )

@@ -77,6 +77,17 @@ class HomeDetailSettingsViewModel @Inject constructor(
         }
     }
 
+    /** 「复制竖屏设置」：把竖屏当前的触钮与手势动作合并进横屏；失败会弹 snackbar。 */
+    fun copyPortraitToLandscape() {
+        viewModelScope.launch {
+            landscapeInitMutex.withLock {
+                settingsRepository.copyPortraitToLandscape().onFailure {
+                    userMessageBus.showError(appContext.getString(R.string.settings_save_failed))
+                }
+            }
+        }
+    }
+
     fun setKeyboardTriggerBehavior(behavior: KeyboardTriggerBehavior, landscape: Boolean) = launchSettingsWrite {
         if (landscape) {
             settingsRepository.setKeyboardTriggerBehaviorLandscape(behavior)
@@ -432,16 +443,20 @@ class HomeDetailSettingsViewModel @Inject constructor(
         settingsRepository.setCornerGestureOverrideSystemNav(enabled)
     }
 
-    fun setCornerGestureOuterDiameterDp(value: Float) = launchSettingsWrite {
-        settingsRepository.setCornerGestureOuterDiameterDp(value)
-    }
-
     fun setCornerGestureInnerDiameterDp(value: Float) = launchSettingsWrite {
         settingsRepository.setCornerGestureInnerDiameterDp(value)
     }
 
+    fun setCornerGestureRingSpacingDp(value: Float) = launchSettingsWrite {
+        settingsRepository.setCornerGestureRingSpacingDp(value)
+    }
+
     fun setCornerGestureBubbleSizeDp(value: Float) = launchSettingsWrite {
         settingsRepository.setCornerGestureBubbleSizeDp(value)
+    }
+
+    fun setCornerGestureWheelLayerCount(value: Int) = launchSettingsWrite {
+        settingsRepository.setCornerGestureWheelLayerCount(value)
     }
 
     fun setCornerGestureCancelOutsideWheel(enabled: Boolean) = launchSettingsWrite {
@@ -458,6 +473,10 @@ class HomeDetailSettingsViewModel @Inject constructor(
 
     fun setCornerGestureShowSelectedName(enabled: Boolean) = launchSettingsWrite {
         settingsRepository.setCornerGestureShowSelectedName(enabled)
+    }
+
+    fun setCornerGestureShowEditButton(enabled: Boolean) = launchSettingsWrite {
+        settingsRepository.setCornerGestureShowEditButton(enabled)
     }
 
     fun setCornerGestureSelectedHintIconSizeDp(value: Int) = launchSettingsWrite {

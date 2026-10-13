@@ -30,7 +30,7 @@ class StashRepositoryBitmapTest {
         val stashDir = File(context.filesDir, "stash")
         stashDir.deleteRecursively()
         imageDir = File(stashDir, "images")
-        repository = StashRepository(context)
+        repository = StashRepository(context, StashMetaRepository(context))
     }
 
     private fun bitmap() = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)
@@ -76,12 +76,25 @@ class StashRepositoryBitmapTest {
     }
 
     @Test
-    fun deleteImageEntry_removesItsFile() = runBlocking {
+    fun deleteImageEntry_keepsItsFileForUndo() = runBlocking {
         val added = repository.addImage(bitmap())!!
         val file = File(imageDir, added.imageFileName!!)
         assertTrue(file.exists())
 
         repository.delete(added.id)
+
+        // 上游改成了“可撤销的删除”：文件留着，下次启动统一清孤儿。
+        assertTrue(file.exists())
+        assertTrue(repository.restore(added, 0))
+    }
+
+    @Test
+    fun deleteImageEntry_purgeMedia_removesItsFileRightAway() = runBlocking {
+        val added = repository.addImage(bitmap())!!
+        val file = File(imageDir, added.imageFileName!!)
+        assertTrue(file.exists())
+
+        repository.delete(added.id, purgeMedia = true)
 
         assertFalse(file.exists())
     }

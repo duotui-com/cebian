@@ -156,6 +156,8 @@ class MessageReminderOrchestrator @Inject constructor(
      */
     fun onUserPresent(context: Context) {
         val settings = settingsRepository.readSnapshot().messageReminderSettings
+        // 先补显锁屏期间保留下来的悬浮球提醒，再走「解锁后进入最后一条消息」。
+        overlayPort.replayFloatIconAfterUnlock()
         val pending = pendingUnlockMessage ?: return
         if (!shouldAutoOpenLastMessageOnUnlock(settings, pending)) return
         pendingUnlockMessage = null
@@ -178,7 +180,7 @@ class MessageReminderOrchestrator @Inject constructor(
                     onDismiss = {},
                 )
             }
-        }, UNLOCK_OPEN_DELAY_MS)
+        }, resolveUnlockOpenDelayMs(settings))
     }
 
     private fun openPendingMessage(context: Context, data: NotificationData) {
@@ -303,7 +305,5 @@ class MessageReminderOrchestrator @Inject constructor(
 
     private companion object {
         const val TAG = "MessageReminder"
-        /** 解锁后稍作延迟再打开，避免与桌面/解锁动画竞争。 */
-        const val UNLOCK_OPEN_DELAY_MS = 900L
     }
 }

@@ -16,6 +16,7 @@ import com.slideindex.app.message.MessageSettings
 import com.slideindex.app.overlay.PanelSide
 import com.slideindex.app.shake.ShakeGestureType
 import com.slideindex.app.shell.ShellCommand
+import com.slideindex.app.util.PredictiveBackStartupStore
 import com.slideindex.app.util.ServiceEnabledStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -74,6 +75,8 @@ class SettingsRepository @Inject constructor(
             // （历史上表现为 overlay 进程按默认手势动作执行，例如短滑=返回）。
             runCatching {
                 editor.cleanupLegacyClipboardKeysOnce()
+                overlay.migrateFvRingLauncherPreferenceKeysOnce()
+                overlay.migrateFloatBallInstantTranslateDefaultOnOnce()
                 edge.persistOppositeGestureSlotRepairIfNeeded()
             }.onFailure {
                 android.util.Log.w(
@@ -100,11 +103,20 @@ class SettingsRepository @Inject constructor(
                 .distinctUntilChanged()
                 .collect { enabled -> ServiceEnabledStore.write(context, enabled) }
         }
+        // §0.16.25：预测性返回开关也落一个同步镜像：它在 Application.attachBaseContext
+        // 就要被读到（用来写 ApplicationInfo 的 FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK），
+        // 而那个时点**不能**同步读 DataStore。详见 PredictiveBackStartupStore 的 KDoc。
+        cacheScope.launch {
+            settings
+                .map { it.predictiveBackEnabled }
+                .distinctUntilChanged()
+                .collect { enabled -> PredictiveBackStartupStore.write(context, enabled) }
+        }
         // 圆环槽位面板引用的一次性归一化：只碰自己的键，不阻塞快照收集（上面那批修复会先写盘，
         // 若把这条也串进去会推迟 collect 启动，readSnapshot() 读到旧值的窗口跟着变大）。
         cacheScope.launch {
             runCatching {
-                overlay.migrateFvAppSwitcherQuickLauncherPanelsOnce()
+                overlay.migrateFvRingLauncherQuickLauncherPanelsOnce()
             }.onFailure {
                 android.util.Log.w(
                     "SettingsRepository",
@@ -169,6 +181,7 @@ class SettingsRepository @Inject constructor(
     suspend fun removeTriggerHandle(side: PanelSide, handleId: String, landscape: Boolean = false) =
         edge.removeTriggerHandle(side, handleId, landscape)
     suspend fun ensureLandscapeTriggerHandlesInitialized() = edge.ensureLandscapeTriggerHandlesInitialized()
+    suspend fun copyPortraitToLandscape() = edge.copyPortraitToLandscape()
     suspend fun setTriggerAlignOppositeSide(
         handleId: String,
         sourceSide: PanelSide,
@@ -263,7 +276,12 @@ class SettingsRepository @Inject constructor(
     suspend fun addFreezerApp(packageName: String) = edge.addFreezerApp(packageName)
     suspend fun removeFreezerApp(packageName: String) = edge.removeFreezerApp(packageName)
     suspend fun setFreezerShowInLauncher(enabled: Boolean) = edge.setFreezerShowInLauncher(enabled)
+    suspend fun setFreezerWorkMode(modeId: Int) = edge.setFreezerWorkMode(modeId)
     suspend fun setFreezerAppPackages(packages: Set<String>) = edge.setFreezerAppPackages(packages)
+    suspend fun setFreezerAppIntent(packageName: String, intent: FreezerAppIntent?) =
+        edge.setFreezerAppIntent(packageName, intent)
+    suspend fun clearFreezerAppIntents(packageNames: Set<String>) =
+        edge.clearFreezerAppIntents(packageNames)
     suspend fun setExpandPanelSlotAction(index: Int, action: com.slideindex.app.gesture.GestureAction?) =
         edge.setExpandPanelSlotAction(index, action)
     suspend fun removeHiddenApp(packageName: String) = edge.removeHiddenApp(packageName)
@@ -435,45 +453,47 @@ class SettingsRepository @Inject constructor(
     suspend fun setHoneycombLauncherItems(items: List<com.slideindex.app.launcher.QuickLauncherItem>) =
         overlay.setHoneycombLauncherItems(items)
 
-    suspend fun setFvAppSwitcherSettings(
-        axis: FvAppSwitcherAxis,
-        settings: FvAppSwitcherSettings,
-    ) = overlay.setFvAppSwitcherSettings(axis, settings)
+    suspend fun setQuickWheels(wheels: List<QuickWheel>) = overlay.setQuickWheels(wheels)
 
-    suspend fun setFvAppSwitcherSlot(
-        axis: FvAppSwitcherAxis,
+    suspend fun setFvRingLauncherSettings(
+        axis: FvRingLauncherAxis,
+        settings: FvRingLauncherSettings,
+    ) = overlay.setFvRingLauncherSettings(axis, settings)
+
+    suspend fun setFvRingLauncherSlot(
+        axis: FvRingLauncherAxis,
         index: Int,
         item: com.slideindex.app.launcher.QuickLauncherItem,
-    ) = overlay.setFvAppSwitcherSlot(axis, index, item)
+    ) = overlay.setFvRingLauncherSlot(axis, index, item)
 
-    suspend fun setFvAppSwitcherSlotIconOverride(
-        axis: FvAppSwitcherAxis,
+    suspend fun setFvRingLauncherSlotIconOverride(
+        axis: FvRingLauncherAxis,
         index: Int,
-        override: FvAppSwitcherSlotIconOverride?,
-    ) = overlay.setFvAppSwitcherSlotIconOverride(axis, index, override)
+        override: FvRingLauncherSlotIconOverride?,
+    ) = overlay.setFvRingLauncherSlotIconOverride(axis, index, override)
 
-    suspend fun swapFvAppSwitcherSlots(
-        axis: FvAppSwitcherAxis,
+    suspend fun swapFvRingLauncherSlots(
+        axis: FvRingLauncherAxis,
         fromIndex: Int,
         toIndex: Int,
-    ) = overlay.swapFvAppSwitcherSlots(axis, fromIndex, toIndex)
+    ) = overlay.swapFvRingLauncherSlots(axis, fromIndex, toIndex)
 
-    suspend fun setFvAppSwitcherCircleCount(
-        axis: FvAppSwitcherAxis,
+    suspend fun setFvRingLauncherCircleCount(
+        axis: FvRingLauncherAxis,
         circleCount: Int,
-    ) = overlay.setFvAppSwitcherCircleCount(axis, circleCount)
+    ) = overlay.setFvRingLauncherCircleCount(axis, circleCount)
 
-    suspend fun setFvAppSwitcherLinkAppearanceAxes(
+    suspend fun setFvRingLauncherLinkAppearanceAxes(
         enabled: Boolean,
-        activeAxis: FvAppSwitcherAxis,
-        mergeDirection: FvAppSwitcherAxisMergeDirection?,
-    ) = overlay.setFvAppSwitcherLinkAppearanceAxes(enabled, activeAxis, mergeDirection)
+        activeAxis: FvRingLauncherAxis,
+        mergeDirection: FvRingLauncherAxisMergeDirection?,
+    ) = overlay.setFvRingLauncherLinkAppearanceAxes(enabled, activeAxis, mergeDirection)
 
-    suspend fun setFvAppSwitcherLinkSlotAxes(
+    suspend fun setFvRingLauncherLinkSlotAxes(
         enabled: Boolean,
-        activeAxis: FvAppSwitcherAxis,
-        mergeDirection: FvAppSwitcherAxisMergeDirection?,
-    ) = overlay.setFvAppSwitcherLinkSlotAxes(enabled, activeAxis, mergeDirection)
+        activeAxis: FvRingLauncherAxis,
+        mergeDirection: FvRingLauncherAxisMergeDirection?,
+    ) = overlay.setFvRingLauncherLinkSlotAxes(enabled, activeAxis, mergeDirection)
 
     suspend fun setQuickLauncherDisplaySettings(settings: QuickLauncherDisplaySettings) =
         overlay.setQuickLauncherDisplaySettings(settings)
@@ -590,11 +610,20 @@ class SettingsRepository @Inject constructor(
     suspend fun setFloatBallPickPanelStyle(style: PickResultPanelStyle) =
         overlay.setFloatBallPickPanelStyle(style)
 
+    suspend fun setFloatBallPickPanelPlacement(placement: PickResultPanelPlacement) =
+        overlay.setFloatBallPickPanelPlacement(placement)
+
     suspend fun setFloatBallPickSearchGridDefaultState(state: PickResultSearchGridDefaultState) =
         overlay.setFloatBallPickSearchGridDefaultState(state)
 
     suspend fun setFloatBallPickSearchGridLastExpanded(expanded: Boolean) =
         overlay.setFloatBallPickSearchGridLastExpanded(expanded)
+
+    suspend fun setFloatBallPickTextModeDefault(state: PickResultTextModeDefault) =
+        overlay.setFloatBallPickTextModeDefault(state)
+
+    suspend fun setFloatBallPickTextModeLastMode(storageKey: String) =
+        overlay.setFloatBallPickTextModeLastMode(storageKey)
 
     suspend fun setFloatBallPickDefaultSearchEngineId(id: String?) =
         overlay.setFloatBallPickDefaultSearchEngineId(id)
@@ -644,6 +673,9 @@ class SettingsRepository @Inject constructor(
     suspend fun setFloatBallUpSwipeShortPercent(value: Float) =
         overlay.setFloatBallUpSwipeShortPercent(value)
 
+    suspend fun setFloatBallOverlayAnchorAtTouchDown(enabled: Boolean) =
+        overlay.setFloatBallOverlayAnchorAtTouchDown(enabled)
+
     suspend fun setFloatBallInstantTranslate(enabled: Boolean) =
         overlay.setFloatBallInstantTranslate(enabled)
 
@@ -652,6 +684,9 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFloatBallTranslateTargetLang(languageCode: String) =
         overlay.setFloatBallTranslateTargetLang(languageCode)
+
+    suspend fun setFloatBallTranslateAppPackage(packageName: String) =
+        overlay.setFloatBallTranslateAppPackage(packageName)
 
     suspend fun setFloatBallImageSearchPickPanelTransparency(value: Float) =
         overlay.setFloatBallImageSearchPickPanelTransparency(value)
@@ -779,6 +814,15 @@ class SettingsRepository @Inject constructor(
     suspend fun setStashPanelBackgroundBlurRadiusDp(value: Int) =
         overlay.setStashPanelBackgroundBlurRadiusDp(value)
 
+    suspend fun setStashPanelHandleOpenTab(tab: StashPanelHandleOpenTab) =
+        overlay.setStashPanelHandleOpenTab(tab)
+
+    suspend fun setStashPanelWidthMode(mode: StashPanelWidthMode) =
+        overlay.setStashPanelWidthMode(mode)
+
+    suspend fun setOverlayBlurEnabled(enabled: Boolean) =
+        overlay.setOverlayBlurEnabled(enabled)
+
     suspend fun setDefaultImageViewerPackage(packageName: String?) = overlay.setDefaultImageViewerPackage(packageName)
     suspend fun setImageEditorDelayDeleteEnabled(enabled: Boolean) = overlay.setImageEditorDelayDeleteEnabled(enabled)
 
@@ -821,6 +865,12 @@ class SettingsRepository @Inject constructor(
     suspend fun setSearchPanelSettingsSearchEnabled(enabled: Boolean) =
         overlay.setSearchPanelSettingsSearchEnabled(enabled)
 
+    suspend fun setSearchPanelShortcutSearchEnabled(enabled: Boolean) =
+        overlay.setSearchPanelShortcutSearchEnabled(enabled)
+
+    suspend fun setSearchPanelClipboardSearchEnabled(enabled: Boolean) =
+        overlay.setSearchPanelClipboardSearchEnabled(enabled)
+
     suspend fun setSearchPanelFileTypesEnabled(types: Set<String>) =
         overlay.setSearchPanelFileTypesEnabled(types)
 
@@ -838,9 +888,6 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setSearchPanelFileFolderBlacklist(patterns: Set<String>) =
         overlay.setSearchPanelFileFolderBlacklist(patterns)
-
-    suspend fun setSearchPanelPresentationMode(mode: SearchPanelPresentationMode) =
-        overlay.setSearchPanelPresentationMode(mode)
 
     suspend fun setSearchPanelBarPosition(position: SearchPanelBarPosition) =
         overlay.setSearchPanelBarPosition(position)
@@ -950,9 +997,11 @@ class SettingsRepository @Inject constructor(
     suspend fun setCornerGestureLandscapePreventFalseTouch(enabled: Boolean) =
         overlay.setCornerGestureLandscapePreventFalseTouch(enabled)
     suspend fun setCornerGestureOverrideSystemNav(enabled: Boolean) = overlay.setCornerGestureOverrideSystemNav(enabled)
-    suspend fun setCornerGestureOuterDiameterDp(value: Float) = overlay.setCornerGestureOuterDiameterDp(value)
     suspend fun setCornerGestureInnerDiameterDp(value: Float) = overlay.setCornerGestureInnerDiameterDp(value)
+    suspend fun setCornerGestureRingSpacingDp(value: Float) = overlay.setCornerGestureRingSpacingDp(value)
     suspend fun setCornerGestureBubbleSizeDp(value: Float) = overlay.setCornerGestureBubbleSizeDp(value)
+    suspend fun setCornerGestureWheelLayerCount(value: Int) =
+        overlay.setCornerGestureWheelLayerCount(value)
     suspend fun setCornerGestureCancelOutsideWheel(enabled: Boolean) =
         overlay.setCornerGestureCancelOutsideWheel(enabled)
     suspend fun setCornerGestureProgressiveLayers(enabled: Boolean) =
@@ -961,6 +1010,8 @@ class SettingsRepository @Inject constructor(
         overlay.setCornerGestureSlotHaptic(enabled)
     suspend fun setCornerGestureShowSelectedName(enabled: Boolean) =
         overlay.setCornerGestureShowSelectedName(enabled)
+    suspend fun setCornerGestureShowEditButton(enabled: Boolean) =
+        overlay.setCornerGestureShowEditButton(enabled)
 
     suspend fun setCornerGestureSelectedHintIconSizeDp(value: Int) =
         overlay.setCornerGestureSelectedHintIconSizeDp(value)
@@ -1056,8 +1107,12 @@ class SettingsRepository @Inject constructor(
     suspend fun removeMessageDndPackage(packageName: String) = message.removeMessageDndPackage(packageName)
     suspend fun setMessageSuppressWhenSystemDnd(enabled: Boolean) = message.setMessageSuppressWhenSystemDnd(enabled)
     suspend fun setMessageOpenLastOnUnlock(enabled: Boolean) = message.setMessageOpenLastOnUnlock(enabled)
+    suspend fun setMessageKeepFloatIconAfterUnlock(enabled: Boolean) =
+        message.setMessageKeepFloatIconAfterUnlock(enabled)
     suspend fun setMessageUnlockConfirmationAutoDismissSeconds(seconds: Int) =
         message.setMessageUnlockConfirmationAutoDismissSeconds(seconds)
+    suspend fun setMessageUnlockOpenDelayMs(millis: Int) =
+        message.setMessageUnlockOpenDelayMs(millis)
     suspend fun setMessageOpenLastAlways(packageName: String, enabled: Boolean) =
         message.setMessageOpenLastAlways(packageName, enabled)
     suspend fun upsertMessageAppFilterRule(rule: MessageAppFilterRule) = message.upsertMessageAppFilterRule(rule)

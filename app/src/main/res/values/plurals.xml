@@ -84,6 +84,10 @@
         <item quantity="one">%d configured</item>
         <item quantity="other">%d configured</item>
     </plurals>
+    <plurals name="fv_ring_launcher_entry_summary">
+        <item quantity="one">%d item configured</item>
+        <item quantity="other">%d items configured</item>
+    </plurals>
     <plurals name="quick_launcher_entry_summary_panels">
         <item quantity="one">%d launcher panel</item>
         <item quantity="other">%d launcher panels</item>
@@ -128,6 +132,10 @@
         <item quantity="one">Copied %d item</item>
         <item quantity="other">Copied %d items</item>
     </plurals>
+    <plurals name="freezer_restore_intents_done_count">
+        <item quantity="one">Done — %d app updated</item>
+        <item quantity="other">Done — %d apps updated</item>
+    </plurals>
     <plurals name="freezer_refreeze_done">
         <item quantity="one">Froze %d app</item>
         <item quantity="other">Froze %d apps</item>
@@ -136,9 +144,21 @@
         <item quantity="one">Unfroze %d app</item>
         <item quantity="other">Unfroze %d apps</item>
     </plurals>
+    <plurals name="freezer_pause_all_done">
+        <item quantity="one">Paused %d app</item>
+        <item quantity="other">Paused %d apps</item>
+    </plurals>
+    <plurals name="freezer_unpause_all_done">
+        <item quantity="one">Resumed %d app</item>
+        <item quantity="other">Resumed %d apps</item>
+    </plurals>
     <plurals name="freezer_import_frozen_done">
         <item quantity="one">Imported %d app</item>
         <item quantity="other">Imported %d apps</item>
+    </plurals>
+    <plurals name="freezer_batch_remove_done">
+        <item quantity="one">Removed %d app from the list</item>
+        <item quantity="other">Removed %d apps from the list</item>
     </plurals>
     <plurals name="holographic_launcher_entry_summary_hidden">
         <item quantity="one">%d app hidden</item>
@@ -163,5 +183,13 @@
     <plurals name="clipboard_lsposed_whitelist_desc">
         <item quantity="one">%1$d app added</item>
         <item quantity="other">%1$d apps added</item>
+    </plurals>
+    <plurals name="search_panel_shortcut_index_count">
+        <item quantity="one">%d shortcut indexed</item>
+        <item quantity="other">%d shortcuts indexed</item>
+    </plurals>
+    <plurals name="search_panel_clipboard_index_count">
+        <item quantity="one">%d clipboard entry</item>
+        <item quantity="other">%d clipboard entries</item>
     </plurals>
 </resources>

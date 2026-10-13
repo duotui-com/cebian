@@ -2,7 +2,6 @@ package com.slideindex.app.service
 
 import android.app.Activity
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
@@ -26,6 +25,7 @@ import androidx.core.app.NotificationCompat
 import com.slideindex.app.R
 import com.slideindex.app.overlay.FloatBallOcrRegions
 import com.slideindex.app.perf.PickPerf
+import com.slideindex.app.util.ForegroundNotificationChannels
 import com.slideindex.app.util.MediaProjectionStore
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CompletableDeferred
@@ -56,6 +56,19 @@ class ScreenCaptureService : Service() {
                     SessionState.markNotReady()
                     stopSelf()
                     return START_NOT_STICKY
+                }
+                // 渠道先落地再 startForeground：渠道缺失会被系统判为非法前台服务通知并杀进程。
+                // 但「用户关掉了通知渠道」不是放弃的理由（见 Result.isUsable）：不调
+                // startForeground() 会被 AMS 以前台服务超时为由杀进程，截图功能跟着一起没了。
+                val channel = ensureChannel()
+                if (!channel.isUsable) {
+                    Log.e(TAG, "截图通知渠道不可用，放弃前台化")
+                    SessionState.markNotReady()
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+                if (channel.blocked) {
+                    Log.w(TAG, "渠道存在但被用户关闭：通知不可见，仍照常前台化以免前台服务超时杀进程")
                 }
                 try {
                     startForeground(NOTIFICATION_ID, buildNotification())
@@ -202,15 +215,14 @@ class ScreenCaptureService : Service() {
             .build()
     }
 
-    private fun ensureChannel() {
-        val manager = getSystemService(NotificationManager::class.java) ?: return
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            getString(R.string.screen_capture_channel_name),
-            NotificationManager.IMPORTANCE_LOW
+    private fun ensureChannel(): ForegroundNotificationChannels.Result =
+        ForegroundNotificationChannels.ensureUsable(
+            context = this,
+            id = CHANNEL_ID,
+            name = getString(R.string.screen_capture_channel_name),
+            importance = NotificationManager.IMPORTANCE_LOW,
+            tag = TAG,
         )
-        manager.createNotificationChannel(channel)
-    }
 
     private fun readResultData(intent: Intent): Intent? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

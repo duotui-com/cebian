@@ -1,3 +1,10 @@
+/*
+ * 移植自 GestureEVO（https://github.com/LumiaGG/GestureEVO，GPL-3.0-only）
+ *   源文件：utils/TempDndRestoreWorker.kt
+ * 已按本项目的数据模型、主题与集成层改写（部分模块拆分为多文件、部分能力为本项目新增）；
+ * 版权与许可声明见 THIRD_PARTY_NOTICES.md，文件级映射见 docs/ATTRIBUTIONS.md。
+ */
+
 package com.slideindex.app.timeddnd
 
 import android.app.AutomaticZenRule
@@ -18,7 +25,6 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.slideindex.app.R
-import com.slideindex.app.remind.RemindAlarmScheduler
 import com.slideindex.app.util.PermissionHelper
 import com.slideindex.app.util.VolumeControlHelper
 import java.util.concurrent.TimeUnit
@@ -73,7 +79,7 @@ object TempDndManager {
             Log.w(TAG, "Policy access pre-check failed, will still try enabling DND directly")
         }
 
-        val safeMinutes = RemindAlarmScheduler.clampMinutes(minutes)
+        val safeMinutes = TempDndLimits.clampMinutes(minutes)
 
         val snapshot = TempDndPreferences.readOriginalFilter(appContext)
         if (snapshot == TempDndPreferences.NO_FILTER_SNAPSHOT) {

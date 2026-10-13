@@ -5,9 +5,11 @@ import com.slideindex.app.gesture.GestureAction
 import com.slideindex.app.gesture.GestureRule
 import com.slideindex.app.gesture.GestureTriggerType
 import com.slideindex.app.gesture.TriggerHandle
+import com.slideindex.app.message.MessageSettings
 import com.slideindex.app.overlay.PanelSide
 import com.slideindex.app.otp.OtpKeywords
 import com.slideindex.app.shake.ShakeGestureType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -99,6 +101,22 @@ class SettingsMutatorsTest {
     }
 
     @Test
+    fun addTriggerHandlePair_persistsFactorySlotsForNewGroup() = runBlocking {
+        // 新触钮的出厂动作必须真正落盘：只进内存的话重启后又会退回"借用 default 组"。
+        val handleCountBefore = awaitSettings().leftTriggerHandles.size
+
+        repository.addTriggerHandlePair()
+
+        val snapshot = awaitSettings { it.leftTriggerHandles.size == handleCountBefore + 1 }
+        val newId = snapshot.leftTriggerHandles.last().id
+        assertTrue(snapshot.gestureRules.any { it.handleId == newId && it.side == PanelSide.LEFT })
+        assertEquals(
+            GestureAction.Back,
+            snapshot.slotAction(PanelSide.LEFT, GestureTriggerType.SHORT_SWIPE_IN, newId),
+        )
+    }
+
+    @Test
     fun triggerVerticalRange_swapsInvertedBoundsAndMirrorsOppositeSide() = runBlocking {
         repository.setTriggerVerticalRange(
             side = PanelSide.LEFT,
@@ -167,7 +185,16 @@ class SettingsMutatorsTest {
         repository.setShakeGesturesEnabled(true)
         awaitSettings { it.shakeGestureSettings.enabled }
 
-        val snapshot = repository.readSnapshot()
+        // readSnapshot() 读的是后台 IO 收集器维护的缓存，可能比 flow 的第一个发射晚一拍；
+        // 这里等它**有界地**追上（真追不上才失败），避免机器忙时把时序抖动当成断言失败。
+        val snapshot = withTimeout(5_000) {
+            var current = repository.readSnapshot()
+            while (!current.serviceEnabled || !current.shakeGestureSettings.enabled) {
+                delay(10)
+                current = repository.readSnapshot()
+            }
+            current
+        }
         assertTrue(snapshot.serviceEnabled)
         assertTrue(snapshot.shakeGestureSettings.enabled)
     }
@@ -263,6 +290,69 @@ class SettingsMutatorsTest {
         }
         assertTrue(afterAdd.freezerAppPackages.contains("com.example.app"))
         assertFalse(afterAdd.freezerBootstrapExcludedPackages.contains("com.example.app"))
+    }
+
+    @Test
+    fun setFreezerWorkMode_persistsPauseAndFreeze() = runBlocking {
+        repository.setFreezerWorkMode(FreezerWorkMode.PAUSE.id)
+        val paused = awaitSettings { it.freezerWorkMode.isPause }
+        assertEquals(FreezerWorkMode.PAUSE, paused.freezerWorkMode)
+
+        repository.setFreezerWorkMode(FreezerWorkMode.FREEZE.id)
+        val frozen = awaitSettings { !it.freezerWorkMode.isPause }
+        assertEquals(FreezerWorkMode.FREEZE, frozen.freezerWorkMode)
+    }
+
+    @Test
+    fun setFreezerAppIntent_persistsAndClearsPerPackage() = runBlocking {
+        repository.addFreezerApp("com.example.app")
+        repository.setFreezerAppIntent("com.example.app", FreezerAppIntent.PAUSE)
+        repository.setFreezerAppIntent("com.example.other", FreezerAppIntent.FROZEN)
+
+        val recorded = awaitSettings { it.freezerAppIntents.size == 2 }
+        assertEquals(FreezerAppIntent.PAUSE, recorded.freezerAppIntents["com.example.app"])
+        assertEquals(FreezerAppIntent.FROZEN, recorded.freezerAppIntents["com.example.other"])
+
+        repository.clearFreezerAppIntents(setOf("com.example.app"))
+        val cleared = awaitSettings { it.freezerAppIntents.size == 1 }
+        assertEquals(null, cleared.freezerAppIntents["com.example.app"])
+    }
+
+    @Test
+    fun removeFreezerApp_dropsItsIntent() = runBlocking {
+        repository.addFreezerApp("com.example.app")
+        repository.setFreezerAppIntent("com.example.app", FreezerAppIntent.PAUSE)
+        awaitSettings { it.freezerAppIntents.containsKey("com.example.app") }
+
+        repository.removeFreezerApp("com.example.app")
+        val afterRemove = awaitSettings { !it.freezerAppIntents.containsKey("com.example.app") }
+        assertFalse(afterRemove.freezerAppIntents.containsKey("com.example.app"))
+    }
+
+    @Test
+    fun messageUnlockOpenDelayMs_clampsToRange() = runBlocking {
+        repository.setMessageUnlockOpenDelayMs(-100)
+        assertEquals(
+            0,
+            awaitSettings { it.messageReminderSettings.unlockOpenDelayMs == 0 }
+                .messageReminderSettings.unlockOpenDelayMs,
+        )
+
+        repository.setMessageUnlockOpenDelayMs(9_999)
+        val max = MessageSettings.MAX_UNLOCK_OPEN_DELAY_MS
+        assertEquals(
+            max,
+            awaitSettings { it.messageReminderSettings.unlockOpenDelayMs == max }
+                .messageReminderSettings.unlockOpenDelayMs,
+        )
+    }
+
+    @Test
+    fun messageUnlockOpenDelayMs_defaultsTo600ms() = runBlocking {
+        assertEquals(
+            MessageSettings.DEFAULT_UNLOCK_OPEN_DELAY_MS,
+            awaitSettings().messageReminderSettings.unlockOpenDelayMs,
+        )
     }
 }
 

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 
 class DownloadService : Service() {
     companion object {
+        private const val TAG = "DownloadService"
         private const val EXTRA_VERSION = "extra_version"
         private const val EXTRA_URL = "extra_url"
         private const val EXTRA_SIZE = "extra_size"
@@ -99,6 +101,19 @@ class DownloadService : Service() {
     }
 
     private fun startForegroundCompat(progress: Int) {
+        // 渠道先建好并确认存在，再 startForeground：渠道取不到时系统会判为非法前台服务
+        // 通知并在 AMS 侧异步杀进程（Bad notification for startForeground）。
+        // 判据只能用「渠道存不存在」：用户关掉通知渠道时 startForeground() 依然成功
+        // （通知不显示而已），跳过它则 onStartCommand 里那次 startForegroundService()
+        // 的倒计时没人清，30 秒后整个进程被以前台服务超时为由杀掉，下载跟着中断。
+        val channel = UpdateNotifications.ensureDownloadChannel(this)
+        if (!channel.isUsable) {
+            Log.e(TAG, "更新下载通知渠道不可用，跳过前台化")
+            return
+        }
+        if (channel.blocked) {
+            Log.w(TAG, "渠道存在但被用户关闭：通知不可见，仍照常前台化以免前台服务超时杀进程")
+        }
         val notification = UpdateNotifications.buildDownloadNotification(this, progress)
         ServiceCompat.startForeground(
             this,

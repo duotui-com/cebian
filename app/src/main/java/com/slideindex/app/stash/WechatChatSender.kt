@@ -36,12 +36,18 @@ sealed interface StashSendResult {
     data class Failed(val failure: StashSendFailure, val blocksSent: Int) : StashSendResult
 }
 
-/** 逐块发送的内容：文字块与图片块按条目内的顺序，丢掉空白块。 */
+/**
+ * 逐块发送的内容：文字块与图片块按条目内的顺序，丢掉空白块。
+ * 语音块 / 不认识的块没法通过聊天输入框发出去，直接略过（条目里只有语音时就等于“没有可发内容”）。
+ */
 internal fun StashEntry.sendableBlocks(): List<ClipboardContentBlock> =
     resolvedContentBlocks().filter { block ->
         when (block.kind) {
             ClipboardBlockKind.TEXT -> block.text.isNotBlank()
             ClipboardBlockKind.IMAGE -> block.fileName.isNotBlank()
+            ClipboardBlockKind.AUDIO,
+            ClipboardBlockKind.UNKNOWN,
+            -> false
         }
     }
 
@@ -75,6 +81,10 @@ internal object StashBlockSender {
                 when (block.kind) {
                     ClipboardBlockKind.TEXT -> driver.sendText(block.text.trim())
                     ClipboardBlockKind.IMAGE -> driver.sendImage(block.fileName)
+                    // [sendableBlocks] 已经把这两类挡在外面；走到这里说明调用方绕过了过滤，按失败处理而不是悄悄少发。
+                    ClipboardBlockKind.AUDIO,
+                    ClipboardBlockKind.UNKNOWN,
+                    -> StashSendFailure.UNEXPECTED
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled

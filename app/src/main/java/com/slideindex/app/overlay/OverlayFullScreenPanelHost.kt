@@ -26,7 +26,16 @@ class OverlayFullScreenPanelHost(
     private val layoutParamsFactory: (Context, Boolean) -> WindowManager.LayoutParams =
         { context, focusable -> OverlayPanelLayoutParams.fullScreenOverlay(context, focusable) },
     private val onScreenOff: () -> Unit = {},
-    private val excludeLeftBackEdge: Boolean = true
+    private val excludeLeftBackEdge: Boolean = true,
+    /**
+     * 系统把我们的窗口摘掉时回调（§0.16.13 的修复）。
+     *
+     * 例如 Flyme 在切前台 App / 拉起别的 Activity 时会隐藏无障碍覆盖层，我们的 ComposeView 随之
+     * `onViewDetachedFromWindow` —— 但**原来不清 `composeViewRef`**，于是 `isAttached` /
+     * `isViewVisible()` 一直为 true，宿主就"以为面板还开着"：用户再点只会走 dismiss，
+     * 表现为**面板再也打不开**（只能强停 App 才好）。
+     */
+    private val onViewDetached: () -> Unit = {}
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -92,6 +101,21 @@ class OverlayFullScreenPanelHost(
         layoutParams = params
         appContext = context
         screenOffDismissReceiver.register(context)
+        // §0.16.13：窗口被系统摘掉时（不只是我们自己 hide）要把宿主状态复位，否则"面板打不开"。
+        compose.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) = Unit
+
+            override fun onViewDetachedFromWindow(v: View) {
+                if (composeViewRef !== v) return
+                Log.w(tag, "panel view detached by system -> reset host state")
+                composeViewRef = null
+                ownerRef = null
+                layoutParams = null
+                windowManager = null
+                runCatching { screenOffDismissReceiver.unregister() }
+                runCatching { onViewDetached() }
+            }
+        })
         return dialogOwner
     }
 
@@ -116,15 +140,55 @@ class OverlayFullScreenPanelHost(
     }
 
     /**
+     * 只切「可触摸」，不动可见性。
+     *
+     * 跟手拉出用的：面板窗**看得见**（跟着手指走），但拖动期间不能抢把手那个窗的手势 ——
+     * 面板窗是 MATCH_PARENT，只要它还吃触摸，把手就拿不到后续的 MOVE。
+     */
+    fun setTouchable(touchable: Boolean) {
+        runOnMain {
+            val wm = windowManager ?: return@runOnMain
+            val view = composeViewRef ?: return@runOnMain
+            val params = layoutParams ?: return@runOnMain
+            params.flags = if (touchable) {
+                params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+            } else {
+                params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            }
+            runCatching { wm.updateViewLayout(view, params) }
+        }
+    }
+
+    /**
+     * 面板窗的**水平位置**（px，窗口左边缘坐标；gravity 是 TOP|START，所以正数向右，左右侧都不用反号）。
+     *
+     * 跟手拖出用它：窗口只有 78% 宽（见 [OverlayPanelLayoutParams.stashClipboardSidePanel]），
+     * 移动**窗口本身**（而不是窗口里的内容）才能让系统级背景模糊跟着实时重算 ——
+     * 这也是"拖动过程也是实时模糊"的关键（自绘 RenderEffect 快照一平移就失效，只剩白 tint）。
+     *
+     * 值没变就直接返回：拖动每帧都会调，避免无谓的 `updateViewLayout`。
+     */
+    fun setRevealOffsetPx(px: Int) {
+        runOnMain {
+            val wm = windowManager ?: return@runOnMain
+            val view = composeViewRef ?: return@runOnMain
+            val params = layoutParams ?: return@runOnMain
+            if (params.x == px) return@runOnMain
+            params.x = px
+            runCatching { wm.updateViewLayout(view, params) }
+        }
+    }
+
+    /**
      * Cross-window blur for translucent overlay panels (API 31+, [WindowManager.isCrossWindowBlurEnabled]).
      * Returns true when [FLAG_BLUR_BEHIND] is active — Compose should use semi-transparent surfaces.
      */
-    fun updateBackgroundBlur(context: Context, blurRadiusDp: Int): Boolean {
+    fun updateBackgroundBlur(context: Context, blurRadiusDp: Int, userEnabled: Boolean = true): Boolean {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             var result = false
             val latch = java.util.concurrent.CountDownLatch(1)
             mainHandler.post {
-                result = updateBackgroundBlur(context, blurRadiusDp)
+                result = updateBackgroundBlur(context, blurRadiusDp, userEnabled)
                 latch.countDown()
             }
             runCatching { latch.await(500, java.util.concurrent.TimeUnit.MILLISECONDS) }
@@ -134,9 +198,8 @@ class OverlayFullScreenPanelHost(
         val view = composeViewRef ?: return false
         val params = layoutParams ?: return false
 
-        val wantsNativeBlur = blurRadiusDp > 0
-        val canNativeBlur = wantsNativeBlur && runCatching { wm.isCrossWindowBlurEnabled }
-            .getOrDefault(false)
+        val wantsNativeBlur = blurRadiusDp > 0 && userEnabled
+        val canNativeBlur = wantsNativeBlur && OverlayBlurGate.isSystemBlurEnabled(wm)
 
         if (canNativeBlur) {
             params.flags = params.flags or WindowManager.LayoutParams.FLAG_BLUR_BEHIND

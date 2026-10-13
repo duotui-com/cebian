@@ -13,13 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** 暂存夹一条内容四周的内边距；想调整留白改这一个值。 */
 internal val StashItemPadding: Dp = 3.dp
 
 /**
- * 暂存夹列表里的一条：没有卡片底色和圆角，条与条之间用分隔线隔开。
+ * 暂存夹列表里的一条话术：没有卡片底色和圆角，条与条之间用分隔线隔开。
  *
  * 左边可选的缩略图 [leading]，右边是 [body]（两行文案 + 一排操作按钮）。点按整条触发 [onClick]（发送），长按拖出内容。
  */
@@ -42,6 +41,6 @@ internal fun HistoryStashItemShell(
             leading?.invoke()
             Column(modifier = Modifier.weight(1f), content = body)
         }
-        HorizontalDivider(color = MiuixTheme.colorScheme.dividerLine.copy(alpha = 0.5f))
+        HorizontalDivider(color = historyTheme().line)
     }
 }

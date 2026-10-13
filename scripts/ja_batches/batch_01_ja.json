@@ -57,7 +57,7 @@
   },
   {
     "name": "external_invocation_hint",
-    "ja": "xgesture:// リンクまたは Intent アクションで他アプリから XGesture の機能を開けます。検索パネル、ストッシュ、クリップボードにはサイドバーとアクセシビリティサービスが必要です。"
+    "ja": "xgesture:// リンクまたは Intent アクションで他アプリから XGesture の機能を開けます。検索パネル、ひらめき、クリップボードにはサイドバーとアクセシビリティサービスが必要です。"
   },
   {
     "name": "external_invocation_query_hint",
@@ -97,7 +97,7 @@
   },
   {
     "name": "external_invocation_entry_stash",
-    "ja": "ストッシュ"
+    "ja": "ひらめき"
   },
   {
     "name": "external_invocation_entry_clipboard",
@@ -121,7 +121,7 @@
   },
   {
     "name": "external_invocation_entry_stash_desc",
-    "ja": "ストッシュパネルを開く"
+    "ja": "ひらめきパネルを開く"
   },
   {
     "name": "external_invocation_entry_clipboard_desc",
@@ -137,7 +137,7 @@
   },
   {
     "name": "external_invocation_action_stash_desc",
-    "ja": "ストッシュパネルを開く"
+    "ja": "ひらめきパネルを開く"
   },
   {
     "name": "external_invocation_action_clipboard_desc",

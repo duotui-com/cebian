@@ -46,6 +46,8 @@ data class HomeMainSettings(
     val predictiveBackEnabled: Boolean = false,
     val appUiLanguageTag: String = "",
     val swipeDismissEnabled: Boolean = true,
+    /** 悬浮窗模糊总开关：关闭后所有浮层窗口/面板降级为实色底。 */
+    val overlayBlurEnabled: Boolean = true,
 ) {
     val bottomNavBlurRadiusDp: Float
         get() = when (BottomNavStyle.fromId(bottomNavStyleId)) {
@@ -92,6 +94,7 @@ data class HomeMainSettings(
             predictiveBackEnabled = settings.predictiveBackEnabled,
             appUiLanguageTag = settings.appUiLanguageTag,
             swipeDismissEnabled = settings.swipeDismissEnabled,
+            overlayBlurEnabled = settings.overlayBlurEnabled,
         )
     }
 }
@@ -120,6 +123,7 @@ data class ExtensionHubSettings(
     val clipboardLsposedWhitelist: Set<String> = setOf(CLIPBOARD_LSPOSED_SELF_PACKAGE),
     val privilegeMode: PrivilegeMode = PrivilegeMode.SHIZUKU,
     val holographicHiddenAppCount: Int = 0,
+    val fvRingLauncherConfiguredCount: Int = 0,
 ) {
     companion object {
         fun from(settings: AppSettings): ExtensionHubSettings = ExtensionHubSettings(
@@ -139,6 +143,7 @@ data class ExtensionHubSettings(
             clipboardLsposedWhitelist = settings.clipboardLsposedWhitelist,
             privilegeMode = settings.privilegeMode,
             holographicHiddenAppCount = settings.holographicLauncher.hiddenAppPackages.size,
+            fvRingLauncherConfiguredCount = settings.launcher.fvRingLauncherVertical.configuredCount(),
         )
     }
 }

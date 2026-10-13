@@ -133,10 +133,19 @@ internal class GestureSessionThresholdTracker(
         return isTriggerConfigured(trigger) || (counterpart?.let { isTriggerConfigured(it) } == true)
     }
 
-    private fun isReturnSwipeHapticEnabled(): Boolean =
-        isTriggerConfigured(GestureTriggerType.SHORT_SWIPE_IN_AND_BACK) ||
-            isTriggerConfigured(GestureTriggerType.SHORT_SWIPE_UP_AND_BACK) ||
-            isTriggerConfigured(GestureTriggerType.SHORT_SWIPE_DOWN_AND_BACK)
+    /**
+     * 折返震动开关：只认「当前首段方向对应的那个折返槽位」是否配了动作。
+     *
+     * 早先是三个折返槽位「任一配了动作」就整体打开，于是把"向内折返"设成「无」之后，
+     * 只要"沿边折返"还配着动作，向内折返时照样补一声震动；而识别器那边会用
+     * `isTriggerConfigured` 过滤掉未配置的折返（[SwipePathRecognizer.directionTrigger]），
+     * 松手执行的仍是基础内滑 —— 表现就是"白响一声"的幽灵震动。
+     * 改成与识别器同一口径后，未配置的折返不再有震动。
+     */
+    private fun isReturnSwipeHapticEnabled(): Boolean {
+        val trigger = pathRecognizer.activeReturnSwipeTrigger() ?: return false
+        return isTriggerConfigured(trigger)
+    }
 
     fun maybeHapticLongPress(rawX: Float, rawY: Float) {
         if (longPressHapticFired) return
@@ -148,6 +157,11 @@ internal class GestureSessionThresholdTracker(
     }
 
     fun reset() {
+        // 峰值必须跟"已提示"标记一起归零。它记的是"本次手势滑到过的最远处"，
+        // 跨手势留着会让下一次手指刚按下去（当次距离远低于阈值）就同时越过短/长两档，
+        // 在同一帧连发两声震动（实测：上次滑到 501，下次只滑 91px 也双响）。
+        peakPrimaryDistance = 0f
+        peakCompoundDistance = 0f
         wasAboveShortThreshold = false
         wasAboveLongThreshold = false
         wasAboveCompoundShortThreshold = false

@@ -496,6 +496,42 @@ class WechatChatSenderTest {
     }
 
     @Test
+    fun sendableBlocks_skipsVoiceBlocks_soAVoiceOnlyEntryHasNothingToSend() {
+        val mixed = StashEntry(
+            id = "m",
+            type = StashEntryType.RICH,
+            contentBlocks = listOf(
+                ClipboardContentBlock.text("文字"),
+                ClipboardContentBlock.audio("v.m4a", 3_000L),
+                ClipboardContentBlock.image("p.png"),
+            ),
+            createdAtEpochMs = 1L
+        )
+        val voiceOnly = StashEntry(
+            id = "v",
+            type = StashEntryType.RICH,
+            contentBlocks = listOf(ClipboardContentBlock.audio("v.m4a", 3_000L)),
+            createdAtEpochMs = 1L
+        )
+
+        assertEquals(listOf("文字", "p.png"), mixed.sendableBlocks().map { it.text.ifEmpty { it.fileName } })
+        assertTrue(voiceOnly.sendableBlocks().isEmpty())
+    }
+
+    @Test
+    fun sendAll_aVoiceBlockThatBypassedTheFilter_failsInsteadOfBeingSilentlyDropped() = runTest {
+        val driver = RecordingDriver()
+
+        val result = StashBlockSender.sendAll(
+            listOf(ClipboardContentBlock.text("先发文字"), ClipboardContentBlock.audio("v.m4a", 1_000L)),
+            driver
+        )
+
+        assertEquals(StashSendResult.Failed(StashSendFailure.UNEXPECTED, blocksSent = 1), result)
+        assertEquals(listOf("text:先发文字"), driver.calls)
+    }
+
+    @Test
     fun sendableBlocks_textAndImageEntries() {
         val text = StashEntry(id = "t", type = StashEntryType.TEXT, text = "  hello ", createdAtEpochMs = 1L)
         val image = StashEntry(id = "i", type = StashEntryType.IMAGE, imageFileName = "i.png", createdAtEpochMs = 1L)

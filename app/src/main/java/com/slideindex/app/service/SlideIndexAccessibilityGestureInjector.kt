@@ -13,6 +13,9 @@ import android.view.accessibility.AccessibilityWindowInfo
 import com.slideindex.app.gesture.GestureAction
 import com.slideindex.app.gesture.PointerSwipeConfig
 import com.slideindex.app.gesture.PointerSwipeDirection
+import com.slideindex.app.overlay.FloatBallStashPanel
+import com.slideindex.app.overlay.WidgetPickerOverlayWindow
+import com.slideindex.app.overlay.WidgetPopupOverlayWindow
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -45,10 +48,54 @@ internal object SlideIndexAccessibilityGestureInjector {
         }
         val result = when (action) {
             GestureAction.Back -> {
-                if (ClipboardFloatService.isExpandedShowing() && !ClipboardFloatService.isPinned()) {
-                    ClipboardFloatService.closeFromBack()
-                } else {
-                    service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                // §0.16.22 / §0.16.24：**先看收纳面板**（闪念 / 剪贴板侧栏）。
+                //
+                // 为什么必须由这里插一手：面板是独立 overlay 窗，它自己的按键返回处理在真机上
+                // **收不到事件**（实测：面板开着按系统 BACK，窗口焦点不变、面板纹丝不动；
+                // 而"点面板外遮罩"能关，说明面板的 dismiss 本身是好的）。手势返回（悬浮球 / 触钮）
+                // **都**汇到本漏斗，所以这里给面板一条明确入口，不必再指望"系统返回能落到面板窗上"。
+                //
+                // ⚠️ **只调入口、不判定**：`requestBackIfShowing()` 把这次返回交给面板**自己的返回链**，
+                // 那条链里的层级判定**全工程只有一份**（注册表见 `HistoryPanelScreen` 的 KDoc）：
+                //   ① 输入法弹着 → 只收键盘（面板/弹窗/展开态都不动）
+                //   ② 否则面板里的子层（提醒选择器 / 标签管理 / 编辑条 / 记一条弹窗 / 展开的卡片）
+                //      → 只关最上面那一层
+                //   ③ 否则窗口输入态 → 交回浏览态
+                //   ④ 否则面板本身 → 收起
+                // 面板没显示 → 返回 false，落到下面的分支（`GLOBAL_ACTION_BACK`，不吞别人的返回）。
+                //
+                // ⛔ **不要在这里自己判 IME、判子层、也不要自己 `FloatBallStashPanel.dismiss()`**：
+                // 那等于把层级再抄一份，抄漏了就会出现"面板里弹着键盘/卡片展开着，返回却把整个面板关了"
+                // （§0.16.22 的真机回归）。
+                when {
+                    // §0.16.25：小组件面板浮窗 + 「添加小组件」浮窗页面也走手势返回链路。
+                    // 它们过去不在这里，靠"系统注入 KEYCODE_BACK"来关；而那个注入在预测性返回开着的机器上
+                    // 会被 SelfInjectedBackGuard 当回声消费掉（见该类 KDoc），于是"手势返回没反应"。
+                    // 顺序：添加页在最上层，先问它；再问小组件面板本体。
+                    // ⚠️ 这里**只做路由**、不复制键盘优先/子层判定：各窗自己的返回链
+                    // （OverlayViewBackHandler / dismissFromBack）仍然是唯一漏斗。
+                    WidgetPickerOverlayWindow.isShowing -> {
+                        // 走它自己的返回漏斗（键盘优先在内），不要在这里直接关页面。
+                        WidgetPickerOverlayWindow.requestBack()
+                    }
+                    WidgetPopupOverlayWindow.requestBackIfVisible() -> true
+                    FloatBallStashPanel.requestBackIfShowing() -> true
+                    ClipboardFloatService.isExpandedShowing() && !ClipboardFloatService.isPinned() ->
+                        ClipboardFloatService.closeFromBack()
+                    else -> {
+                        // §0.16.24 诊断：面板那一整套层级（含第 0 档键盘优先）**没有任何一档认领**这一次
+                        // 返回 → 交回系统。这是唯一打 `consumed=false` 的地方：真机上看到它，就说明这次
+                        // 返回漏给了下层 App（面板当时没显示），不是被面板吞掉了。
+                        Log.i(BACK_DECISION_TAG, "back decision consumed=false branch=fallthrough")
+                        // §0.16.25：这里**故意不登记"自注入返回"**。
+                        // 曾经登记过（SelfInjectedBackGuard），想拦"系统把这次返回又注回来"的回环；但真机日志与
+                        // 崩溃栈证明那个回环发生在系统内部（`ViewRootImpl` 的兼容回调自己递归注入），
+                        // **根本没有跑回 app 的代码**，所以闸门拦不住它；反而把"系统注入键送达到浮窗"
+                        // 这条正常路吃掉了，导致小组件面板/添加页等浮窗"手势返回没反应"。
+                        // 拦不住的敌人、却误伤自己人 —— 因此撤掉闸门，改为把这些浮窗**直接接进手势返回链路**
+                        // （见上面 when 里的路由），让返回不再依赖系统回声。
+                        service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                    }
                 }
             }
             GestureAction.Home -> service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
@@ -756,6 +803,14 @@ internal object SlideIndexAccessibilityGestureInjector {
     const val MAX_HOLD_DURATION_MS = 5_000L
     const val MAX_RECORDED_GESTURE_DURATION_MS = 5_000L
     private const val TAG = "SlideIndexA11y"
+    /**
+     * §0.16.24：返回决策日志的 tag —— 沿用 `OverlayViewBackHandler` 那个 `OverlayBack`（**不新建 tag**），
+     * 字符串与面板链其余档位逐字一致，`adb logcat -s OverlayBack` 才能把一次返回读成一行。
+     *
+     * 本文件只负责打**最后一档** `fallthrough`（`consumed=false`：走完整套层级都没命中、交回系统）；
+     * 其余分支名见 `OverlaySidePanelHost` 里的常量注释。
+     */
+    private const val BACK_DECISION_TAG = "OverlayBack"
     private const val GESTURE_TIMEOUT_MS = 600L
     private const val SCROLL_GESTURE_DELAY_MS = 180L
 }

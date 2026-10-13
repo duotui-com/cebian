@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.slideindex.app.settings"
-    compileSdk = 37
+    compileSdk = 37
     compileSdkMinor = 1
 
     defaultConfig {
@@ -22,6 +22,7 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
+    implementation(project(":core:cloud-storage"))
     implementation(project(":core:gesture"))
     implementation(project(":core:notification"))
     implementation(project(":core:overlay-layout"))

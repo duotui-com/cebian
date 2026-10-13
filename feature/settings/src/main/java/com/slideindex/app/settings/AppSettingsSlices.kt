@@ -94,6 +94,10 @@ data class LauncherSettings(
     val freezerAppPackages: Set<String> = emptySet(),
     val freezerBootstrapExcludedPackages: Set<String> = emptySet(),
     val freezerShowInLauncher: Boolean = false,
+    /** 冰箱工作模式：面板底部按钮默认执行冻结还是暂停，见 [FreezerWorkMode]。 */
+    val freezerWorkModeId: Int = FreezerWorkMode.DEFAULT.id,
+    /** 每个成员上次被设成的目标态；批量动作优先按它还原，见 [FreezerAppIntent]。 */
+    val freezerAppIntents: Map<String, FreezerAppIntent> = emptyMap(),
     val expandPanelSlotActions: List<com.slideindex.app.gesture.GestureAction?> = List(8) { null },
     /** “切换上一应用”动作忽略的包名黑名单。 */
     val previousAppExcludedPackages: Set<String> = emptySet(),
@@ -105,13 +109,15 @@ data class LauncherSettings(
     val honeycombLauncher: List<com.slideindex.app.launcher.QuickLauncherItem> = emptyList(),
     val honeycombDisplay: HoneycombDisplaySettings = HoneycombDisplaySettings(),
     val appCarouselSwitcher: AppCarouselSwitcherSettings = AppCarouselSwitcherSettings(),
-    val fvAppSwitcherVertical: FvAppSwitcherSettings = FvAppSwitcherSettings(),
-    val fvAppSwitcherHorizontal: FvAppSwitcherSettings = FvAppSwitcherSettings(),
+    val fvRingLauncherVertical: FvRingLauncherSettings = FvRingLauncherSettings(),
+    val fvRingLauncherHorizontal: FvRingLauncherSettings = FvRingLauncherSettings(),
     /** 为 true 时顶/底与左/右共用同一套外观（圈数、尺寸、半径等）。 */
-    val fvAppSwitcherLinkAppearanceAxes: Boolean = FvAppSwitcherLinkFlags.DEFAULT_LINK_APPEARANCE_AXES,
+    val fvRingLauncherLinkAppearanceAxes: Boolean = FvRingLauncherLinkFlags.DEFAULT_LINK_APPEARANCE_AXES,
     /** 为 true 时顶/底与左/右共用同一套槽位。 */
-    val fvAppSwitcherLinkSlotAxes: Boolean = FvAppSwitcherLinkFlags.DEFAULT_LINK_SLOT_AXES,
+    val fvRingLauncherLinkSlotAxes: Boolean = FvRingLauncherLinkFlags.DEFAULT_LINK_SLOT_AXES,
     val holographicLauncher: HolographicLauncherSettings = HolographicLauncherSettings(),
+    /** 「快速启动轮盘」：可创建多个自定义轮盘。 */
+    val quickWheels: List<QuickWheel> = emptyList(),
     val shellCommands: List<com.slideindex.app.shell.ShellCommand> = emptyList(),
     val activityShortcuts: List<com.slideindex.app.activity.ActivityShortcut> = emptyList(),
     /** 桌面图标长按菜单顺序；空表示用默认顺序。 */
@@ -262,10 +268,21 @@ data class FloatBallSettings(
     val floatBallPickTextFirstPanel: Boolean = false,
     /** Pick panel presentation style: INTEGRATED_SCROLL vs TAB_PAGED. */
     val floatBallPickPanelStyle: PickResultPanelStyle = PickResultPanelStyle.TAB_PAGED,
+    /** 取词面板在屏幕上的落位方式：贴底（默认）或屏幕中间。 */
+    val floatBallPickPanelPlacement: PickResultPanelPlacement = PickResultPanelPlacement.BOTTOM_DOCKED,
     /** Pick panel: default search grid display state (REMEMBER_LAST, ALWAYS_EXPANDED, ALWAYS_COLLAPSED). */
     val floatBallPickSearchGridDefaultState: PickResultSearchGridDefaultState = PickResultSearchGridDefaultState.REMEMBER_LAST,
     /** Pick panel: last search grid expanded state for REMEMBER_LAST mode. */
     val floatBallPickSearchGridLastExpanded: Boolean = false,
+    /** Pick panel: 文本区「点词」进入面板时的默认状态（REMEMBER_LAST / ALWAYS_ON / ALWAYS_OFF）。 */
+    val floatBallPickTextModeDefault: PickResultTextModeDefault = PickResultTextModeDefault.REMEMBER_LAST,
+    /**
+     * Pick panel: 上次退出面板时「点词」的状态，仅 REMEMBER_LAST 生效。
+     *
+     * 存 overlay 的 `PickResultTextMode` 存储键（见 PickResultTextModeStore）；
+     * 空串表示还没有记录过，读取方需回落默认值。
+     */
+    val floatBallPickTextModeLastMode: String = "",
     /** Pick panel: engine used by search-button long-press quick search (null = long press idle). */
     val floatBallPickDefaultSearchEngineId: String? = null,
     /** Pick panel: auto-select all text when the panel opens after word pick or screenshot. */
@@ -297,11 +314,20 @@ data class FloatBallSettings(
     val floatBallSideSwipeShortPercent: Float = 320f,
     /** 上滑短滑阈值 = percent × 40dp / 100；超过即为长滑。 */
     val floatBallUpSwipeShortPercent: Float = 256f,
+    /**
+     * 悬浮球手势打开的浮层（快速启动器 / 圆环启动器）对齐手指**按下**位置。
+     *
+     * false = 沿用历史行为：对齐手势判定成立时（滑动为松手时）手指所在位置。
+     * 只影响悬浮球触发的这两个浮层，边滑手势与其它浮层不受影响。
+     */
+    val floatBallOverlayAnchorAtTouchDown: Boolean = false,
     /** When false, translate opens Google Translate in browser; when true, shows in-app overlay. */
-    val floatBallInstantTranslate: Boolean = false,
+    val floatBallInstantTranslate: Boolean = true,
     val floatBallTranslateEngine: FloatBallTranslateEngine = FloatBallTranslateEngine.GOOGLE,
     /** BCP-47 style target language code, or [TranslateTargetLanguages.FOLLOW_APP] to follow app UI language. */
     val floatBallTranslateTargetLang: String = TranslateTargetLanguages.FOLLOW_APP,
+    /** Engine [FloatBallTranslateEngine.LOCAL_APP]: 用户指定的翻译 App 包名；空 = 未选择。 */
+    val floatBallTranslateAppPackage: String = "",
     /** Pick-result card transparency while the in-app translate overlay is open (0=opaque, 1=transparent). */
     val floatBallImageSearchPickPanelTransparency: Float = 0.65f,
     /** Save shared long-image OCR results for later re-open from pick settings. */
@@ -381,6 +407,16 @@ data class ClipboardSettings(
     /** Cross-window blur behind stash/history side panel (API 31+). */
     val stashPanelBackgroundBlurEnabled: Boolean = false,
     val stashPanelBackgroundBlurRadiusDp: Int = AppSettings.STASH_PANEL_BLUR_RADIUS_DEFAULT_DP,
+    /**
+     * 从贴边指示条打开收纳面板时先显示哪个页签。
+     * 默认 [StashPanelHandleOpenTab.CLIPBOARD] = 加这条设置之前的历史行为（点指示条一直开剪贴板）。
+     */
+    val stashPanelHandleOpenTab: StashPanelHandleOpenTab = StashPanelHandleOpenTab.CLIPBOARD,
+    /**
+     * 侧拉面板宽度档位，见 [StashPanelWidthMode]。
+     * 本 fork 默认 [StashPanelWidthMode.COMPACT]（约 62%）：话术列表要的是“一屏多条”，抽屉太宽会盖掉底下的聊天界面。
+     */
+    val stashPanelWidthMode: StashPanelWidthMode = StashPanelWidthMode.COMPACT,
 )
 
 /** 搜索面板与搜索引擎。 */
@@ -397,6 +433,10 @@ data class SearchPanelSettings(
     val searchPanelFileSearchEnabled: Boolean = true,
     val searchPanelAppSearchEnabled: Boolean = true,
     val searchPanelSettingsSearchEnabled: Boolean = true,
+    /** 应用快捷方式（清单 android.app.shortcuts）搜索。 */
+    val searchPanelShortcutSearchEnabled: Boolean = true,
+    /** 剪贴板历史内容搜索。 */
+    val searchPanelClipboardSearchEnabled: Boolean = true,
     /** Enum names of enabled file types; empty means all. */
     val searchPanelFileTypesEnabled: Set<String> = emptySet(),
     val searchPanelFileShowFolders: Boolean = false,
@@ -404,7 +444,6 @@ data class SearchPanelSettings(
     val searchPanelFilePreviewsEnabled: Boolean = true,
     val searchPanelFileFolderWhitelist: Set<String> = emptySet(),
     val searchPanelFileFolderBlacklist: Set<String> = emptySet(),
-    val searchPanelPresentationMode: SearchPanelPresentationMode = SearchPanelPresentationMode.BOTTOM_SHEET,
     val searchPanelBarPosition: SearchPanelBarPosition = SearchPanelBarPosition.TOP,
     val searchPanelListOrder: SearchPanelListOrder = SearchPanelListOrder.TOP_DOWN,
     val searchPanelAppDisplayStyle: SearchPanelAppDisplayStyle = SearchPanelAppDisplayStyle.ICONS,
@@ -474,4 +513,16 @@ data class OtpSettings(
     val otpRecordAppNotifyLimit: Int = com.slideindex.app.otp.OtpRecordLimits.DEFAULT,
     /** 这些应用的验证码不处理（既不提取也不自动填充）。 */
     val otpBlockedPackages: Set<String> = emptySet(),
+)
+
+/**
+ * 全局悬浮窗外观：所有浮层窗口与面板的模糊总开关。
+ *
+ * 只管"窗口跨窗模糊"与"面板内 backdrop"两条路，**不含**壁纸/截图模糊
+ * （`BlurredWallpaperCache` / `SystemWallpaperBlurHelper`；蜂窝与全息启动器背景保持现状）。
+ * 关闭后各处一律降级为实色底，不允许只剩半透明 tint。
+ */
+data class OverlayBlurSettings(
+    /** 悬浮窗模糊总开关；关闭时全部降级为实色底。 */
+    val overlayBlurEnabled: Boolean = true,
 )

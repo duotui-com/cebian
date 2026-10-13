@@ -62,8 +62,9 @@ class StashCategoryViewModel @Inject constructor(
         viewModelScope.launch { stashRepository.moveToCategory(entryId, categoryId) }
     }
 
+    /** 管理页的删除不给撤销，所以连图片 / 语音文件一起立刻删掉（面板里的删除才留着文件给“撤销”用）。 */
     fun deleteEntry(entryId: String) {
-        viewModelScope.launch { stashRepository.delete(entryId) }
+        viewModelScope.launch { stashRepository.delete(entryId, purgeMedia = true) }
     }
 
     fun reorderEntries(categoryId: String, orderedIds: List<String>) {

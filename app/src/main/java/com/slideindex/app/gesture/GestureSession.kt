@@ -35,9 +35,9 @@ class GestureSession(
         ): Boolean
         fun onHoneycombLauncherPointerMove(rawX: Float, rawY: Float)
         fun onHoneycombLauncherContinuousRelease(rawX: Float, rawY: Float)
-        fun onShowAppSwitcher(continuousPick: Boolean, rawX: Float, rawY: Float): Boolean
-        fun onAppSwitcherPointerMove(rawX: Float, rawY: Float)
-        fun onAppSwitcherContinuousRelease(rawX: Float, rawY: Float)
+        fun onShowRingLauncher(continuousPick: Boolean, rawX: Float, rawY: Float): Boolean
+        fun onRingLauncherPointerMove(rawX: Float, rawY: Float)
+        fun onRingLauncherContinuousRelease(rawX: Float, rawY: Float)
         fun onShowFingertipRing(continuousPick: Boolean, rawX: Float, rawY: Float): Boolean
         fun onFingertipRingPointerMove(rawX: Float, rawY: Float)
         fun onFingertipRingContinuousRelease(rawX: Float, rawY: Float)
@@ -233,21 +233,28 @@ class GestureSession(
         sessionContinuousPick.clearHoneycomb()
     }
 
-    fun appSwitcherContinuousPickActive(): Boolean = sessionContinuousPick.appSwitcherActive()
+    fun ringLauncherContinuousPickActive(): Boolean = sessionContinuousPick.ringLauncherActive()
 
-    fun clearAppSwitcherContinuousPick() {
-        sessionContinuousPick.clearAppSwitcher()
+    fun clearRingLauncherContinuousPick() {
+        sessionContinuousPick.clearRingLauncher()
     }
 
     fun clearFingertipRingContinuousPick() {
         sessionContinuousPick.clearFingertipRing()
     }
 
+    fun quickWheelContinuousPickActive(): Boolean = sessionContinuousPick.quickWheelActive()
+
+    fun clearQuickWheelContinuousPick() {
+        sessionContinuousPick.clearQuickWheel()
+    }
+
     fun isContinuousPickActive(): Boolean =
         sessionContinuousPick.honeycombActive() ||
-            sessionContinuousPick.appSwitcherActive() ||
+            sessionContinuousPick.ringLauncherActive() ||
             sessionContinuousPick.appCarouselSwitcherActive() ||
             sessionContinuousPick.fingertipRingActive() ||
+            sessionContinuousPick.quickWheelActive() ||
             sessionContinuousPick.shellActive() ||
             sessionContinuousPick.taskSwitcherActive() ||
             sessionContinuousPick.quickLauncherActive()
@@ -331,8 +338,8 @@ class GestureSession(
             return
         }
 
-        if (sessionContinuousPick.appSwitcherActive()) {
-            callbacks.onAppSwitcherPointerMove(rawX, rawY)
+        if (sessionContinuousPick.ringLauncherActive()) {
+            callbacks.onRingLauncherPointerMove(rawX, rawY)
             return
         }
 
@@ -343,6 +350,11 @@ class GestureSession(
 
         if (sessionContinuousPick.fingertipRingActive()) {
             callbacks.onFingertipRingPointerMove(rawX, rawY)
+            return
+        }
+
+        if (sessionContinuousPick.quickWheelActive()) {
+            com.slideindex.app.overlay.quickwheel.QuickWheelOverlayWindow.onExternalMove(rawX, rawY)
             return
         }
 
@@ -411,9 +423,9 @@ class GestureSession(
                     return
                 }
 
-                if (sessionContinuousPick.appSwitcherActive()) {
-                    sessionContinuousPick.clearAppSwitcher()
-                    callbacks.onAppSwitcherContinuousRelease(rawX, rawY)
+                if (sessionContinuousPick.ringLauncherActive()) {
+                    sessionContinuousPick.clearRingLauncher()
+                    callbacks.onRingLauncherContinuousRelease(rawX, rawY)
                     endSession()
                     return
                 }
@@ -423,6 +435,16 @@ class GestureSession(
                     com.slideindex.app.overlay.carousel.AppCarouselSwitcherOverlay.confirmContinuousRelease(
                         rawX,
                         rawY
+                    )
+                    endSession()
+                    return
+                }
+
+                if (sessionContinuousPick.quickWheelActive()) {
+                    sessionContinuousPick.clearQuickWheel()
+                    com.slideindex.app.overlay.quickwheel.QuickWheelOverlayWindow.confirmContinuousRelease(
+                        rawX,
+                        rawY,
                     )
                     endSession()
                     return
@@ -593,9 +615,9 @@ class GestureSession(
                 sessionContinuousPick.honeycomb = false
                 callbacks.onShowHoneycombLauncher(continuousPick = false, rawX, rawY)
             }
-            GestureAction.AppSwitcher -> {
-                sessionContinuousPick.appSwitcher = false
-                callbacks.onShowAppSwitcher(continuousPick = false, rawX, rawY)
+            GestureAction.RingLauncher -> {
+                sessionContinuousPick.ringLauncher = false
+                callbacks.onShowRingLauncher(continuousPick = false, rawX, rawY)
             }
             GestureAction.AppCarouselSwitcher -> {
                 sessionCallbacks.hapticConfirmLaunch()
@@ -607,6 +629,22 @@ class GestureSession(
                     x,
                     y,
                     externalTracking = false
+                )
+            }
+            is GestureAction.QuickWheel -> {
+                sessionContinuousPick.quickWheel = false
+                sessionCallbacks.hapticConfirmLaunch()
+                com.slideindex.app.overlay.quickwheel.QuickWheelOverlayWindow.show(
+                    context = actionExecutor.context,
+                    settings = sessionSettings,
+                    wheelId = action.wheelId,
+                    anchorRawX = rawX,
+                    anchorRawY = rawY,
+                    actionExecutor = actionExecutor,
+                    externalTracking = false,
+                    shape = action.shape,
+                    manualSectorMask = action.manualSectorMask,
+                    anchorMode = action.anchorMode
                 )
             }
             GestureAction.HolographicLauncher -> {
@@ -713,8 +751,9 @@ class GestureSession(
         if (sessionAdjustMode != null) return
         if (sessionContinuousPick.fingertipRingActive() ||
             sessionContinuousPick.honeycombActive() ||
-            sessionContinuousPick.appSwitcherActive() ||
-            sessionContinuousPick.appCarouselSwitcherActive()
+            sessionContinuousPick.ringLauncherActive() ||
+            sessionContinuousPick.appCarouselSwitcherActive() ||
+            sessionContinuousPick.quickWheelActive()
         ) {
             return
         }

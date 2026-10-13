@@ -32,7 +32,7 @@
 画面端の多角度マルチセグメントスワイプ、片手フローティングポインター、多機能フローティングボール、端末のシェイク、伏せ置き、背面タップなどで **50 種以上のシステムアクション** を簡単に起動できます。**100% ローカルオフライン OCR**、分かち書き（CppJieba）、逆画像検索の集約を深く統合し、任意のアプリ上に高効率なオーバーレイランチャー、アプリ凍結室、OTP 認証コード抽出、通知管理、各 OEM のフリーフォーム小窓を提供。クラウドアップロードや広告は一切なく、プライバシー最優先です。
 
 - **パッケージ名：** `com.slideindex.app`
-- **現在のバージョン：** 1.32.0（versionCode 67）
+- **現在のバージョン：** 1.40.2（versionCode 76）
 - **システム要件：** Android 12+（API 31+）
 - **ライセンス：** [AGPL-3.0 License](LICENSE)
 
@@ -404,12 +404,15 @@ XGesture が日常で役立つと感じたら、開発者にコーヒー ☕ を
 - [SideGesture](https://github.com/aaronzzx/SideGesture) — エッジジェスチャーと Overlay 構成
 - [EdgeGesture](https://github.com/evilgodxu/EdgeGesture) — 拡張パネル、背面ジェスチャー等
 - [EdgeX](https://github.com/oxohang/EdgeX) & [FanFreeform](https://github.com/oxohang/FanFreeform) — ハニカムランチャーと凍結室
+- [Hail](https://github.com/aistra0528/Hail) — 凍結室の凍結/一時停止の特権パス（PM API と shell フォールバック）
 - [ClipboardListener](https://github.com/aa2013/ClipboardListener) & [ClipShare](https://github.com/aa2013/ClipShare) — バックグラウンドクリップボード監視
 - [Root Activity Launcher](https://github.com/zacharee/RootActivityLauncher) — 非エクスポート Activity 起動
 - [Circle To Search](https://github.com/AKS-Labs/CircleToSearch) — 逆画像検索多エンジン統合
 - [Nova Text](https://github.com/CashewTeam/BigBang_NovaText) — フローティングボール OCR
 - [XposedSmsCode](https://github.com/tianma8023/XposedSmsCode) — OTP SMS Hook
 - [Miuix](https://github.com/compose-miuix-ui/miuix) — Miuix Compose コンポーネント
+- [Quick Search](https://github.com/teja2495/quick-search) — 集約検索のファイル/連絡先/電卓インデックスと Web サジェスト
+- [QuickDash](https://github.com/balajitechlabs/quickdash) — 「クイックメニュー」各ツールの仕様参考
 
 ---
 

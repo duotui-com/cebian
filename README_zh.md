@@ -32,7 +32,7 @@
 支持通过屏幕边缘多角度多段滑动、单手悬浮指针、全能悬浮球、机身晃动、扣桌或背部敲击手势，轻松触发 **50+ 种系统动作**；深度整合 **100% 本地离线多引擎 OCR**、分词（CppJieba）与以图搜图聚合，并在任意应用之上提供高效率的悬浮启动面板、应用冻结室、OTP 验证码提取、通知管理与主流 OEM 自由小窗，全程无云端上传与商业广告，纯净隐私优先。
 
 - **应用包名：** `com.slideindex.app`
-- **当前版本：** 1.32.0（versionCode 67）
+- **当前版本：** 1.40.2（versionCode 76）
 - **系统要求：** Android 12+（API 31+）
 - **开源协议：** [AGPL-3.0 License](LICENSE)
 
@@ -423,12 +423,15 @@ cd XGesture
 - [SideGesture](https://github.com/aaronzzx/SideGesture) — 边缘手势与 overlay 架构参考
 - [EdgeGesture](https://github.com/evilgodxu/EdgeGesture) — 扩展面板、闹钟提醒、屏幕翻译、全局复制与背面手势参考
 - [EdgeX](https://github.com/oxohang/EdgeX) & [FanFreeform](https://github.com/oxohang/FanFreeform) — 蜂窝启动器与应用冻结室（Freezer）架构参考
+- [Hail](https://github.com/aistra0528/Hail) — 冻结室的冻结/挂起特权路径对齐（PM API 与 shell 兜底、挂起反射级联）
 - [ClipboardListener](https://github.com/aa2013/ClipboardListener) & [ClipShare](https://github.com/aa2013/ClipShare) — Android 10+ 剪贴板后台监听架构
 - [Root Activity Launcher](https://github.com/zacharee/RootActivityLauncher) — 未导出 Activity 启动方案
 - [Circle To Search](https://github.com/AKS-Labs/CircleToSearch) — 以图搜图多引擎集成策略
 - [Nova Text](https://github.com/CashewTeam/BigBang_NovaText) — 悬浮球取词与点词交互思路
 - [XposedSmsCode](https://github.com/tianma8023/XposedSmsCode) — OTP 短信 Hook 与验证码提取规则
 - [Miuix](https://github.com/compose-miuix-ui/miuix) — 优美的 Material & Miuix 风格 Compose 组件库
+- [Quick Search](https://github.com/teja2495/quick-search) — 聚合搜索的文件/联系人/计算器索引与网页建议
+- [QuickDash](https://github.com/balajitechlabs/quickdash) — 「快捷菜单」各工具的行为规格参考
 
 ---
 

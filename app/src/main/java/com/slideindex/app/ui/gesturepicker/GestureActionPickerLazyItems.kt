@@ -19,6 +19,7 @@ import com.slideindex.app.gesture.GestureAction
 import com.slideindex.app.gesture.GestureActionType
 import com.slideindex.app.gesture.ActionPickerCatalogPolicy
 import com.slideindex.app.gesture.GestureTriggerType
+import com.slideindex.app.gesture.LaunchWindowMode
 import com.slideindex.app.gesture.SlotPickerKind
 import com.slideindex.app.ui.picker.FilteredShortcutCatalog
 import com.slideindex.app.ui.picker.GestureActionCatalog
@@ -94,6 +95,7 @@ fun LazyListScope.actionPickerActionItems(
     onOpenExecuteShellCommand: () -> Unit,
     onOpenOpenLink: () -> Unit = {},
     onOpenSimulateKeyEvent: (() -> Unit)? = null,
+    onOpenQuickWheel: (() -> Unit)? = null,
 ) {
     if (filtered.isEmpty()) {
         item(key = "actions-empty") {
@@ -166,6 +168,17 @@ fun LazyListScope.actionPickerActionItems(
                         onOpenSimulateKeyEvent()
                     },
                 )
+            } else if (action.type == GestureActionType.QUICK_WHEEL && onOpenQuickWheel != null) {
+                // 快捷轮盘要先选「哪个轮盘 + 以什么形态呼出」，所以点它是打开配置而不是直接选中；
+                // 但"当前就是这个动作"时必须按已选中显示（主色标题 + 打勾），与其它动作一致。
+                ActionPickerQuickWheelRow(
+                    action = action,
+                    segmentIndex = index,
+                    segmentCount = section.actions.size,
+                    subtitle = gestureActionDescription(action),
+                    selected = current is GestureAction.QuickWheel,
+                    onOpenConfig = onOpenQuickWheel,
+                )
             } else {
                 ActionPickerActionRow(
                     action = action,
@@ -194,12 +207,14 @@ fun LazyListScope.actionPickerAppItems(
 ) {
     items(filtered.size, key = { filtered[it].packageName }) { index ->
         val app = filtered[index]
-        val selected = current is GestureAction.LaunchApp && current.packageName == app.packageName
+        val currentApp = current as? GestureAction.LaunchApp
+        val selected = currentApp?.packageName == app.packageName
         ActionPickerAppRow(
             app = app,
             segmentIndex = index,
             segmentCount = filtered.size,
             selected = selected,
+            windowMode = if (selected) currentApp.windowMode else LaunchWindowMode.FOLLOW_GLOBAL,
             onSelect = onSelect,
         )
     }

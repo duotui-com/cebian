@@ -34,6 +34,8 @@ import com.slideindex.app.settings.ClipboardMonitoringMode
 import com.slideindex.app.settings.ClipboardOverlayScale
 import com.slideindex.app.settings.ExtensionHubSettings
 import com.slideindex.app.settings.HistoryFloatHandleWidth
+import com.slideindex.app.settings.StashPanelHandleOpenTab
+import com.slideindex.app.settings.StashPanelWidthMode
 import com.slideindex.app.settings.toMinimalAppSettings
 import com.slideindex.app.util.PermissionHelper
 import com.slideindex.app.ui.miuix.MiuixConfirmDialog
@@ -427,6 +429,8 @@ fun StashPanelSettingsScreen(
     onClipboardHistoryFloatEnabledLandscapeChange: (Boolean) -> Unit,
     onClipboardHistoryFloatLockPositionChange: (Boolean) -> Unit,
     onClipboardHistoryFloatHandleWidthChange: (Int) -> Unit,
+    onStashPanelHandleOpenTabChange: (StashPanelHandleOpenTab) -> Unit,
+    onStashPanelWidthModeChange: (StashPanelWidthMode) -> Unit,
     onOpenOverlayPermission: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -436,6 +440,24 @@ fun StashPanelSettingsScreen(
     val handleWidthPresets = HistoryFloatHandleWidth.presets
     val handleWidthIndex = handleWidthPresets.indexOf(settings.clipboardHistoryFloatHandleWidthDp).let {
         if (it >= 0) it else handleWidthPresets.indexOf(HistoryFloatHandleWidth.DEFAULT_DP).coerceAtLeast(0)
+    }
+    // 「指示条打开面板先显示哪个页签」：三档固定顺序（记住上次 / 闪念 / 剪贴板），照枚举声明顺序渲染。
+    val handleOpenTabEntries = StashPanelHandleOpenTab.entries
+    val handleOpenTabLabels = handleOpenTabEntries.map { tab ->
+        when (tab) {
+            StashPanelHandleOpenTab.REMEMBER_LAST ->
+                stringResource(R.string.stash_panel_handle_open_tab_remember)
+            StashPanelHandleOpenTab.STASH -> stringResource(R.string.stash_panel_tab)
+            StashPanelHandleOpenTab.CLIPBOARD -> stringResource(R.string.clipboard_panel_tab)
+        }
+    }
+    // 「面板宽度」：两档，照枚举声明顺序渲染（标准 = 设计稿规格；紧凑 = 用户反馈"太宽"之后补的）。
+    val widthModeEntries = StashPanelWidthMode.entries
+    val widthModeLabels = widthModeEntries.map { mode ->
+        when (mode) {
+            StashPanelWidthMode.STANDARD -> stringResource(R.string.stash_panel_width_mode_standard)
+            StashPanelWidthMode.COMPACT -> stringResource(R.string.stash_panel_width_mode_compact)
+        }
     }
 
     SettingsScreenScaffold(
@@ -499,6 +521,28 @@ fun StashPanelSettingsScreen(
                                 selectedIndex = handleWidthIndex,
                                 onSelectedIndexChange = {
                                     onClipboardHistoryFloatHandleWidthChange(handleWidthPresets[it])
+                                },
+                            )
+                            // 点指示条 / 从指示条横向拉出，两条路都按这一档走（长按=就地记一条不受影响）。
+                            SettingDropdownRow(
+                                title = stringResource(R.string.stash_panel_handle_open_tab_title),
+                                items = handleOpenTabLabels,
+                                selectedIndex = handleOpenTabEntries
+                                    .indexOf(settings.stashPanelHandleOpenTab)
+                                    .coerceAtLeast(0),
+                                onSelectedIndexChange = {
+                                    onStashPanelHandleOpenTabChange(handleOpenTabEntries[it])
+                                },
+                            )
+                            // 面板宽度：标准档是设计稿的 78%，窄屏上会盖掉将近四分之三的屏幕。
+                            SettingDropdownRow(
+                                title = stringResource(R.string.stash_panel_width_mode_title),
+                                items = widthModeLabels,
+                                selectedIndex = widthModeEntries
+                                    .indexOf(settings.stashPanelWidthMode)
+                                    .coerceAtLeast(0),
+                                onSelectedIndexChange = {
+                                    onStashPanelWidthModeChange(widthModeEntries[it])
                                 },
                             )
                         }

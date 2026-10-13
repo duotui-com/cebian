@@ -70,11 +70,29 @@ class StashRepositoryTest {
         )
     }
 
+    private val audioDir: File get() = File(stashDir, "audio")
+
+    private fun audioExists(name: String) = File(audioDir, name).exists()
+
+    /** 只有一段语音的条目（上游的 ＋ 记一条 能录），语音文件真实落盘。 */
+    private fun voiceEntry(id: String, categoryId: String? = null): StashEntry {
+        audioDir.mkdirs()
+        val fileName = "$id.m4a"
+        File(audioDir, fileName).writeBytes(byteArrayOf(1, 2, 3))
+        return StashEntry(
+            id = id,
+            type = StashEntryType.RICH,
+            contentBlocks = listOf(ClipboardContentBlock.audio(fileName, 12_000L)),
+            createdAtEpochMs = 1L,
+            categoryId = categoryId
+        )
+    }
+
     private fun writeIndex(entries: List<StashEntry>) {
         File(stashDir, "index.json").writeText(Json.encodeToString(entries))
     }
 
-    private fun repository() = StashRepository(context)
+    private fun repository() = StashRepository(context, StashMetaRepository(context))
 
     /** 用一个全新的仓库实例重新从磁盘读，确认改动确实落盘了。 */
     private fun reloaded() = repository().entries.value
@@ -223,15 +241,86 @@ class StashRepositoryTest {
     }
 
     @Test
-    fun delete_removesEveryImageOfARichEntry() = runBlocking {
+    fun delete_keepsEveryImageForUndo_andRestoreBringsTheEntryBack() = runBlocking {
         writeIndex(listOf(richEntry("r1", "r1a.png", "r1b.png", "r1c.png"), imageEntry("i1")))
         val repo = repository()
+        val removed = repo.entries.value.first { it.id == "r1" }
 
         repo.delete("r1")
 
         assertEquals(listOf("i1"), ids(repo.entries.value))
-        listOf("r1a.png", "r1b.png", "r1c.png").forEach { assertFalse(imageExists(it)) }
+        // 删除故意不删图片文件：撤销（restore）还要用它们。
+        listOf("r1a.png", "r1b.png", "r1c.png").forEach { assertTrue(imageExists(it)) }
+        assertTrue(repo.restore(removed, 0))
+        assertEquals(listOf("r1", "i1"), ids(repo.entries.value))
+    }
+
+    @Test
+    fun orphanImagesOfADeletedEntry_areSweptOnTheNextStartup() = runBlocking {
+        writeIndex(listOf(richEntry("r1", "r1a.png", "r1b.png"), imageEntry("i1")))
+        val repo = repository()
+        repo.delete("r1")
+
+        // 下一次启动：没有任何条目引用的图片文件统一清掉；还被引用的不动。
+        repository()
+
+        listOf("r1a.png", "r1b.png").forEach { assertFalse(imageExists(it)) }
         assertTrue(imageExists("i1.png"))
+    }
+
+    @Test
+    fun delete_purgeMedia_removesImagesAndVoiceRightAway_butOnlyOfThatEntry() = runBlocking {
+        val voice = voiceEntry("v1", categoryId = "A")
+        writeIndex(listOf(richEntry("r1", "r1a.png", "r1b.png", categoryId = "A"), voice, imageEntry("i1")))
+        val repo = repository()
+
+        repo.delete("r1", purgeMedia = true)
+        repo.delete("v1", purgeMedia = true)
+
+        assertEquals(listOf("i1"), ids(repo.entries.value))
+        listOf("r1a.png", "r1b.png").forEach { assertFalse(imageExists(it)) }
+        assertFalse(audioExists("v1.m4a"))
+        assertTrue(imageExists("i1.png"))
+    }
+
+    @Test
+    fun clearAll_andClearCategory_removeVoiceFilesToo_butKeepPhraseVoice() = runBlocking {
+        writeIndex(
+            listOf(
+                voiceEntry("plain-voice"),
+                voiceEntry("phrase-voice", categoryId = "A"),
+                voiceEntry("other-voice", categoryId = "B"),
+            )
+        )
+        val repo = repository()
+
+        repo.clearAll()
+
+        assertEquals(setOf("phrase-voice", "other-voice"), ids(repo.entries.value).toSet())
+        assertFalse(audioExists("plain-voice.m4a"))
+        assertTrue(audioExists("phrase-voice.m4a"))
+
+        repo.clearCategory("A")
+
+        assertEquals(listOf("other-voice"), ids(repo.entries.value))
+        assertFalse(audioExists("phrase-voice.m4a"))
+        assertTrue(audioExists("other-voice.m4a"))
+    }
+
+    @Test
+    fun restore_aPhraseWhenThePlainListIsFull_isNotEvicted() = runBlocking {
+        val plain = (0 until 200).map { textEntry("p$it") }
+        val phrase = textEntry("c1", categoryId = "A", sortOrder = 3)
+        writeIndex(plain + phrase)
+        val repo = repository()
+        val removed = repo.entries.value.first { it.id == "c1" }
+        repo.delete("c1")
+
+        assertTrue(repo.restore(removed, 5))
+
+        assertEquals(201, repo.entries.value.size)
+        assertTrue(repo.entries.value.any { it.id == "c1" && it.categoryId == "A" && it.sortOrder == 3 })
+        assertEquals("普通条目一条没被挤掉", 200, repo.entries.value.count { it.categoryId == null })
     }
 
     // ───────────────────────── 移动 / 释放 ─────────────────────────
@@ -328,19 +417,120 @@ class StashRepositoryTest {
     // ───────────────────────── 编辑 ─────────────────────────
 
     @Test
-    fun updateText_onlyForTextEntries() = runBlocking {
-        writeIndex(listOf(textEntry("t1"), imageEntry("i1"), richEntry("r1", "r1.png")))
+    fun updateText_trimsAndSyncsFirstTextBlock() = runBlocking {
+        writeIndex(listOf(textEntry("t1"), richEntry("r1", "r1.png")))
         val repo = repository()
 
         assertTrue(repo.updateText("t1", "  新内容  "))
-        assertFalse("图片条目没有文字可改", repo.updateText("i1", "x"))
-        assertFalse("图文条目走 updateContent", repo.updateText("r1", "x"))
+        assertTrue(repo.updateText("r1", "新配文"))
         assertFalse("空文字不受理", repo.updateText("t1", "   "))
         assertFalse(repo.updateText("missing", "x"))
 
         val byId = reloaded().associateBy { it.id }
         assertEquals("新内容", byId.getValue("t1").text)
-        assertNull(byId.getValue("i1").text)
+        val rich = byId.getValue("r1")
+        assertEquals("新配文", rich.text)
+        assertEquals("图文条目的第一个文字块要一起改", "新配文", rich.contentBlocks.first().text)
+        assertEquals("不动 type", StashEntryType.RICH, rich.type)
+        assertEquals("图片块原样保留", 2, rich.contentBlocks.size)
+    }
+
+    @Test
+    fun updateContent_refusesEntriesWithVoiceBlocks_soTheRecordingIsNotLost() = runBlocking {
+        val voice = StashEntry(
+            id = "v1",
+            type = StashEntryType.RICH,
+            text = "语音条目",
+            contentBlocks = listOf(
+                ClipboardContentBlock.text("语音条目"),
+                ClipboardContentBlock.audio("v1.m4a", 3_000L),
+            ),
+            createdAtEpochMs = 1L
+        )
+        writeIndex(listOf(voice))
+        val repo = repository()
+
+        assertFalse(voice.isSimpleContent())
+        assertFalse(repo.updateContent("v1", "改写", StashImageEdit.Keep))
+
+        assertEquals(voice, reloaded().single())
+    }
+
+    @Test
+    fun updateContent_keepsAnImageThenTextEntryInThatOrder() = runBlocking {
+        val file = imageFile("it1.png")
+        val imageFirst = StashEntry(
+            id = "it1",
+            type = StashEntryType.RICH,
+            text = "配文",
+            imageFileName = file,
+            contentBlocks = listOf(ClipboardContentBlock.image(file), ClipboardContentBlock.text("配文")),
+            createdAtEpochMs = 1L,
+            categoryId = "A"
+        )
+        writeIndex(listOf(imageFirst))
+        val repo = repository()
+
+        assertTrue(repo.updateContent("it1", "改过的配文", StashImageEdit.Keep))
+
+        val updated = reloaded().single()
+        // 面板编辑条能做出“图在前、文字在后”；管理页改写不能悄悄翻成“文字在前”，微信里发出去的顺序就变了。
+        assertEquals(
+            listOf(file, "改过的配文"),
+            updated.contentBlocks.map { it.fileName.ifEmpty { it.text } }
+        )
+        assertEquals("A", updated.categoryId)
+    }
+
+    @Test
+    fun updateContent_removingTheImage_deletesTheFileAfterTheIndexIsWritten() = runBlocking {
+        writeIndex(listOf(richEntry("r1", "r1.png")))
+        val repo = repository()
+
+        assertTrue(repo.updateContent("r1", "只留文字", StashImageEdit.Remove))
+
+        // 先看文件（还没有第二个仓库实例去做启动时的孤儿清理），再看落盘的索引。
+        assertFalse("索引写成功之后旧图立刻删掉", imageExists("r1.png"))
+        assertEquals(StashEntryType.TEXT, reloaded().single().type)
+    }
+
+    @Test
+    fun replaceBlocks_removingTheOnlyImage_leavesNoGhostImageReference() = runBlocking {
+        writeIndex(listOf(richEntry("r1", "r1.png", categoryId = "A")))
+        val repo = repository()
+
+        assertTrue(repo.replaceBlocks("r1", listOf(StashRichPart.Text("只剩文字"))))
+
+        val updated = reloaded().single()
+        assertTrue("块里已经没有图了，别再回退去读旧的 imageFileName", updated.allImageFileNames().isEmpty())
+        assertNull(updated.imageFileName)
+        assertEquals("A", updated.categoryId)
+    }
+
+    @Test
+    fun replaceBlockFileNames_withoutImageBlocks_leavesNoGhostImageReference() = runBlocking {
+        writeIndex(listOf(richEntry("r1", "r1.png")))
+        val repo = repository()
+
+        assertTrue(repo.replaceBlockFileNames("r1", listOf(ClipboardContentBlock.text("只剩文字"))))
+
+        val updated = reloaded().single()
+        assertTrue(updated.allImageFileNames().isEmpty())
+        assertNull(updated.imageFileName)
+    }
+
+    @Test
+    fun replaceBlocks_keepsCategorySortOrderAndPin() = runBlocking {
+        val pinned = richEntry("r1", "r1.png", categoryId = "A").copy(sortOrder = 4, starred = true)
+        writeIndex(listOf(pinned))
+        val repo = repository()
+
+        assertTrue(repo.replaceBlocks("r1", listOf(StashRichPart.Text("新正文"))))
+
+        val updated = reloaded().single()
+        assertEquals("A", updated.categoryId)
+        assertEquals(4, updated.sortOrder)
+        assertTrue(updated.starred)
     }
 
     @Test

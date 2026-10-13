@@ -5,7 +5,6 @@ package com.slideindex.app.clipboard.monitor
  * Adapted for XGesture clipboard history / stash integration.
  */
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
@@ -26,6 +25,7 @@ import com.slideindex.app.R
 import com.slideindex.app.clipboard.ClipboardFocusReader
 import com.slideindex.app.clipboard.ClipboardReader
 import com.slideindex.app.settings.ClipboardMonitoringMode
+import com.slideindex.app.util.ForegroundNotificationChannels
 import com.slideindex.app.util.PermissionHelper
 import java.io.File
 import java.lang.ref.WeakReference
@@ -88,7 +88,27 @@ class ClipboardMonitorForegroundService : Service() {
         // 先把进程标记成前台：冷启动 / 装机替换 / 开机重活期间，5 秒窗口很容易被挤掉
         // （历史 ForegroundServiceDidNotStartInTimeException 的成因）。
         // 渠道与正式文案随后补齐，这里用最小通知占位，失败也只记日志。
-        runCatching {
+        // 顺序不能动：渠道必须先于任何 startForeground 落地。
+        // 否则 AMS 在 ServiceRecord.postNotification() 里查不到渠道，会走
+        // killMisbehavingService()，进程被系统以「Bad notification for startForeground」
+        // 强杀——注意那个 catch 抓不住，因为判定发生在 AMS 的 handler 线程。
+        //
+        // 判据只能是「渠道存不存在」（Result.isUsable），**不能**用「用户有没有关掉通知」
+        // （Result.canPromote）：渠道被用户关闭时通知只是不显示，startForeground() 照样成功；
+        // 而一旦因为 canPromote=false 跳过 startForeground()，AMS 那条
+        // startForegroundService() 的倒计时就只有 startForeground() 能清，
+        // 到点必抛 ForegroundServiceDidNotStartInTimeException 把整个进程杀掉
+        // （真机表现：每次冷启动必崩，清数据/删渠道记录后消失）。
+        val channel = ensureChannel()
+        if (!channel.isUsable) {
+            Log.e(tag, "通知渠道不可用，放弃常驻，避免被系统判定为非法前台服务通知")
+            stopSelf()
+            return
+        }
+        if (channel.blocked) {
+            Log.w(tag, "渠道存在但被用户关闭：通知不可见，仍照常前台化以免前台服务超时杀进程")
+        }
+        try {
             val bootstrap = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("")
@@ -99,8 +119,9 @@ class ClipboardMonitorForegroundService : Service() {
             } else {
                 startForeground(NOTIFICATION_ID, bootstrap)
             }
-        }.onFailure { Log.w(tag, "bootstrap startForeground failed", it) }
-        ensureChannel()
+        } catch (error: Exception) {
+            Log.w(tag, "bootstrap startForeground failed", error)
+        }
         promoteToForeground(
             getString(R.string.clipboard_monitor_notification_waiting_title),
             getString(R.string.clipboard_monitor_notification_waiting_text),
@@ -487,6 +508,18 @@ class ClipboardMonitorForegroundService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun promoteToForeground(title: String, text: String) {
+        // 同一份硬前提：渠道不存在时不要 startForeground（会撞「非法通知」被杀）。
+        // [onCreate] 里已经挡过一次，但 [onStartCommand] 与设置页重试路径会再次进来。
+        // 注意这里只拦「渠道不存在」；渠道被用户关闭（blocked）必须照常前台化 ——
+        // 跳过 startForeground() 会被 AMS 以前台服务超时为由直接杀掉进程。
+        val channel = ensureChannel()
+        if (!channel.isUsable) {
+            Log.e(tag, "通知渠道不可用，跳过前台化；常驻监听降级为普通进程状态")
+            return
+        }
+        if (channel.blocked) {
+            Log.w(tag, "渠道存在但被用户关闭：通知不可见，仍照常前台化以免前台服务超时杀进程")
+        }
         val notification = runCatching {
             buildNotification(title, text)
         }.getOrElse { error ->
@@ -510,13 +543,6 @@ class ClipboardMonitorForegroundService : Service() {
             }
         }.onFailure { error ->
             Log.e(tag, "startForeground failed", error)
-            startForeground(
-                NOTIFICATION_ID,
-                NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                    .setContentTitle(title)
-                    .build(),
-            )
         }
     }
 
@@ -529,16 +555,16 @@ class ClipboardMonitorForegroundService : Service() {
         manager.notify(NOTIFICATION_ID, buildNotification(title, text))
     }
 
-    private fun ensureChannel() {
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            getString(R.string.clipboard_monitor_notification_channel_name),
-            NotificationManager.IMPORTANCE_MIN,
-        ).apply {
-            description = getString(R.string.clipboard_monitor_notification_channel_desc)
-        }
-        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
-    }
+    /** 建渠道并回查确认它存在；返回结果见 [ForegroundNotificationChannels.Result]。 */
+    private fun ensureChannel(): ForegroundNotificationChannels.Result =
+        ForegroundNotificationChannels.ensureUsable(
+            context = this,
+            id = CHANNEL_ID,
+            name = getString(R.string.clipboard_monitor_notification_channel_name),
+            importance = NotificationManager.IMPORTANCE_MIN,
+            description = getString(R.string.clipboard_monitor_notification_channel_desc),
+            tag = tag,
+        )
 
     private fun buildNotification(title: String, text: String): Notification {
         val launchIntent = Intent(this, MainActivity::class.java)

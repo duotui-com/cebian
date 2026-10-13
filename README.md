@@ -32,7 +32,7 @@
 Easily trigger **50+ system actions** via customizable multi-angle screen-edge swipes, reachability floating pointers, multi-functional floating ball, device shaking, desk-flipping, or back-tap gestures. Deeply integrates **100% offline on-device OCR**, word segmentation (CppJieba), and reverse image search aggregation—delivering high-efficiency overlay launchers, app freezing, OTP verification code extraction, notification management, and OEM freeform windows on top of any app, completely free from ads and cloud trackers.
 
 - **Package Name:** `com.slideindex.app`
-- **Current Version:** 1.32.0 (versionCode 67)
+- **Current Version:** 1.40.2 (versionCode 76)
 - **Requirements:** Android 12+ (API 31+)
 - **License:** [AGPL-3.0 License](LICENSE)
 
@@ -77,7 +77,7 @@ The app features four main navigation tabs: 🏠 **Home** · 📳 **Motion** · 
 | **System Navigation** | Back, Home, Recents, Previous App, Lock Screen, Power Menu, Split Screen |
 | **Screenshot & Visual** | Fullscreen Screenshot, Region Screenshot, Screenshot OCR, Region OCR, Screen Recorder, Flashlight |
 | **OCR & Image Search** | Floating Ball OCR, Reverse Image Search, Live Screen Translation, Universal Screen Copy, Pin Screenshot, QR Code Scanner |
-| **Panels & Launchers** | Quick Launcher, App Index, Circle Launcher (FV Style), Honeycomb Launcher, Holographic Launcher, Task Switcher (OHO Style), App Freezer, Expand Panel (Volume/Brightness), Widget Overlay |
+| **Panels & Launchers** | Quick Launcher, App Index, Ring Launcher (FV Style), Honeycomb Launcher, Holographic Launcher, Task Switcher (OHO Style), App Freezer, Expand Panel (Volume/Brightness), Widget Overlay |
 | **Media & Controls** | Previous/Next Track, Play/Pause, Volume Adjust, Brightness Adjust, Switch IME |
 | **Tools & History** | Floating Pointer, Clipboard History Panel, Quick Tools Panel (OHO Style), Pause Overlay, Pause Gestures |
 | **Advanced & Extensions** | Run Shell Commands (Shizuku / Root), Launch Activity / Shortcut, Direct App Launch, Alarm Reminder in N min, Re-freeze Apps |
@@ -122,7 +122,7 @@ The app features four main navigation tabs: 🏠 **Home** · 📳 **Motion** · 
 | :--- | :--- | :--- |
 | **App Index** | Extensions → App Index | Alphabetical Pinyin rail app drawer with adjustable columns and transparency |
 | **Quick Launcher** | Extensions → Quick Launcher | Grid launcher supporting multi-panel switching, pagination, folder grouping, and shortcut library |
-| **Circle Launcher** | Gesture Action "Circle Launcher" | FV-style concentric circle layout with customizable tiers, spacing, shapes, and slots |
+| **Ring Launcher** | Gesture Action "Ring Launcher" | FV-style concentric ring layout with customizable tiers, spacing, shapes, and slots |
 | **Honeycomb Launcher** | Extensions → Honeycomb Launcher | Hexagonal honeycomb grid layout with swipe-out direct launching |
 | **Holographic Launcher** | Extensions → Holographic Launcher | Fullscreen 3D holographic sphere launcher; drag to rotate and click to open |
 | **Task Switcher** | Gesture Action "Task Switcher" | OHO-style vertical running tasks panel with swipe-to-switch, kill, clear all, and freeform launch |
@@ -142,12 +142,12 @@ The app features four main navigation tabs: 🏠 **Home** · 📳 **Motion** · 
 <table>
   <tr>
     <th width="33.33%" align="center">Corner Radial Menu</th>
-    <th width="33.33%" align="center">Circle Launcher (FV Style)</th>
+    <th width="33.33%" align="center">Ring Launcher (FV Style)</th>
     <th width="33.33%" align="center">Quick Launcher (Grid)</th>
   </tr>
   <tr>
     <td align="center"><img src="art/screenshots/01_circle_launcher_framed.webp" width="100%" alt="Corner Radial Menu" /></td>
-    <td align="center"><img src="art/screenshots/03_honeycomb_launcher_framed.webp" width="100%" alt="Circle Launcher" /></td>
+    <td align="center"><img src="art/screenshots/03_honeycomb_launcher_framed.webp" width="100%" alt="Ring Launcher" /></td>
     <td align="center"><img src="art/screenshots/06_quick_launcher_framed.webp" width="100%" alt="Quick Launcher" /></td>
   </tr>
   <tr>
@@ -423,12 +423,15 @@ Special thanks to the following open-source projects for their architecture, ins
 - [SideGesture](https://github.com/aaronzzx/SideGesture) — Edge gesture and overlay architecture reference
 - [EdgeGesture](https://github.com/evilgodxu/EdgeGesture) — Expand panel, alarm reminder, screen translation, universal copy, and back-tap gesture reference
 - [EdgeX](https://github.com/oxohang/EdgeX) & [FanFreeform](https://github.com/oxohang/FanFreeform) — Honeycomb launcher and App Freezer architecture reference
+- [Hail](https://github.com/aistra0528/Hail) — Freezer privileged paths (PM API and shell fallback, suspend reflection cascade)
 - [ClipboardListener](https://github.com/aa2013/ClipboardListener) & [ClipShare](https://github.com/aa2013/ClipShare) — Android 10+ background clipboard listening architecture
 - [Root Activity Launcher](https://github.com/zacharee/RootActivityLauncher) — Non-exported activity launching scheme
 - [Circle To Search](https://github.com/AKS-Labs/CircleToSearch) — Multi-engine reverse image search strategy
 - [Nova Text](https://github.com/CashewTeam/BigBang_NovaText) — Floating ball OCR and word selection interaction
 - [XposedSmsCode](https://github.com/tianma8023/XposedSmsCode) — OTP SMS Hook and verification code extraction rules
 - [Miuix](https://github.com/compose-miuix-ui/miuix) — Elegant Material & Miuix style Compose UI component library
+- [Quick Search](https://github.com/teja2495/quick-search) — Aggregated search: file/contact/calculator indexes and web suggestions
+- [QuickDash](https://github.com/balajitechlabs/quickdash) — Behaviour-spec reference for the Quick Menu tools
 
 ---
 

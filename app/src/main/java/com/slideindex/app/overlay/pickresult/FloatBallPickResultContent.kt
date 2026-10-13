@@ -46,9 +46,9 @@ import com.slideindex.app.overlay.FloatBallPickResultPanel
 import com.slideindex.app.overlay.PickResultContentOrigin
 import com.slideindex.app.overlay.PickResultTextSource
 import com.slideindex.app.overlay.ScreenshotLayoutMeta
-import com.slideindex.app.overlay.overlayBottomPanelMaxHeightFraction
-import com.slideindex.app.overlay.overlayBottomPanelMaxWidth
-import com.slideindex.app.overlay.overlayBottomPanelWidth
+import com.slideindex.app.overlay.overlayPickPanelMaxHeightFraction
+import com.slideindex.app.overlay.overlayPickPanelMaxWidth
+import com.slideindex.app.overlay.overlayPickPanelWidth
 import com.slideindex.app.overlay.overlayContainerHeightDp
 import com.slideindex.app.overlay.overlayContainerWidthDp
 import com.slideindex.app.overlay.overlayIsLandscape
@@ -108,6 +108,7 @@ internal fun FloatBallPickResultContent(
     onPinImageToScreen: () -> Unit,
     onStashImage: () -> Unit,
     onImageClick: () -> Unit,
+    onCopyImage: (() -> Unit)? = null,
     onImageIndexChange: (Int) -> Unit,
     screenRect: Rect?,
     layoutMeta: ScreenshotLayoutMeta?
@@ -132,6 +133,12 @@ internal fun FloatBallPickResultContent(
     val showTextSection = hasTextSection || isEditMode
     val hasImageContent = panelImages.isNotEmpty() || screenshot != null
     val textFirstPanelEnabled = appSettings.floatBallPickTextFirstPanel
+    // 屏幕取词入口（悬浮球点词/拖选、区域截图、指针悬停、触钮、通用复制）左上角保留一颗 OCR 来源芯片：
+    // 识别开关没开或模型没装时置灰，而不是消失。分享图片 OCR 与剪贴板/收纳入口不适用，
+    // 它们各自按可用性只显示对应那一颗。
+    val forceOcrSourceChip =
+        contentOrigin == PickResultContentOrigin.SCREEN_PICK && !isShareImageOcr &&
+            !ocrAvailable && !ocrLoading
     val reserveImageSectionPlaceholder = textFirstPanelEnabled &&
         contentOrigin == PickResultContentOrigin.SCREEN_PICK &&
         !hasImageContent
@@ -157,13 +164,23 @@ internal fun FloatBallPickResultContent(
         showTextSection &&
         hasImageContent &&
         !isEditMode
-    val maxPanelHeight = overlayContainerHeightDp() * overlayBottomPanelMaxHeightFraction()
+    val maxPanelHeight = overlayContainerHeightDp() *
+        overlayPickPanelMaxHeightFraction(appSettings.floatBallPickPanelPlacement)
+    val centeredPanel = appSettings.floatBallPickPanelPlacement ==
+        com.slideindex.app.settings.PickResultPanelPlacement.CENTER
     val panelMaxImageHeight = pickResultImageMaxHeightDp()
-    val panelLayoutWidth = overlayBottomPanelMaxWidth() ?: overlayContainerWidthDp()
+    val panelLayoutWidth = overlayPickPanelMaxWidth(appSettings.floatBallPickPanelPlacement)
+        ?: overlayContainerWidthDp()
     val imageContentWidth = if (landscapeDualColumn) {
         (panelLayoutWidth * LANDSCAPE_DUAL_COLUMN_AUX_WEIGHT - 40.dp).coerceAtLeast(80.dp)
     } else {
-        pickResultImageContentWidth()
+        // 居中样式两侧有留白，图片区按面板实际宽度收窄，避免超出卡片被裁切。
+        val extraEdgePadding = if (centeredPanel) {
+            (overlayContainerWidthDp() - panelLayoutWidth).coerceAtLeast(0.dp)
+        } else {
+            0.dp
+        }
+        pickResultImageContentWidth(horizontalPadding = 40.dp + extraEdgePadding)
     }
 
     val dismissInteraction = remember { MutableInteractionSource() }
@@ -364,7 +381,11 @@ internal fun FloatBallPickResultContent(
 
     val overlayImeBottom = rememberOverlayImeBottomHeight()
     val hasAuxiliaryCollapse = showImageSection || hasSearchGrid
-    val panelContentHeight = maxPanelHeight - overlayImeBottom
+    // 高度上限按「整屏可用高度」算，键盘让位交给下游各自让一次：
+    // 居中落位由本函数外层的 `padding(bottom = ime)` 让，贴底落位由 PickResultPanelLayout 内层让。
+    // 真机实测（MEIZU 21，居中落位）：键盘弹出时 containerSize 不缩（一直 851dp），ime 读到 320dp；
+    // 若在这里先减一次 ime，卡片只能长到 275dp，反而填不满键盘上方那块空间。
+    val panelContentHeight = maxPanelHeight
 
     val isTabPaged = appSettings.floatBallPickPanelStyle == com.slideindex.app.settings.PickResultPanelStyle.TAB_PAGED && !landscapeDualColumn
     val showTabBar = isTabPaged && hasImageContent && showTextSection
@@ -451,14 +472,22 @@ internal fun FloatBallPickResultContent(
                         onDismiss = onDismiss
                     )
                 },
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = if (centeredPanel) Alignment.Center else Alignment.BottomCenter
         ) {
-            Box(modifier = Modifier.overlayBottomPanelWidth()) {
+            Box(
+                modifier = Modifier
+                    .overlayPickPanelWidth(appSettings.floatBallPickPanelPlacement)
+                    .then(
+                        // 居中样式：把居中山区域抬到输入法之上，避免被键盘遮住。
+                        if (centeredPanel) Modifier.padding(bottom = overlayImeBottom) else Modifier
+                    )
+            ) {
             PickResultPanelSlideHost(
                 panelRevealed = panelRevealed,
                 panelSlideDistance = panelSlideDistance,
                 panelEnterAnimationMs = appSettings.floatBallPickPanelEnterAnimationMs,
                 panelExitAnimationMs = appSettings.floatBallPickPanelExitAnimationMs,
+                centered = centeredPanel,
                 onPanelBoundsInRoot = { panelBoundsInRoot = it }
             ) { freezeCollapseAnimation ->
                 PickResultCollapsePanelColumn(
@@ -495,6 +524,7 @@ internal fun FloatBallPickResultContent(
                 onPinImageToScreen = onPinImageToScreen,
                 onStashImage = onStashImage,
                 onImageClick = onImageClick,
+                onCopyImage = onCopyImage,
                 onImageIndexChange = onImageIndexChange,
                 onImageSectionExpandedChange = { expanded ->
                     isImageVisible.value = expanded
@@ -516,6 +546,7 @@ internal fun FloatBallPickResultContent(
                 textSource = textSource,
                 textSizeSp = textSizeSp,
                 ocrAvailable = ocrAvailable,
+                forceOcrChip = forceOcrSourceChip,
                 a11yAvailable = a11yAvailable,
                 ocrLoading = ocrLoading,
                 isShareImageOcr = isShareImageOcr,

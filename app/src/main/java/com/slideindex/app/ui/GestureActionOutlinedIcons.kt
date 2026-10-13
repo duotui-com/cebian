@@ -1,6 +1,7 @@
 package com.slideindex.app.ui
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.slideindex.app.gesture.GestureActionType
@@ -29,7 +30,7 @@ internal fun gestureActionTypeOutlinedIcon(type: GestureActionType): ImageVector
     GestureActionType.OPEN_INDEX -> ThinActionIcons.SortByAlpha
     GestureActionType.QUICK_LAUNCHER -> ThinActionIcons.Apps
     GestureActionType.HONEYCOMB_LAUNCHER -> ThinActionIcons.Hive
-    GestureActionType.APP_SWITCHER -> ThinActionIcons.Apps
+    GestureActionType.APP_RING_LAUNCHER -> ThinActionIcons.Apps
     GestureActionType.FINGERTIP_RING -> ThinActionIcons.MenuOpen
     GestureActionType.APP_CAROUSEL_SWITCHER -> ThinActionIcons.AppCarouselSwitcher
     GestureActionType.HOLOGRAPHIC_LAUNCHER -> ThinActionIcons.Globe
@@ -37,6 +38,7 @@ internal fun gestureActionTypeOutlinedIcon(type: GestureActionType): ImageVector
     GestureActionType.SHELL_COMMAND_PANEL -> ThinActionIcons.Code
     GestureActionType.EXECUTE_SHELL_COMMAND -> ThinActionIcons.PlayCircle
     GestureActionType.QUICK_TOOLS_OVERLAY -> ThinActionIcons.QuickTools
+    GestureActionType.QUICK_MENU -> Icons.Outlined.Calculate
     GestureActionType.WIDGET_POPUP_OVERLAY -> ThinActionIcons.Widgets
     GestureActionType.OPEN_STASH_PANEL -> ThinActionIcons.Inventory
     GestureActionType.OPEN_CLIPBOARD_PANEL -> ThinActionIcons.ContentPaste
@@ -49,10 +51,13 @@ internal fun gestureActionTypeOutlinedIcon(type: GestureActionType): ImageVector
     GestureActionType.HOME -> ThinActionIcons.Home
     GestureActionType.RECENTS -> ThinActionIcons.Recents
     GestureActionType.CLOSE_CURRENT_APP -> ThinActionIcons.Close
+    GestureActionType.FORCE_STOP_CURRENT_APP -> ThinActionIcons.ForceStopApp
     GestureActionType.FREE_WINDOW_CURRENT_APP -> ThinActionIcons.FreeWindow
     GestureActionType.CLICK_PASSTHROUGH -> ThinActionIcons.ClickPassthrough
     GestureActionType.FLASHLIGHT -> ThinActionIcons.Flashlight
     GestureActionType.ADJUST_VOLUME -> ThinActionIcons.VolumeUp
+    GestureActionType.VOLUME_UP -> ThinActionIcons.VolumeIncrease
+    GestureActionType.VOLUME_DOWN -> ThinActionIcons.VolumeDecrease
     GestureActionType.ADJUST_BRIGHTNESS -> ThinActionIcons.Brightness
     GestureActionType.TOGGLE_AUTO_BRIGHTNESS -> ThinActionIcons.BrightnessAuto
     GestureActionType.LAUNCH_ASSISTANT -> ThinActionIcons.Assistant
@@ -110,6 +115,8 @@ internal fun gestureActionTypeOutlinedIcon(type: GestureActionType): ImageVector
     GestureActionType.CORNER_INNER_PIN_WHEEL -> ThinActionIcons.TouchApp
     GestureActionType.SNOOZE_OVERLAYS -> ThinActionIcons.VisibilityOff
     GestureActionType.FOREGROUND_ACTIVITY_INSPECTOR -> ThinActionIcons.Search
+    GestureActionType.SMART_SCREENSHOT -> ThinActionIcons.Screenshot
+    GestureActionType.QUICK_WHEEL -> ThinActionIcons.QuickWheel
 }
 
 @Suppress("DEPRECATION")
@@ -118,7 +125,7 @@ internal fun gestureActionTypeThinIcon(type: GestureActionType): ImageVector = w
     GestureActionType.OPEN_INDEX -> ThinActionIcons.SortByAlpha
     GestureActionType.QUICK_LAUNCHER -> ThinActionIcons.Apps
     GestureActionType.HONEYCOMB_LAUNCHER -> ThinActionIcons.Hive
-    GestureActionType.APP_SWITCHER -> ThinActionIcons.Apps
+    GestureActionType.APP_RING_LAUNCHER -> ThinActionIcons.Apps
     GestureActionType.FINGERTIP_RING -> ThinActionIcons.MenuOpen
     GestureActionType.APP_CAROUSEL_SWITCHER -> ThinActionIcons.AppCarouselSwitcher
     GestureActionType.HOLOGRAPHIC_LAUNCHER -> ThinActionIcons.Globe
@@ -126,6 +133,7 @@ internal fun gestureActionTypeThinIcon(type: GestureActionType): ImageVector = w
     GestureActionType.SHELL_COMMAND_PANEL -> ThinActionIcons.Code
     GestureActionType.EXECUTE_SHELL_COMMAND -> ThinActionIcons.Code
     GestureActionType.QUICK_TOOLS_OVERLAY -> ThinActionIcons.QuickTools
+    GestureActionType.QUICK_MENU -> Icons.Outlined.Calculate
     GestureActionType.WIDGET_POPUP_OVERLAY -> ThinActionIcons.Widgets
     GestureActionType.OPEN_STASH_PANEL -> ThinActionIcons.Inventory
     GestureActionType.OPEN_CLIPBOARD_PANEL -> ThinActionIcons.ContentPaste
@@ -138,10 +146,13 @@ internal fun gestureActionTypeThinIcon(type: GestureActionType): ImageVector = w
     GestureActionType.HOME -> ThinActionIcons.Home
     GestureActionType.RECENTS -> ThinActionIcons.Recents
     GestureActionType.CLOSE_CURRENT_APP -> ThinActionIcons.Close
+    GestureActionType.FORCE_STOP_CURRENT_APP -> ThinActionIcons.ForceStopApp
     GestureActionType.FREE_WINDOW_CURRENT_APP -> ThinActionIcons.FreeWindow
     GestureActionType.CLICK_PASSTHROUGH -> ThinActionIcons.ClickPassthrough
     GestureActionType.FLASHLIGHT -> ThinActionIcons.Flashlight
     GestureActionType.ADJUST_VOLUME -> ThinActionIcons.VolumeUp
+    GestureActionType.VOLUME_UP -> ThinActionIcons.VolumeIncrease
+    GestureActionType.VOLUME_DOWN -> ThinActionIcons.VolumeDecrease
     GestureActionType.ADJUST_BRIGHTNESS -> ThinActionIcons.Brightness
     GestureActionType.TOGGLE_AUTO_BRIGHTNESS -> ThinActionIcons.BrightnessAuto
     GestureActionType.LAUNCH_ASSISTANT -> ThinActionIcons.Assistant
@@ -199,4 +210,6 @@ internal fun gestureActionTypeThinIcon(type: GestureActionType): ImageVector = w
     GestureActionType.CORNER_INNER_PIN_WHEEL -> ThinActionIcons.TouchApp
     GestureActionType.SNOOZE_OVERLAYS -> ThinActionIcons.VisibilityOff
     GestureActionType.FOREGROUND_ACTIVITY_INSPECTOR -> ThinActionIcons.Search
+    GestureActionType.SMART_SCREENSHOT -> ThinActionIcons.Screenshot
+    GestureActionType.QUICK_WHEEL -> ThinActionIcons.QuickWheel
 }

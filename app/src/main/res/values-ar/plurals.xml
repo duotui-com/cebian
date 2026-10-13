@@ -168,6 +168,14 @@
         <item quantity="many">%d مُعدّة</item>
         <item quantity="other">%d مُعدّة</item>
     </plurals>
+    <plurals name="fv_ring_launcher_entry_summary">
+        <item quantity="zero">تم تكوين %d عناصر</item>
+        <item quantity="one">تم تكوين %d عنصر</item>
+        <item quantity="two">تم تكوين %d عنصر</item>
+        <item quantity="few">تم تكوين %d عناصر</item>
+        <item quantity="many">تم تكوين %d عناصر</item>
+        <item quantity="other">تم تكوين %d عناصر</item>
+    </plurals>
     <plurals name="quick_launcher_entry_summary_panels">
         <item quantity="zero">%d لوحات تشغيل</item>
         <item quantity="one">%d لوحة تشغيل</item>
@@ -256,6 +264,14 @@
         <item quantity="many">تم نسخ %d عناصر</item>
         <item quantity="other">تم نسخ %d عناصر</item>
     </plurals>
+    <plurals name="freezer_restore_intents_done_count">
+        <item quantity="zero">تمت إعادة %d تطبيقات إلى حالتها المسجّلة</item>
+        <item quantity="one">تمت إعادة %d تطبيق إلى حالته المسجّلة</item>
+        <item quantity="two">تمت إعادة %d تطبيقين إلى حالتهما المسجّلة</item>
+        <item quantity="few">تمت إعادة %d تطبيقات إلى حالتها المسجّلة</item>
+        <item quantity="many">تمت إعادة %d تطبيقًا إلى حالته المسجّلة</item>
+        <item quantity="other">تمت إعادة %d تطبيق إلى حالته المسجّلة</item>
+    </plurals>
     <plurals name="freezer_refreeze_done">
         <item quantity="zero">تم تجميد %d تطبيقات</item>
         <item quantity="one">تم تجميد %d تطبيق</item>
@@ -272,6 +288,22 @@
         <item quantity="many">تم إلغاء تجميد %d تطبيقات</item>
         <item quantity="other">تم إلغاء تجميد %d تطبيقات</item>
     </plurals>
+    <plurals name="freezer_pause_all_done">
+        <item quantity="zero">تم إيقاف %d تطبيقات مؤقتاً</item>
+        <item quantity="one">تم إيقاف %d تطبيق مؤقتاً</item>
+        <item quantity="two">تم إيقاف %d تطبيق مؤقتاً</item>
+        <item quantity="few">تم إيقاف %d تطبيقات مؤقتاً</item>
+        <item quantity="many">تم إيقاف %d تطبيقات مؤقتاً</item>
+        <item quantity="other">تم إيقاف %d تطبيقات مؤقتاً</item>
+    </plurals>
+    <plurals name="freezer_unpause_all_done">
+        <item quantity="zero">تم إلغاء الإيقاف المؤقت عن %d تطبيقات</item>
+        <item quantity="one">تم إلغاء الإيقاف المؤقت عن %d تطبيق</item>
+        <item quantity="two">تم إلغاء الإيقاف المؤقت عن %d تطبيق</item>
+        <item quantity="few">تم إلغاء الإيقاف المؤقت عن %d تطبيقات</item>
+        <item quantity="many">تم إلغاء الإيقاف المؤقت عن %d تطبيقات</item>
+        <item quantity="other">تم إلغاء الإيقاف المؤقت عن %d تطبيقات</item>
+    </plurals>
     <plurals name="freezer_import_frozen_done">
         <item quantity="zero">تم استيراد %d تطبيقات</item>
         <item quantity="one">تم استيراد %d تطبيق</item>
@@ -279,6 +311,14 @@
         <item quantity="few">تم استيراد %d تطبيقات</item>
         <item quantity="many">تم استيراد %d تطبيقات</item>
         <item quantity="other">تم استيراد %d تطبيقات</item>
+    </plurals>
+    <plurals name="freezer_batch_remove_done">
+        <item quantity="zero">لم تتم إزالة أي تطبيق من القائمة</item>
+        <item quantity="one">تمت إزالة %d تطبيق من القائمة</item>
+        <item quantity="two">تمت إزالة %d تطبيقين من القائمة</item>
+        <item quantity="few">تمت إزالة %d تطبيقات من القائمة</item>
+        <item quantity="many">تمت إزالة %d تطبيقاً من القائمة</item>
+        <item quantity="other">تمت إزالة %d تطبيق من القائمة</item>
     </plurals>
     <plurals name="holographic_launcher_entry_summary_hidden">
         <item quantity="zero">%d تطبيقات مخفية</item>
@@ -327,5 +367,21 @@
         <item quantity="few">تمت إضافة %1$d تطبيقات</item>
         <item quantity="many">تمت إضافة %1$d تطبيقًا</item>
         <item quantity="other">تمت إضافة %1$d تطبيق</item>
+    </plurals>
+    <plurals name="search_panel_shortcut_index_count">
+        <item quantity="zero">%d اختصارات مفهرسة</item>
+        <item quantity="one">اختصار واحد مفهرس</item>
+        <item quantity="two">اختصاران مفهران</item>
+        <item quantity="few">%d اختصارات مفهرسة</item>
+        <item quantity="many">%d اختصارًا مفهرسًا</item>
+        <item quantity="other">%d اختصار مفهرس</item>
+    </plurals>
+    <plurals name="search_panel_clipboard_index_count">
+        <item quantity="zero">%d سجلات حافظة</item>
+        <item quantity="one">سجل حافظة واحد</item>
+        <item quantity="two">سجلان للحافظة</item>
+        <item quantity="few">%d سجلات حافظة</item>
+        <item quantity="many">%d سجل حافظة</item>
+        <item quantity="other">%d سجل حافظة</item>
     </plurals>
 </resources>
