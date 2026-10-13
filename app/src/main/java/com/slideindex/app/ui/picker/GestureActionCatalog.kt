@@ -102,6 +102,7 @@ object GestureActionCatalog {
         GestureActionType.OPEN_NOTIFICATIONS,
         GestureActionType.OPEN_QUICK_SETTINGS,
         GestureActionType.CLOSE_CURRENT_APP,
+        GestureActionType.FORCE_STOP_CURRENT_APP,
         GestureActionType.FREE_WINDOW_CURRENT_APP,
         GestureActionType.LOCK_SCREEN,
         GestureActionType.LOCK_SCREEN_AND_SILENCE_RING,
@@ -126,6 +127,8 @@ object GestureActionCatalog {
         GestureActionType.TOGGLE_AUTO_BRIGHTNESS,
         GestureActionType.ADJUST_BRIGHTNESS,
         GestureActionType.ADJUST_VOLUME,
+        GestureActionType.VOLUME_UP,
+        GestureActionType.VOLUME_DOWN,
         GestureActionType.OPEN_VOLUME_PANEL,
         GestureActionType.OPEN_INTERNET_PANEL,
         GestureActionType.TOGGLE_MUTE,
@@ -148,16 +151,18 @@ object GestureActionCatalog {
         GestureActionType.LAUNCH_ASSISTANT,
         GestureActionType.VOICE_SEARCH,
         GestureActionType.VOICE_ASSISTANT,
+        GestureActionType.SMART_SCREENSHOT,
         -> GestureActionCategory.Intelligence
 
         // 4. 面板与启动 (Panels & Launchers)
         GestureActionType.OPEN_INDEX,
         GestureActionType.QUICK_LAUNCHER,
-        GestureActionType.APP_SWITCHER,
+        GestureActionType.APP_RING_LAUNCHER,
         GestureActionType.APP_CAROUSEL_SWITCHER,
         GestureActionType.TASK_SWITCHER,
         GestureActionType.HONEYCOMB_LAUNCHER,
         GestureActionType.HOLOGRAPHIC_LAUNCHER,
+        GestureActionType.QUICK_WHEEL,
         GestureActionType.SEARCH_PANEL,
         GestureActionType.OPEN_LINK,
         GestureActionType.VOLUME_PANEL,
@@ -168,6 +173,7 @@ object GestureActionCatalog {
         GestureActionType.OPEN_STASH_PANEL,
         GestureActionType.WIDGET_POPUP_OVERLAY,
         GestureActionType.QUICK_TOOLS_OVERLAY,
+        GestureActionType.QUICK_MENU,
         -> GestureActionCategory.Panel
 
         // 5. 指针与高级 (Pointer & Advanced)
@@ -208,11 +214,12 @@ object GestureActionCatalog {
         }
         add(GestureAction.QuickLauncher())
         add(GestureAction.OpenIndex)
-        add(GestureAction.AppSwitcher)
+        add(GestureAction.RingLauncher)
         add(GestureAction.FingertipRing)
         add(GestureAction.TaskSwitcher)
         add(GestureAction.HoneycombLauncher)
         add(GestureAction.HolographicLauncher)
+        add(GestureAction.QuickWheel())
         addAll(sharedCoreActions())
         if (includePointerGestureActions) {
             add(GestureAction.OpenFloatingPointerRadialMenu)
@@ -227,11 +234,12 @@ object GestureActionCatalog {
     private fun buildQuickLauncherActions(): List<GestureAction> = buildList {
         add(GestureAction.QuickLauncher())
         add(GestureAction.OpenIndex)
-        add(GestureAction.AppSwitcher)
+        add(GestureAction.RingLauncher)
         add(GestureAction.FingertipRing)
         add(GestureAction.TaskSwitcher)
         add(GestureAction.HoneycombLauncher)
         add(GestureAction.HolographicLauncher)
+        add(GestureAction.QuickWheel())
         addAll(sharedCoreActions())
         add(GestureAction.SnoozeOverlays)
     }
@@ -245,6 +253,7 @@ object GestureActionCatalog {
         GestureAction.OpenNotifications,
         GestureAction.OpenQuickSettings,
         GestureAction.CloseCurrentApp,
+        GestureAction.ForceStopCurrentApp,
         GestureAction.FreeWindowCurrentApp,
         GestureAction.CurrentAppInfo,
         GestureAction.ScreenOffKeepAwake,
@@ -269,6 +278,8 @@ object GestureActionCatalog {
         GestureAction.ToggleAutoBrightness,
         GestureAction.AdjustBrightness,
         GestureAction.AdjustVolume,
+        GestureAction.VolumeUp,
+        GestureAction.VolumeDown,
         GestureAction.OpenVolumePanel,
         GestureAction.ToggleMute,
         GestureAction.MediaPlayPause,
@@ -289,6 +300,7 @@ object GestureActionCatalog {
         GestureAction.LaunchAssistant,
         GestureAction.VoiceSearch,
         GestureAction.VoiceAssistant,
+        GestureAction.SmartScreenshot,
 
         // 4. 面板与启动器 (Panels & Launchers)
         GestureAction.AppCarouselSwitcher,
@@ -302,6 +314,7 @@ object GestureActionCatalog {
         GestureAction.StashPanel,
         GestureAction.WidgetPopupOverlay,
         GestureAction.QuickToolsOverlay,
+        GestureAction.QuickMenu,
 
         // 5. 指针与高级工具 (Pointer & Advanced)
         GestureAction.FloatingPointer,

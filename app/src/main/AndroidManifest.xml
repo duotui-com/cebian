@@ -13,6 +13,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- 闪念语音输入：overlay 在后台要拿麦克风，必须前台服务 + microphone 类型 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.READ_LOGS"
@@ -26,6 +29,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission
         android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"
@@ -76,6 +80,11 @@
         </intent>
         <intent>
             <action android:name="android.intent.action.SEND_MULTIPLE" />
+        </intent>
+        <!-- 「跳转翻译」要探测谁能接收取词文本（Android 11+ 的包可见性）。 -->
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
         </intent>
         <intent>
             <action android:name="android.intent.action.CREATE_SHORTCUT" />
@@ -232,6 +241,20 @@
             android:theme="@style/Theme.SlideIndex.Transparent" />
 
         <activity
+            android:name=".service.FreeWindowShareProxyActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.SlideIndex.Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".imageeditor.SlideIndexImageEditorActivity"
             android:excludeFromRecents="true"
             android:exported="false"
@@ -267,7 +290,7 @@
             android:theme="@style/Theme.SlideIndex.Transparent" />
 
         <activity
-            android:name=".service.AppSwitcherSlotPickTrampolineActivity"
+            android:name=".service.RingLauncherSlotPickTrampolineActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:taskAffinity=""
@@ -332,7 +355,21 @@
             android:theme="@style/Theme.SlideIndex.Transparent" />
 
         <activity
-            android:name=".service.AppSwitcherSlotIconEditorTrampolineActivity"
+            android:name=".service.StashComposerImageTrampolineActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@style/Theme.SlideIndex.Transparent" />
+
+        <activity
+            android:name=".service.StashEditImageTrampolineActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@style/Theme.SlideIndex.Transparent" />
+
+        <activity
+            android:name=".service.RingLauncherSlotIconEditorTrampolineActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:taskAffinity=""
@@ -363,6 +400,34 @@
             android:taskAffinity=""
             android:theme="@style/Theme.SlideIndex.Transparent" />
 
+        <!--
+          「快捷菜单 → 识码解析 → 相机扫码」。
+          不透明主题（要显示相机预览），并在旋转时自行处理而不重建：重建会打断相机会话。
+        -->
+        <activity
+            android:name=".overlay.quickmenu.QuickMenuScanActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="" />
+
+        <!--
+          「快捷菜单 → 倒计时」的到点闹钟接收器：负责响铃通知 + 写计时历史。
+          专属 request code（7301）与提醒（4000 起）互不干扰，所以暂停/复位能精确撤销。
+        -->
+        <receiver
+            android:name=".overlay.quickmenu.QuickMenuTimerAlarmReceiver"
+            android:exported="false" />
+
+        <!--
+          定时提醒到点：发一条通知（标题就是用户输入的提醒内容）。
+          与倒计时分开的 request code（7302），互不干扰。
+        -->
+        <receiver
+            android:name=".overlay.quickmenu.QuickMenuReminderAlarmReceiver"
+            android:exported="false" />
+
         <activity
             android:name=".overlay.searchpanel.ContactPermissionTrampolineActivity"
             android:excludeFromRecents="true"
@@ -373,6 +438,14 @@
 
         <activity
             android:name=".overlay.searchpanel.FilePermissionTrampolineActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:theme="@style/Theme.SlideIndex.Transparent" />
+
+        <activity
+            android:name=".overlay.searchpanel.CameraPermissionTrampolineActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:launchMode="singleTask"
@@ -690,6 +763,39 @@
         <receiver
             android:name=".remind.RemindAlarmReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".stash.StashReminderReceiver"
+            android:exported="false" />
+
+        <!--
+          闪念提醒的补排入口：开机 / 应用更新 / 改系统时间或时区后，照着 StashReminderMirror
+          把未来的提醒重新排进 AlarmManager。数据源是 SharedPreferences，所以不需要 Hilt 就绪。
+        -->
+        <receiver
+            android:name=".stash.StashReminderBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".voice.StashVoicePermissionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.SlideIndex.Transparent" />
+
+        <service
+            android:name=".voice.StashVoiceInputService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <receiver
             android:name=".timeddnd.TempDndNotificationReceiver"

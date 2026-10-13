@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.slideindex.app.download.DownloadProgressRelay
@@ -124,6 +125,19 @@ class NativeEnginePackDownloadService : Service() {
     }
 
     private fun startForegroundCompat(state: NativeEnginePackDownloadState?) {
+        // 渠道先建好并确认存在，再 startForeground：渠道取不到时系统会判为非法前台服务
+        // 通知并在 AMS 侧异步杀进程（Bad notification for startForeground）。
+        // 判据只能用「渠道存不存在」：用户关掉通知渠道时 startForeground() 依然成功
+        // （通知不显示而已），跳过它则 startForegroundService() 的倒计时没人清，
+        // 30 秒后整个进程被以前台服务超时为由杀掉，引擎包下载跟着中断。
+        val channel = NativeEnginePackDownloadNotifications.ensureChannel(this)
+        if (!channel.isUsable) {
+            Log.e(TAG, "下载通知渠道不可用，跳过后台下载前台化")
+            return
+        }
+        if (channel.blocked) {
+            Log.w(TAG, "渠道存在但被用户关闭：通知不可见，仍照常前台化以免前台服务超时杀进程")
+        }
         val notification = NativeEnginePackDownloadNotifications.buildDownloadNotification(this, state)
         ServiceCompat.startForeground(
             this,
@@ -138,6 +152,7 @@ class NativeEnginePackDownloadService : Service() {
     }
 
     companion object {
+        private const val TAG = "NativeEngineDlSvc"
         private const val EXTRA_PACK_ID = "extra_pack_id"
         private const val EXTRA_WIFI_ONLY = "extra_wifi_only"
 

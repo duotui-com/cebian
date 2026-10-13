@@ -38,8 +38,17 @@ android {
         applicationId = "com.slideindex.app"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = 37
-        versionCode = 67
-        versionName = "1.32.0"
+        versionCode = 76
+        versionName = "1.40.2"
+
+        // 输入法诊断日志（ImeDiagnostics）。默认关：正式包零开销。
+        // 出诊断包：`./gradlew :app:assembleFullRelease -PimeDiag=true`（release 构建可用同签名，
+        // 用户不必卸载重装）。日志只在"内容变化或满 1s"时输出，避免日志 IO 改变时序与复现率。
+        buildConfigField(
+            "boolean",
+            "IME_DIAG",
+            ((findProperty("imeDiag") as String?)?.toBoolean() ?: false).toString(),
+        )
 
         ndk {
             abiFilters += "arm64-v8a"
@@ -432,6 +441,7 @@ dependencies {
     implementation(project(":core:ocr"))
     implementation(project(":core:translate"))
     implementation(project(":core:native-engine"))
+    implementation(project(":core:cloud-storage"))
 
     nativeEnginePackArtifacts(libs.onnxruntime.android)
     nativeEnginePackArtifacts(libs.opencv.android)
@@ -460,6 +470,10 @@ dependencies {
     implementation(libs.webkit)
     implementation(libs.okhttp)
     implementation(libs.zxing.core)
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
     implementation(libs.datastore.preferences)
     implementation(libs.tinypinyin)
     implementation(libs.shizuku.api)

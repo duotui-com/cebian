@@ -275,6 +275,13 @@ sealed interface AppNavKey : NavKey {
 
     // Extension tab
     @Serializable data object ExtensionHub : AppNavKey
+    @Serializable data object QuickWheelList : AppNavKey
+    @Serializable data class QuickWheelConfig(val wheelId: String) : AppNavKey
+    @Serializable data class QuickWheelSlotEditor(
+        val wheelId: String,
+        /** `C` 中心容器 / `0:<i>` 一级 / `0:<i>>1:<j>` 二级。 */
+        val path: String,
+    ) : AppNavKey
     @Serializable data object AppCarouselSwitcherSettings : AppNavKey
     @Serializable data object ExtensionExternalInvocations : AppNavKey
     @Serializable data object ExtensionLauncherShortcutMenu : AppNavKey
@@ -296,6 +303,11 @@ sealed interface AppNavKey : NavKey {
         val initialIsLongPress: Boolean = false,
     ) : AppNavKey
     @Serializable data object ExtensionBackup : AppNavKey
+    @Serializable data object ExtensionCloudBackup : AppNavKey
+    @Serializable data object ExtensionCloudStorageSettings : AppNavKey
+
+    /** [configId] 为空串表示新建配置。 */
+    @Serializable data class ExtensionCloudStorageEditor(val configId: String) : AppNavKey
     @Serializable data object ExtensionMissingPermissions : AppNavKey
     @Serializable data object ExtensionPrivacy : AppNavKey
     @Serializable data object ExtensionThirdPartyNotices : AppNavKey
@@ -368,6 +380,7 @@ sealed interface AppNavKey : NavKey {
         val initialLabel: String = "",
     ) : AppNavKey
     @Serializable data object HoneycombDisplaySettings : AppNavKey
+    @Serializable data object RingLauncherSettings : AppNavKey
     @Serializable data object HolographicLauncherSettings : AppNavKey
     @Serializable data object HolographicLauncherHiddenApps : AppNavKey
     @Serializable data object ShellCommands : AppNavKey
@@ -396,6 +409,8 @@ sealed interface AppNavKey : NavKey {
     @Serializable data object SearchPanelPresentationLayout : AppNavKey
     @Serializable data object SearchPanelFileSearch : AppNavKey
     @Serializable data object SearchPanelAppSearch : AppNavKey
+    @Serializable data object SearchPanelShortcutSearch : AppNavKey
+    @Serializable data object SearchPanelClipboardSearch : AppNavKey
     @Serializable data object SearchPanelContactSearch : AppNavKey
     @Serializable data object SearchPanelSystemSettingsSearch : AppNavKey
     @Serializable data object FloatBall : AppNavKey
@@ -419,6 +434,16 @@ sealed interface AppNavKey : NavKey {
         val initialKeyCode: Int = 82,
         val initialKeyName: String = "",
         val initialIsLongPress: Boolean = false,
+    ) : AppNavKey
+    /**
+     * 悬浮球手势绑的是「快速启动器」时，选它打开**哪一个**面板。
+     *
+     * 快速启动器可以有多个面板（页面）；以前悬浮球只能打开默认面板，而侧滑触钮早就能指定
+     * （见 `HomeSideGestureSlotQuickLauncherPanel`），这个键就是把这个能力补齐给悬浮球。
+     */
+    @Serializable data class FloatBallGestureQuickLauncherPanel(
+        val gestureTypeId: Int,
+        val panelId: String = "",
     ) : AppNavKey
     @Serializable data object FloatBallPick : AppNavKey
     /** 「取词 → 拾取与手感」：拾取十字与指针手感参数（原「取词拾取配置」页）。 */
@@ -452,6 +477,8 @@ sealed interface AppNavKey : NavKey {
         val selectedActivityClassName: String,
     ) : AppNavKey
     @Serializable data object TranslateModels : AppNavKey
+    /** 「选择翻译 App」：引擎选「本地 App」时挑一个能接收取词文本的应用。 */
+    @Serializable data object TranslateAppPicker : AppNavKey
     @Serializable data object FloatingPointerPointer : AppNavKey
     @Serializable data object FloatingPointerJoystick : AppNavKey
     @Serializable data object FloatingPointerRadialMenu : AppNavKey

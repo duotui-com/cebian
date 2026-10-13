@@ -68,10 +68,24 @@ data class MessageSettings(
     val appFilterRules: Map<String, MessageAppFilterRule> = emptyMap(),
     /** 解锁屏幕后自动打开锁屏期间到达的最后一条消息。 */
     val openLastMessageOnUnlock: Boolean = false,
+    /**
+     * 解锁后等待多久再打开最后一条消息（毫秒），0 表示立即打开。
+     *
+     * 默认 [DEFAULT_UNLOCK_OPEN_DELAY_MS]：稍等一拍，避开解锁/桌面动画的竞争；
+     * 上限 [MAX_UNLOCK_OPEN_DELAY_MS] 只作越界数据兜底。
+     */
+    val unlockOpenDelayMs: Int = DEFAULT_UNLOCK_OPEN_DELAY_MS,
     /** 解锁后无需询问即可打开消息的应用。 */
     val openLastMessageAlwaysPackages: Set<String> = emptySet(),
     /** 解锁确认卡片自动消失时间，0 表示不自动消失。 */
     val unlockConfirmationAutoDismissSeconds: Int = 3,
+    /**
+     * 锁屏期间到达的消息，其悬浮球提醒保留到解锁后再显示（仅悬浮球样式）。
+     *
+     * 开启后熄屏/锁屏不再删除悬浮球提醒，而是冻结其自动关闭计时并隐藏窗口，
+     * 解锁后重新显示并按 [floatIconAutoDismissSeconds] 重新计时。
+     */
+    val keepFloatIconAfterUnlock: Boolean = false,
 ) {
     @Suppress("DEPRECATION")
     val style: MessageStyle get() = MessageStyle.fromId(styleId)
@@ -93,5 +107,11 @@ data class MessageSettings(
 
     companion object {
         const val C_NOTICE_MAX_RETAINED_CONVERSATIONS = 20
+
+        /** 「解锁后进入最后一条消息」的默认延迟：避免与解锁/桌面动画竞争。 */
+        const val DEFAULT_UNLOCK_OPEN_DELAY_MS = 600
+
+        /** 解锁后打开延迟的上限（毫秒）：再长也只是白白等。 */
+        const val MAX_UNLOCK_OPEN_DELAY_MS = 1500
     }
 }

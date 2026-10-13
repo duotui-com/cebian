@@ -1,19 +1,25 @@
 package com.slideindex.app.overlay.history
 
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slideindex.app.clipboard.ClipboardEntry
+import com.slideindex.app.clipboard.ClipboardHistoryFilter
 import com.slideindex.app.clipboard.ClipboardHistoryRepository
 import com.slideindex.app.stash.StashCategory
 import com.slideindex.app.stash.StashCategoryFilter
 import com.slideindex.app.stash.StashCategoryRepository
 import com.slideindex.app.stash.StashEntry
+import com.slideindex.app.stash.StashMetaRepository
+import com.slideindex.app.stash.StashMetaStore
 import com.slideindex.app.stash.StashRepository
+import com.slideindex.app.stash.StashTag
 import com.slideindex.app.stash.matchesQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,6 +44,7 @@ class HistoryPanelViewModel(
     private val stashRepository: StashRepository?,
     private val clipboardRepository: ClipboardHistoryRepository?,
     private val stashCategoryRepository: StashCategoryRepository? = null,
+    private val metaRepository: StashMetaRepository? = null,
 ) : ViewModel() {
 
     val stashSearchQuery: StateFlow<String> =
@@ -47,6 +55,43 @@ class HistoryPanelViewModel(
 
     val selectedTab: StateFlow<HistoryPanelTab> =
         savedStateHandle.getStateFlow(KEY_SELECTED_TAB, HistoryPanelTab.Stash)
+
+    /**
+     * 标签筛选的**选中集合**（多选；空集 = 「全部」，与老的单选 `null` 同义）。
+     *
+     * ⚠️ 真身**不在** ViewModel 里，而在进程级单例 [StashTagFilterState]（与草稿
+     * [StashComposerDraft] 同一套做法）：面板是 overlay 窗，关掉 / 被系统摘掉之后下次打开是
+     * **全新的 ViewModelStore + 全新的 ViewModel** —— 状态放在这里会跟着没（用户感受就是
+     * "关掉再打开，我选的标签没了"）。这里只是把它桥成 Flow，喂给 [filteredStashEntries]。
+     */
+    val selectedTags: StateFlow<Set<String>> =
+        snapshotFlow { StashTagFilterState.selectedTags.value }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                StashTagFilterState.selectedTags.value,
+            )
+
+    /** 多标签匹配方式：true = 同时含全部（AND，默认），false = 含任一（OR）。同样活在单例里。 */
+    val tagMatchAll: StateFlow<Boolean> =
+        snapshotFlow { StashTagFilterState.matchAll.value }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                StashTagFilterState.matchAll.value,
+            )
+
+    /** 元数据（标签定义 / 标签绑定 / 完成态 / 追加内容 / 来源）。见 `StashMetaRepository`。 */
+    private val metaStore: StateFlow<StashMetaStore> =
+        metaRepository?.store ?: MutableStateFlow(StashMetaStore())
+
+    /** 卡片渲染要读的元数据（完成态 / 标签 / 追加 / 来源），与筛选共用同一份。 */
+    val stashMeta: StateFlow<StashMetaStore> get() = metaStore
+
+    /** 供筛选行渲染的标签定义，按 order 排序。 */
+    val availableTags: StateFlow<List<StashTag>> = metaStore
+        .map { store -> store.tags.sortedBy { it.order } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val stashEntries: StateFlow<List<StashEntry>> = stashRepository?.entries
         ?.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -70,19 +115,55 @@ class HistoryPanelViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, StashCategoryFilter.All)
 
-    val filteredStashEntries: StateFlow<List<StashEntry>> = combine(
+    /**
+     * 先按分类收窄（「全部」= 不收窄；各分类内置顶的浮到最前，见 [StashCategoryFilter.apply]），
+     * 再交给下面的搜索 / 标签筛选。`combine` 的类型安全重载最多 5 路，所以分类这一层单独合并。
+     */
+    private val categoryScopedEntries: Flow<List<StashEntry>> = combine(
         stashEntries,
-        _debouncedStashSearchQuery,
         stashCategoryFilter,
-    ) { entries, query, categoryFilter ->
-        val inCategory = categoryFilter.apply(entries)
+    ) { entries, categoryFilter -> categoryFilter.apply(entries) }
+
+    val filteredStashEntries: StateFlow<List<StashEntry>> = combine(
+        categoryScopedEntries,
+        _debouncedStashSearchQuery,
+        selectedTags,
+        tagMatchAll,
+        metaStore,
+    ) { entries, query, tags, matchAll, meta ->
         val trimmed = query.trim()
-        if (trimmed.isEmpty()) inCategory else inCategory.filter { it.matchesQuery(trimmed) }
+        if (trimmed.isEmpty()) {
+            // 没在搜索：标签筛选生效（空集 = 「全部」，谓词退化成"恒真"，与改动前一字不差）。
+            entries.filter { it.matchesTagFilter(tags, matchAll, meta) }
+        } else {
+            // 搜索 **∧** 标签筛选（两者都生效，都是 AND）：搜索框负责文字 / 标签名命中，
+            // 标签再叠一层。
+            //
+            // ⚠️ 这是**刻意的设计（用户已确认）**，不要再改回"搜索时忽略标签筛选"：
+            // `docs/capsule-refactor-plan.md` §0.2 / §2 一度按设计稿 `visible()` 把这条改成
+            // "搜索时忽略标签筛选"，本轮明确要求恢复叠加（`docs/capsule-feature-prompt.md` 的
+            // P0 验收标准原本也写着"标签筛选与搜索条件叠加"）。配套文案见
+            // `R.string.stash_empty_search_hint`（四套 locale 都写的是"搜索会与标签筛选同时生效"）。
+            entries.filter {
+                it.matchesQuery(trimmed, meta.tagsOf(it.id)) &&
+                    it.matchesTagFilter(tags, matchAll, meta)
+            }
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val clipboardEntryCount: StateFlow<Int> = clipboardRepository?.entryCount
-        ?.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-        ?: MutableStateFlow(0)
+    /** 剪贴板固定筛选（`ClipboardHistoryFilter`），SavedStateHandle 持久化。 */
+    val clipboardFilter: StateFlow<ClipboardHistoryFilter> =
+        savedStateHandle.getStateFlow(KEY_CLIPBOARD_FILTER, ClipboardHistoryFilter.All)
+
+    private val _clipboardFilterCount = MutableStateFlow(clipboardRepository?.entryCount?.value ?: 0)
+
+    /**
+     * 当前筛选下的**完整**条数（SQL `COUNT`）。
+     *
+     * 面板头部的数字用它，**不是** [filteredClipboardEntries]`.size` —— 后者只是"已经加载的那几页"，
+     * 用户往下滑会变大（§0.16.4 待办 1 要修的就是这个）。
+     */
+    val clipboardFilterCount: StateFlow<Int> = _clipboardFilterCount.asStateFlow()
 
     private val _clipboardPagedEntries = MutableStateFlow<List<ClipboardEntry>>(emptyList())
     private val _clipboardSearchResults = MutableStateFlow<List<ClipboardEntry>>(emptyList())
@@ -90,10 +171,20 @@ class HistoryPanelViewModel(
     private var clipboardReachedEnd = false
     private var clipboardLoadJob: Job? = null
     private var clipboardActivateJob: Job? = null
+    private var clipboardCountJob: Job? = null
     private var clipboardPagesInitialized = false
+    /** 当前 `_clipboardPagedEntries` 是按哪个筛选加载的（筛选切换时要整批重来）。 */
+    private var clipboardPagesFilter = ClipboardHistoryFilter.All
 
     val clipboardListLoading: StateFlow<Boolean> = _clipboardListLoading.asStateFlow()
 
+    /**
+     * 列表里真正要渲染的东西。
+     *
+     * 搜索时**忽略固定筛选**（与闪念页签"搜索时忽略标签筛选"同款，见 `filteredStashEntries`）：
+     * 搜索结果本来就整批拿回来（`SEARCH_RESULT_LIMIT`），再叠一层筛选只会让人搜不到自己刚复制的东西。
+     * 没在搜索时：分页本身就是按 [clipboardFilter] 从 SQLite 取的，不需要在这里再过滤一遍。
+     */
     val filteredClipboardEntries: StateFlow<List<ClipboardEntry>> = combine(
         _clipboardPagedEntries,
         _clipboardSearchResults,
@@ -102,6 +193,15 @@ class HistoryPanelViewModel(
         if (query.trim().isEmpty()) paged else searched
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** 头部条数：搜索时 = 搜索命中条数（整批已加载，不随滚动变），否则 = 筛选后的库总数。 */
+    val clipboardViewCount: StateFlow<Int> = combine(
+        clipboardFilterCount,
+        filteredClipboardEntries,
+        clipboardSearchQuery,
+    ) { total, visible, query ->
+        if (query.trim().isEmpty()) total else visible.size
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
     val expandedEntryIds: StateFlow<Set<String>> =
         savedStateHandle.getStateFlow(KEY_EXPANDED_IDS, emptySet())
 
@@ -109,6 +209,14 @@ class HistoryPanelViewModel(
         savedStateHandle.getStateFlow(KEY_IMAGE_INDICES, emptyMap())
 
     init {
+        // 元数据孤儿清理：条目会因为删除 / `MAX_ENTRIES = 200` 裁剪而消失，元数据得跟着收敛。
+        // **只在拿到非空列表时做** —— 空列表可能只是还没加载，照它清会把用户元数据抹光。
+        viewModelScope.launch {
+            val ids = stashRepository?.entries?.value?.map { it.id }.orEmpty()
+            if (ids.isNotEmpty()) {
+                runCatching { metaRepository?.pruneOrphans(ids) }
+            }
+        }
         viewModelScope.launch {
             stashSearchQuery
                 .debounce(200)
@@ -126,12 +234,43 @@ class HistoryPanelViewModel(
         viewModelScope.launch {
             clipboardRepository?.revision?.collect { revision ->
                 if (revision == 0L) return@collect
+                refreshClipboardFilterCount()
                 if (clipboardSearchQuery.value.isNotBlank()) {
                     runSearch(clipboardSearchQuery.value)
                     return@collect
                 }
                 syncPagedListAfterRevision()
             }
+        }
+        // 筛选切换：条数立刻按新筛选重算，分页整批作废重来（游标与"到底了没有"都是按旧筛选算的）。
+        viewModelScope.launch {
+            clipboardFilter.collect { filter ->
+                refreshClipboardFilterCount()
+                if (clipboardPagesFilter == filter) return@collect
+                clipboardPagesFilter = filter
+                clipboardReachedEnd = false
+                clipboardPagesInitialized = false
+                _clipboardPagedEntries.value = emptyList()
+                // 正在跑的加载是**按旧筛选**取的，必须丢掉：否则它回来会把旧筛选的那批写进
+                // `_clipboardPagedEntries`，列表和条数就对不上了。
+                clipboardLoadJob?.cancel()
+                _clipboardListLoading.value = false
+                refreshClipboardPages(showInitialLoading = true)
+            }
+        }
+    }
+
+    /** 重新算"当前筛选下的完整条数"（SQL COUNT，走 IO）。 */
+    private fun refreshClipboardFilterCount() {
+        val repo = clipboardRepository
+        val filter = clipboardFilter.value
+        clipboardCountJob?.cancel()
+        clipboardCountJob = viewModelScope.launch {
+            if (repo == null) {
+                _clipboardFilterCount.value = 0
+                return@launch
+            }
+            _clipboardFilterCount.value = repo.countEntries(filter)
         }
     }
 
@@ -149,6 +288,25 @@ class HistoryPanelViewModel(
 
     fun setSelectedTab(tab: HistoryPanelTab) {
         savedStateHandle[KEY_SELECTED_TAB] = tab
+    }
+
+    /** 点标签 = 切换选中（可多选）；再点已选中的 = 取消。状态落在进程级单例 [StashTagFilterState]。 */
+    fun toggleTagFilter(tag: String) {
+        StashTagFilterState.toggleTag(tag)
+    }
+
+    /** 清空选中（回到「全部」）。「全部」胶囊 / 「清除」胶囊 / 存下新条目后的收尾都走它。 */
+    fun clearTagFilter() {
+        StashTagFilterState.clear()
+    }
+
+    /** 「全部 / 任一」开关：true = 同时含全部（AND，默认），false = 含任一（OR）。 */
+    fun setTagMatchAll(matchAll: Boolean) {
+        StashTagFilterState.setMatchAll(matchAll)
+    }
+
+    fun setClipboardFilter(filter: ClipboardHistoryFilter) {
+        savedStateHandle[KEY_CLIPBOARD_FILTER] = filter
     }
 
     fun toggleExpanded(entryId: String) {
@@ -173,6 +331,8 @@ class HistoryPanelViewModel(
                 triggerContext = context,
                 skipWhenListening = false,
             )
+            // 条数也重算一次：监听进程（另一个进程）写库时我们这边收不到 revision。
+            refreshClipboardFilterCount()
             if (!clipboardPagesInitialized || _clipboardPagedEntries.value.isEmpty()) {
                 refreshClipboardPages(showInitialLoading = _clipboardPagedEntries.value.isEmpty())
             }
@@ -241,6 +401,7 @@ class HistoryPanelViewModel(
             repo.loadHistoryPage(
                 createdBeforeMs = null,
                 limit = HistoryFloatPagination.PAGE_SIZE,
+                filter = clipboardPagesFilter,
             )
         }.entries
         if (freshTop.isEmpty()) {
@@ -275,6 +436,7 @@ class HistoryPanelViewModel(
                 repo.loadHistoryPage(
                     createdBeforeMs = cursor,
                     limit = HistoryFloatPagination.PAGE_SIZE,
+                    filter = clipboardPagesFilter,
                 )
             }
             if (page.entries.isEmpty()) {
@@ -313,7 +475,27 @@ class HistoryPanelViewModel(
         private const val KEY_EXPANDED_IDS = "expanded_entry_ids"
         private const val KEY_IMAGE_INDICES = "selected_image_indices"
         private const val KEY_SELECTED_TAB = "selected_tab"
+        private const val KEY_CLIPBOARD_FILTER = "clipboard_filter"
         /** 侧栏入场动画 + chrome z-order 抬升后再刷新剪贴板，避免与 WM/DB 并发。 */
         private const val CLIPBOARD_TAB_ACTIVATE_DELAY_MS = 450L
     }
+}
+
+/**
+ * 标签筛选谓词（多选）。
+ *
+ * - [selected] 为空 = 没筛标签 → **恒真**（一条不过滤，行为与改动前的"「全部」"完全相同）；
+ * - [matchAll] = true → AND：条目必须**同时含全部**选中标签（默认，需求 2）；
+ * - [matchAll] = false → OR：含**任一**选中标签即可（需求 3 的「任一」）。
+ *
+ * 只选一个标签时 AND / OR 退化成同一个谓词 —— 这正是"单选时代的行为不用重学"的根据。
+ */
+private fun StashEntry.matchesTagFilter(
+    selected: Set<String>,
+    matchAll: Boolean,
+    meta: StashMetaStore,
+): Boolean {
+    if (selected.isEmpty()) return true
+    val names = meta.tagsOf(id)
+    return if (matchAll) selected.all { it in names } else selected.any { it in names }
 }

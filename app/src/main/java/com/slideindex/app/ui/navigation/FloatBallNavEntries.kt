@@ -35,6 +35,7 @@ import com.slideindex.app.ui.GestureSimulateKeyEventScreen
 import com.slideindex.app.ui.ImageSearchEngineDetailScreen
 import com.slideindex.app.ui.ImageSearchEngineSettingsScreen
 import com.slideindex.app.ui.OcrModelSettingsScreen
+import com.slideindex.app.ui.QuickLauncherPanelPickScreen
 import com.slideindex.app.ui.SearchEngineEditorCategory
 import com.slideindex.app.ui.SearchEngineEditorScreen
 import com.slideindex.app.ui.SearchEnginePreviewSortScreen
@@ -47,6 +48,7 @@ import com.slideindex.app.ui.picker.ActivityShortcutPickAppScreen
 import com.slideindex.app.ui.picker.MyShortcutsFolderScreen
 import com.slideindex.app.ui.picker.PresetShortcutsFolderScreen
 import com.slideindex.app.ui.picker.ShareImageTargetPickScreen
+import com.slideindex.app.ui.picker.TranslateAppPickScreen
 import com.slideindex.app.ui.picker.ShareTargetPickScreen
 import com.slideindex.app.ui.resolveImageSearchEngine
 import com.slideindex.app.ui.viewmodel.ExtensionSettingsViewModel
@@ -371,10 +373,14 @@ fun NavEntryBuilder.floatBallNavEntries(ctx: MainNavContext) {
             onOpenShellCommand = { type, command ->
                 ctx.navigate(AppNavKey.FloatBallGestureShellCommand(type.id, command))
             },
+            onOpenQuickLauncherPanel = { type, panelId ->
+                ctx.navigate(AppNavKey.FloatBallGestureQuickLauncherPanel(type.id, panelId))
+            },
             onDownSwipeShortPercentChange = viewModel::setFloatBallDownSwipeShortPercent,
             onSideSwipeShortPercentChange = viewModel::setFloatBallSideSwipeShortPercent,
             onUpSwipeShortPercentChange = viewModel::setFloatBallUpSwipeShortPercent,
             onLongPressMsChange = viewModel::setFloatBallLongPressMs,
+            onOverlayAnchorAtTouchDownChange = viewModel::setFloatBallOverlayAnchorAtTouchDown,
         )
     }
 
@@ -486,6 +492,30 @@ fun NavEntryBuilder.floatBallNavEntries(ctx: MainNavContext) {
                 viewModel.setFloatBallGestureAction(
                     gestureType,
                     GestureAction.ExecuteShellCommand(command),
+                )
+                ctx.navigateBackTo(returnKey)
+            },
+        )
+    }
+
+    /**
+     * 悬浮球手势绑的是「快速启动器」时，选要打开哪一个面板（页面）。
+     * 与侧滑触钮那条 `AppNavKey.HomeSideGestureSlotQuickLauncherPanel` 同构，用同一个选择页。
+     */
+    hiltEntry<AppNavKey.FloatBallGestureQuickLauncherPanel> { key ->
+        val viewModel: ExtensionSettingsViewModel = hiltViewModel()
+        val overlaySettings by viewModel.overlaySettings.collectAsStateWithLifecycle()
+        val settings = overlaySettings.toMinimalAppSettings()
+        val gestureType = FloatBallGestureType.fromId(key.gestureTypeId) ?: FloatBallGestureType.SINGLE_TAP
+        val returnKey = AppNavKey.FloatBallGesture
+        QuickLauncherPanelPickScreen(
+            settings = settings,
+            currentPanelId = key.panelId,
+            onBack = { ctx.backStack.removeLastOrNull() },
+            onSelect = { panel ->
+                viewModel.setFloatBallGestureAction(
+                    gestureType,
+                    GestureAction.QuickLauncher(panel.id),
                 )
                 ctx.navigateBackTo(returnKey)
             },
@@ -668,7 +698,9 @@ fun NavEntryBuilder.floatBallNavEntries(ctx: MainNavContext) {
             settings = settings,
             onBack = { ctx.navigateBackTo(AppNavKey.FloatBallPick) },
             onPickPanelStyleChange = viewModel::setFloatBallPickPanelStyle,
+            onPickPanelPlacementChange = viewModel::setFloatBallPickPanelPlacement,
             onPickSearchGridDefaultStateChange = viewModel::setFloatBallPickSearchGridDefaultState,
+            onPickTextModeDefaultChange = viewModel::setFloatBallPickTextModeDefault,
             onPickTextFirstPanelChange = viewModel::setFloatBallPickTextFirstPanel,
             onPickAutoSelectAllChange = viewModel::setFloatBallPickAutoSelectAll,
             onPickCopyDismissPanelChange = viewModel::setFloatBallPickCopyDismissPanel,
@@ -702,6 +734,20 @@ fun NavEntryBuilder.floatBallNavEntries(ctx: MainNavContext) {
             onTargetLangChange = viewModel::setTranslateTargetLang,
             onOpenMlKitModels = { ctx.navigate(AppNavKey.TranslateModels) },
             onOpenCloudTranslateSettings = { ctx.navigate(AppNavKey.CloudTranslateSettings) },
+            onOpenTranslateAppPicker = { ctx.navigate(AppNavKey.TranslateAppPicker) },
+        )
+    }
+
+    hiltEntry<AppNavKey.TranslateAppPicker> {
+        val viewModel: TranslateSettingsViewModel = hiltViewModel()
+        val overlaySettings by viewModel.overlaySettings.collectAsStateWithLifecycle()
+        TranslateAppPickScreen(
+            selectedPackageName = overlaySettings.floatBallTranslateAppPackage,
+            onBack = { ctx.navigateBackTo(AppNavKey.FloatBallTranslation) },
+            onSelect = { packageName ->
+                viewModel.setTranslateAppPackage(packageName)
+                ctx.navigateBackTo(AppNavKey.FloatBallTranslation)
+            },
         )
     }
 

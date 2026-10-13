@@ -1,3 +1,10 @@
+/*
+ * 移植自 GestureEVO（https://github.com/LumiaGG/GestureEVO，GPL-3.0-only）
+ *   源文件：inspire/imageeditor/InspireImageEditorActivity.kt
+ * 已按本项目的数据模型、主题与集成层改写（部分模块拆分为多文件、部分能力为本项目新增）；
+ * 版权与许可声明见 THIRD_PARTY_NOTICES.md，文件级映射见 docs/ATTRIBUTIONS.md。
+ */
+
 package com.slideindex.app.imageeditor
 
 import android.animation.AnimatorSet
@@ -50,6 +57,7 @@ import com.slideindex.app.overlay.resolvePinImageDisplaySizePx
 import com.slideindex.app.search.SearchEngineLauncher
 import com.slideindex.app.settings.SettingsRepository
 import com.slideindex.app.stash.StashCoordinator
+import com.slideindex.app.stash.StashMetaRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlin.math.abs
@@ -78,6 +86,12 @@ class SlideIndexImageEditorActivity : AppCompatActivity() {
     private var pinScreenRect: Rect? = null
     private var pinLayoutMeta: ScreenshotLayoutMeta? = null
     private var pickReturnContext: ImageEditorPickReturnContext? = null
+    /**
+     * 「保存的结果写到这个文件」（§0.16.22）：非 null = 本实例是被 [resultIntent] 拉起来的，
+     * 「保存」要交出结果而不是写相册。见 [saveEditedBitmapToOutput]。
+     */
+    private var resultOutputPath: String? = null
+
     private var shareEngineDragHelper: ImageEditorShareEngineDragHelper? = null
 
     private lateinit var modeButtons: List<Pair<MaterialButton, EditorMode>>
@@ -98,6 +112,16 @@ class SlideIndexImageEditorActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityInspireImageEditorBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        resultOutputPath = intent.getStringExtra(EXTRA_RESULT_OUTPUT_PATH)?.takeIf { it.isNotBlank() }
+        // §0.16.23：判读日志（tag 与中转 Activity 相同，`adb logcat -s StashImageEdit` 一次看全）。
+        // 这一行是"extra 到底有没有传进来"的**编辑器侧证据**：null 就说明调用方没带 extra，
+        // 本次「保存」会走老的"写相册 + 保存选项"，调用方永远等不到 RESULT_OK。
+        android.util.Log.i(
+            com.slideindex.app.service.StashEditImageTrampolineActivity.LOG_TAG,
+            "editor onCreate resultOutputPath=$resultOutputPath " +
+                "inputCachePath=${intent.getStringExtra(EXTRA_IMAGE_CACHE_PATH)}",
+        )
 
         quickTools = ImageEditorQuickToolsCoordinator(this, binding, editorSession)
 
@@ -260,7 +284,16 @@ class SlideIndexImageEditorActivity : AppCompatActivity() {
             true
         }
         binding.btnCopy.setOnClickListener { copyEditedBitmap() }
-        binding.btnSave.setOnClickListener { showSaveOptions(it) }
+        binding.btnSave.setOnClickListener {
+            // §0.16.22：调用方（闪念编辑浮窗的 ✎）要求"结果回传"时，「保存」不再是
+            // "写进相册 + 弹保存选项"，而是"写到它指定的文件 + RESULT_OK 返回"。
+            val output = resultOutputPath
+            if (output != null) {
+                saveEditedBitmapToOutput(output)
+            } else {
+                showSaveOptions(it)
+            }
+        }
         binding.compactAddTextButton.setOnClickListener {
             val center = binding.editorView.visibleImageCenterPoint() ?: return@setOnClickListener
             showTextEditor(center, binding.editorView.suggestedTextSizeForInsert(), null)
@@ -570,6 +603,7 @@ class SlideIndexImageEditorActivity : AppCompatActivity() {
                 bitmap = bitmap,
                 pinDisplayWidthPx = displayW,
                 pinDisplayHeightPx = displayH,
+                source = StashMetaRepository.SOURCE_IMAGE,
             ) { success ->
                 Toast.makeText(
                     ctx,
@@ -610,6 +644,50 @@ class SlideIndexImageEditorActivity : AppCompatActivity() {
         val yOff = -(anchor.height + popupBinding.root.measuredHeight + dpToPx(8))
         popup.showAsDropDown(anchor, xOff, yOff)
         saveOptionsPopup = popup
+    }
+
+    /**
+     * 「保存」的结果版本（§0.16.22）：把编辑后的位图写进调用方指定的文件，然后 `RESULT_OK` 返回。
+     *
+     * 为什么走文件而不是把 Bitmap 塞进 `Intent`：Bitmap 走 Binder 有 1MB 级别的事务上限，
+     * 一张 2048 长的图必定 `TransactionTooLargeException`。与
+     * `StashComposerImageTrampolineActivity` 回传"选图路径"是同一套做法。
+     *
+     * 失败（导出不出来 / 写不进去）时**写 `RESULT_CANCELED`** 并留在编辑器里：
+     * 调用方按"取消 = 什么都不动"处理，用户不会以为改丢了。写到一半的残文件也在这里删掉。
+     */
+    private fun saveEditedBitmapToOutput(outputPath: String) {
+        exportJob?.cancel()
+        val bitmap = exportEditedBitmap()
+        if (bitmap == null) {
+            toast(R.string.inspire_image_edit_export_failed)
+            return
+        }
+        exportJob = lifecycleScope.launch(Dispatchers.IO) {
+            val file = java.io.File(outputPath)
+            val written = runCatching {
+                file.parentFile?.mkdirs()
+                file.outputStream().use { out ->
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+                }
+                file.length() > 0L
+            }.onFailure {
+                android.util.Log.w("SlideIndexImageEditor", "write edited image failed: $outputPath", it)
+            }.getOrDefault(false)
+            android.util.Log.i(
+                com.slideindex.app.service.StashEditImageTrampolineActivity.LOG_TAG,
+                "editor save→output outputPath=$outputPath 写入成功=$written 字节=${file.length()}",
+            )
+            withContext(Dispatchers.Main) {
+                if (!written) {
+                    runCatching { file.delete() }
+                    toast(R.string.inspire_image_edit_export_failed)
+                    return@withContext
+                }
+                setResult(RESULT_OK)
+                finish()
+            }
+        }
     }
 
     private fun exportAndSave(deleteAfterMinutes: Int) {
@@ -759,6 +837,13 @@ class SlideIndexImageEditorActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_IMAGE_CACHE_PATH = "extra_image_cache_path"
 
+        /**
+         * 「保存的结果写到这个文件，然后 `RESULT_OK` 返回」（§0.16.22）。
+         *
+         * 只有 [resultIntent] 会传它；不传 = 老行为（保存进相册 / 自动删除）。
+         */
+        const val EXTRA_RESULT_OUTPUT_PATH = "extra_image_editor_result_output_path"
+
         private const val PREFS_NAME = "slide_index_image_editor"
         private const val KEY_LAST_MODE = "inspire_image_editor_last_mode"
         private const val KEY_LAST_COLOR = "inspire_image_editor_last_color"
@@ -784,5 +869,28 @@ class SlideIndexImageEditorActivity : AppCompatActivity() {
                 imageCachePath?.takeIf { it.isNotBlank() }?.let { putExtra(EXTRA_IMAGE_CACHE_PATH, it) }
             })
         }
+
+        /**
+         * 给**中转 Activity** 用的启动 Intent（§0.16.22）：多传一个 [resultOutputPath]。
+         *
+         * 多出来的这一个 extra 会把「保存」改成 **"保存到指定文件并 `RESULT_OK` 返回"**
+         * （见 [saveEditedBitmapToOutput]）—— 闪念编辑浮窗里的图片块要的就是这个：
+         * 点 ✎ 进编辑器、保存后**换掉那一块的那张图**，而不是像普通人那样"存进相册再 finish"。
+         *
+         * ⚠️ §0.16.23 回归修复：这里**只造 Intent，不自己 `startActivity`**。
+         * 调用方（`StashEditImageTrampolineActivity`）必须用它的 `registerForActivityResult` launcher
+         * 去 launch —— 原来这个方法内部直接 `context.startActivity(...)`，`requestCode` 是 -1，
+         * 编辑器的 `RESULT_OK` 永远回不到中转 Activity，结果就是"涂鸦保存了但图片没换 +
+         * 面板挂起不恢复"。也**不能**加 `FLAG_ACTIVITY_NEW_TASK`：那会把编辑器放进另一个任务，
+         * 结果同样回不来。
+         *
+         * 为什么不让调用方直接读 [ImageEditorLaunchCache] 里的 bitmap：那个静态缓存是给
+         * "取词面板长按关闭"那条同进程短路径用的，普通关闭 / 保存都不会把结果放回去。
+         */
+        fun resultIntent(context: Context, imageCachePath: String?, resultOutputPath: String): Intent =
+            Intent(context, SlideIndexImageEditorActivity::class.java).apply {
+                imageCachePath?.takeIf { it.isNotBlank() }?.let { putExtra(EXTRA_IMAGE_CACHE_PATH, it) }
+                putExtra(EXTRA_RESULT_OUTPUT_PATH, resultOutputPath)
+            }
     }
 }

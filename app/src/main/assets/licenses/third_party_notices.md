@@ -43,7 +43,29 @@ XGesture（`com.slideindex.app`）在 [GNU Affero General Public License v3.0](L
 - **License:** [GNU General Public License v3.0](app/src/main/assets/licenses/GPL-3.0.txt)
 - **Source:** https://github.com/CashewTeam/BigBang_NovaText
 - **Used in:** 悬浮球取词、无障碍文本提取与 OCR 降级等交互思路（无直接代码移植）
-- **Note:** XGesture 悬浮球主实现参考 GestureEVO / FooView 路线；与 Nova Text 属同类产品思路借鉴
+- **Note:** XGesture 悬浮球主实现参考 GestureEVO / FooView 路线；与 Nova Text 属同类产品思路借鉴（GestureEVO 已开源，另见下一条）
+
+---
+
+## GestureEVO
+
+- **Copyright:** GestureEVO contributors
+- **License:** [GNU General Public License v3.0](app/src/main/assets/licenses/GPL-3.0.txt)（项目标注 GPL-3.0-only）
+- **Source:** https://github.com/LumiaGG/GestureEVO
+- **Used in:** 悬浮球取词管线（`inspire/`：`InspireView`、`InspireFloating`、`InspireDataHolder`、`ManagedBitmap`、`AccessibilityNodeManager`、`BaseFloatingWindow` 等，类职责与模块划分沿用该项目）、屏幕搜索（`screensearch/`：`ScreenSearchFloating`、`ScreenSearchCapture`、`ScreenSearchHighlightView` 等，搜索主循环、无障碍与 OCR 两条取文路径、滚动节奏与区域裁剪策略沿用该项目）、图片编辑器（`imageeditor/`：`EditorSession`、`EditorMode`、`EditAction`、`EditorExportEngine`、`EditorRenderUtils`、`BrushSizePreviewView`、`ShapeTypePreviewView` 沿用其模块划分；核心视图 `ui/ImageEditorView` 与其 `ui/InspireImageEditorView` 有 71 个同名方法）、临时免打扰（`timeddnd/`：`TempDndManager` 与其同名实现，`hasUsableDndPolicyAccess` 签名一致）、无障碍手势注入的观感对齐（`SlideIndexAccessibilityGestureInjector`）
+- **Modifications:** 以 Kotlin 集成至 XGesture 取词与手势管线；按本项目的数据模型、设置体系与主题改写；构建与依赖替换为本仓库体系；屏幕搜索在其基础上废除区域裁剪改为全屏遍历、单步滚动幅度由 60% 屏高收窄至 30%、新增滚动后停稳判定与触底检测、截图前隐藏本项目浮层；图片编辑器拆分为 model/state/ui/utils 多文件，核心视图在本仓库为 Java 实现（其源为 Kotlin `ui/InspireImageEditorView`）并接入本项目的 Material 取色与主题，新增序号标注、钉图、共享拖拽与快捷工具；临时免打扰拆为 6 个文件并新增取消、规则记录与独立的时长范围（`TempDndLimits`，1..1440 分钟，与该项目一致；原先借用提醒模块的 1..120）。移植文件均已加来源头注释
+- **Note:** GestureEVO 的 `inspire/` 内含 `BigBang*` 类，其取词交互应源自 BigBang / Nova Text 一脉（本项目对二者的参考见上一条）
+
+---
+
+## QuickDash
+
+- **Copyright:** balajitechlabs and contributors
+- **License:** 仓库自述 [GPL-3.0](app/src/main/assets/licenses/GPL-3.0.txt)（上游许可链存疑，见 Note）
+- **Source:** https://github.com/balajitechlabs/quickdash
+- **Used in:** 「快捷菜单」各工具的行为规格参考（二维码解析与生成、密码生成、单位/汇率换算、秒表与倒计时、文本工具）
+- **Modifications:** 全部以 Kotlin 独立重写，**无直接代码移植**；重写过程中另修正了参考实现的多处缺陷（二维码尺寸参数被忽略、SSID 含分隔符时的解析、一处从未生效的渐变着色器）
+- **Note:** QuickDash 自称 GPL-3.0，但其上游 PocketOps 标注的是自定义开源许可，与 GPL-3.0 存在冲突（README 末尾另有 All Rights Reserved）。因许可链不清晰，本项目**只参考行为规格、不使用其代码**；若今后需移植其代码，须先厘清该许可链。
 
 ---
 
@@ -102,8 +124,8 @@ XGesture（`com.slideindex.app`）在 [GNU Affero General Public License v3.0](L
 - **Copyright:** Teja Karlapudi
 - **License:** [MIT License](app/src/main/assets/licenses/MIT.txt)
 - **Source:** https://github.com/teja2495/quick-search
-- **Used in:** 聚合搜索中的文件搜索（MediaStore 文件名检索与过滤）、计算器表达式求值、Google 搜索建议 API、联系人打开方式、文件类型分类与路径模式匹配等
-- **Modifications:** 以 Kotlin 重写并集成至 XGesture 聚合搜索管线；去除 Quick Search 独立 App 的 ViewModel / 偏好层；文件搜索改为 `FileSearchIndex` 等独立模块
+- **Used in:** 聚合搜索中的文件搜索（MediaStore 文件名检索与过滤）、计算器表达式求值、Google 搜索建议 API、联系人打开方式、文件类型分类与路径模式匹配等；搜索面板的前缀别名匹配（`SearchPanelAliasResolver`，first token + 空格取别名）与系统壁纸取图顺序（`SystemWallpaperBlurHelper`，drawable → fastDrawable → wallpaper file）
+- **Modifications:** 以 Kotlin 重写并集成至 XGesture 聚合搜索管线；去除 Quick Search 独立 App 的 ViewModel / 偏好层；文件搜索改为 `FileSearchIndex` 等独立模块；搜索面板侧只对齐式样与取图顺序，未移植其代码
 
 ---
 
@@ -158,8 +180,18 @@ XGesture（`com.slideindex.app`）在 [GNU Affero General Public License v3.0](L
 
 ---
 
+## Hail（雹）
+
+- **Copyright:** aistra0528 and contributors
+- **License:** [GNU General Public License v3.0](app/src/main/assets/licenses/GPL-3.0.txt)
+- **Source:** https://github.com/aistra0528/Hail
+- **Used in:** 应用冻结室的冻结/解冻特权路径（`FreezerPrivilegedOps`：优先 PM API、其次 shell 兜底）与应用挂起（Suspend / 暂停）的实现路径（`setAppSuspended`：按 SDK 的 7/9 参数反射级联、`FLAG_SUSPENDED` 回读判定、`SuspendDialogInfo`、`FreezerBootstrap` 扫描 `FLAG_SUSPENDED`），对齐 Hail 的 `HShell.setAppDisabled` / `HShizuku.setAppDisabled` / `HShizuku.setAppSuspended`
+- **Modifications:** 集成至 XGesture 冰箱管线（冰箱主体移植自 EdgeX）；冻结与挂起两条路径均按 Hail 的行为与特权 API 选择实现，未整体引入其模块结构
+
+---
+
 ## 许可证全文
 
-- Apache License 2.0：`app/src/main/assets/licenses/Apache-2.0.txt`
-- MIT License：`app/src/main/assets/licenses/MIT.txt`
-- GNU General Public License v3.0：`app/src/main/assets/licenses/GPL-3.0.txt`
+- [Apache License 2.0](app/src/main/assets/licenses/Apache-2.0.txt)
+- [MIT License](app/src/main/assets/licenses/MIT.txt)
+- [GNU General Public License v3.0](app/src/main/assets/licenses/GPL-3.0.txt)

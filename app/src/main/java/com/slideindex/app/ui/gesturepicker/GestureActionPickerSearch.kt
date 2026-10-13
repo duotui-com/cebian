@@ -6,7 +6,6 @@ import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import com.slideindex.app.R
 import com.slideindex.app.gesture.GestureAction
 import com.slideindex.app.gesture.GestureActionType
@@ -59,6 +58,18 @@ fun filterGestureActions(
 }
 
 fun gestureActionSearchAliases(context: Context, action: GestureAction): List<String> = when (action.type) {
+    GestureActionType.QUICK_MENU -> listOf(
+        context.getString(R.string.gesture_search_quick_menu_1),
+        "quick menu",
+        "toolbox",
+        "utilities",
+        context.getString(R.string.gesture_search_quick_menu_2),
+        "calculator",
+        "converter",
+        "qr code",
+        "password",
+        "stopwatch",
+    )
     GestureActionType.APP_CAROUSEL_SWITCHER -> listOf(
         context.getString(R.string.gesture_search_carousel_1),
         "app switcher",
@@ -123,6 +134,26 @@ fun gestureActionSearchAliases(context: Context, action: GestureAction): List<St
         context.getString(R.string.gesture_search_volume_3),
         "volume panel",
     )
+    GestureActionType.VOLUME_UP -> listOf(
+        context.getString(R.string.gesture_search_volume_1),
+        context.getString(R.string.gesture_search_volume_2),
+        context.getString(R.string.gesture_search_volume_3),
+        "volume up",
+    )
+    GestureActionType.VOLUME_DOWN -> listOf(
+        context.getString(R.string.gesture_search_volume_1),
+        context.getString(R.string.gesture_search_volume_2),
+        context.getString(R.string.gesture_search_volume_3),
+        "volume down",
+    )
+    GestureActionType.FORCE_STOP_CURRENT_APP -> listOf(
+        context.getString(R.string.gesture_search_force_stop_1),
+        context.getString(R.string.gesture_search_force_stop_2),
+        context.getString(R.string.gesture_search_force_stop_3),
+        "force stop",
+        "kill app",
+        "kill",
+    )
     GestureActionType.SIMULATE_KEY_EVENT -> listOf(
         context.getString(R.string.gesture_search_keyevent_1),
         context.getString(R.string.gesture_search_keyevent_2),
@@ -135,6 +166,7 @@ fun gestureActionSearchAliases(context: Context, action: GestureAction): List<St
 fun gestureActionDescriptionText(context: Context, action: GestureAction): String? =
     when (action.type) {
         GestureActionType.APP_CAROUSEL_SWITCHER -> context.getString(R.string.gesture_action_app_carousel_switcher_desc)
+    GestureActionType.QUICK_MENU -> context.getString(R.string.gesture_action_quick_menu_desc)
         GestureActionType.FINGERTIP_RING -> context.getString(R.string.gesture_action_fingertip_ring_desc)
         GestureActionType.SCREEN_OFF_KEEP_AWAKE -> context.getString(R.string.gesture_action_screen_off_keep_awake_desc)
         GestureActionType.PIN_TO_SCREEN -> context.getString(R.string.gesture_action_pin_to_screen_desc)
@@ -159,6 +191,7 @@ fun gestureActionDescriptionText(context: Context, action: GestureAction): Strin
         GestureActionType.TIMED_DND -> context.getString(R.string.gesture_action_timed_dnd_desc)
         GestureActionType.UNIVERSAL_COPY -> context.getString(R.string.gesture_action_universal_copy_desc)
         GestureActionType.SCREEN_SEARCH -> context.getString(R.string.gesture_action_screen_search_desc)
+        GestureActionType.SMART_SCREENSHOT -> context.getString(R.string.gesture_action_smart_screenshot_desc)
         GestureActionType.FREEZER_PANEL -> context.getString(R.string.gesture_action_freezer_panel_desc)
         GestureActionType.REFREEZE -> context.getString(R.string.gesture_action_refreeze_desc)
         GestureActionType.CLIPBOARD_PICK -> context.getString(R.string.gesture_action_clipboard_pick_desc)
@@ -170,6 +203,9 @@ fun gestureActionDescriptionText(context: Context, action: GestureAction): Strin
         GestureActionType.SNOOZE_OVERLAYS -> context.getString(R.string.gesture_action_snooze_overlays_desc)
         GestureActionType.OPEN_INTERNET_PANEL -> context.getString(R.string.gesture_action_open_internet_panel_desc)
         GestureActionType.OPEN_VOLUME_PANEL -> context.getString(R.string.gesture_action_open_volume_panel_desc)
+        GestureActionType.VOLUME_UP -> context.getString(R.string.gesture_action_volume_up_desc)
+        GestureActionType.VOLUME_DOWN -> context.getString(R.string.gesture_action_volume_down_desc)
+        GestureActionType.FORCE_STOP_CURRENT_APP -> context.getString(R.string.gesture_action_force_stop_current_app_desc)
         GestureActionType.CURRENT_APP_INFO -> context.getString(R.string.gesture_action_current_app_info_desc)
         GestureActionType.SIMULATE_KEY_EVENT -> context.getString(R.string.gesture_action_simulate_key_event_desc)
         else -> null
@@ -217,7 +253,7 @@ fun gestureActionLabelText(context: Context, action: GestureAction): String = wh
         GestureActionType.OPEN_INDEX -> context.getString(R.string.gesture_action_open_index)
         GestureActionType.QUICK_LAUNCHER -> context.getString(R.string.gesture_action_quick_launcher)
         GestureActionType.HONEYCOMB_LAUNCHER -> context.getString(R.string.gesture_action_honeycomb_launcher)
-        GestureActionType.APP_SWITCHER -> context.getString(R.string.gesture_action_app_switcher)
+        GestureActionType.APP_RING_LAUNCHER -> context.getString(R.string.gesture_action_ring_launcher)
         GestureActionType.APP_CAROUSEL_SWITCHER -> context.getString(R.string.gesture_action_app_carousel_switcher)
         GestureActionType.FINGERTIP_RING -> context.getString(R.string.gesture_action_fingertip_ring)
         GestureActionType.HOLOGRAPHIC_LAUNCHER -> context.getString(R.string.gesture_action_holographic_launcher)
@@ -226,6 +262,7 @@ fun gestureActionLabelText(context: Context, action: GestureAction): String = wh
         GestureActionType.HOME -> context.getString(R.string.gesture_action_home)
         GestureActionType.RECENTS -> context.getString(R.string.gesture_action_recents)
         GestureActionType.CLOSE_CURRENT_APP -> context.getString(R.string.gesture_action_close_current_app)
+        GestureActionType.FORCE_STOP_CURRENT_APP -> context.getString(R.string.gesture_action_force_stop_current_app)
         GestureActionType.FREE_WINDOW_CURRENT_APP -> context.getString(R.string.gesture_action_free_window_current_app)
         GestureActionType.CLICK_PASSTHROUGH -> context.getString(R.string.gesture_action_click_passthrough)
         GestureActionType.FLASHLIGHT -> context.getString(R.string.gesture_action_flashlight)
@@ -254,6 +291,8 @@ fun gestureActionLabelText(context: Context, action: GestureAction): String = wh
         GestureActionType.SEARCH_PANEL -> context.getString(R.string.gesture_action_search_panel)
         GestureActionType.OPEN_LINK -> context.getString(R.string.gesture_action_open_link)
         GestureActionType.VOLUME_PANEL -> context.getString(R.string.gesture_action_volume_panel)
+        GestureActionType.VOLUME_UP -> context.getString(R.string.gesture_action_volume_up)
+        GestureActionType.VOLUME_DOWN -> context.getString(R.string.gesture_action_volume_down)
         GestureActionType.SCREEN_TRANSLATE -> context.getString(R.string.gesture_action_screen_translate)
         GestureActionType.REMIND,
         GestureActionType.REMIND_1M,
@@ -264,6 +303,7 @@ fun gestureActionLabelText(context: Context, action: GestureAction): String = wh
         -> context.getString(R.string.gesture_action_remind)
         GestureActionType.UNIVERSAL_COPY -> context.getString(R.string.gesture_action_universal_copy)
         GestureActionType.SCREEN_SEARCH -> context.getString(R.string.gesture_action_screen_search)
+        GestureActionType.SMART_SCREENSHOT -> context.getString(R.string.gesture_action_smart_screenshot)
         GestureActionType.FREEZER_PANEL -> context.getString(R.string.gesture_action_freezer_panel)
         GestureActionType.REFREEZE -> context.getString(R.string.gesture_action_refreeze)
         GestureActionType.POWER_MENU -> context.getString(R.string.gesture_action_power_menu)
@@ -274,6 +314,7 @@ fun gestureActionLabelText(context: Context, action: GestureAction): String = wh
         GestureActionType.SHELL_COMMAND_PANEL -> context.getString(R.string.gesture_action_shell_command_panel)
         GestureActionType.EXECUTE_SHELL_COMMAND -> context.getString(R.string.gesture_action_execute_shell_command)
         GestureActionType.QUICK_TOOLS_OVERLAY -> context.getString(R.string.gesture_action_quick_tools_overlay)
+    GestureActionType.QUICK_MENU -> context.getString(R.string.gesture_action_quick_menu)
         GestureActionType.WIDGET_POPUP_OVERLAY -> context.getString(R.string.gesture_action_widget_popup_overlay)
         GestureActionType.OPEN_STASH_PANEL -> context.getString(R.string.gesture_action_stash_panel)
         GestureActionType.OPEN_CLIPBOARD_PANEL -> context.getString(R.string.gesture_action_clipboard_panel)
@@ -302,6 +343,7 @@ fun gestureActionLabelText(context: Context, action: GestureAction): String = wh
         GestureActionType.CORNER_INNER_PIN_WHEEL -> context.getString(R.string.gesture_action_corner_inner_pin_wheel)
         GestureActionType.LAUNCH_APP -> context.getString(R.string.gesture_action_launch_app)
         GestureActionType.LAUNCH_SHORTCUT -> context.getString(R.string.gesture_action_launch_shortcut)
+        GestureActionType.QUICK_WHEEL -> context.getString(R.string.gesture_action_quick_wheel)
     }
 }
 
@@ -363,7 +405,7 @@ fun gestureActionLabel(action: GestureAction, settings: AppSettings? = null): St
         GestureActionType.OPEN_INDEX -> stringResource(R.string.gesture_action_open_index)
         GestureActionType.QUICK_LAUNCHER -> stringResource(R.string.gesture_action_quick_launcher)
         GestureActionType.HONEYCOMB_LAUNCHER -> stringResource(R.string.gesture_action_honeycomb_launcher)
-        GestureActionType.APP_SWITCHER -> stringResource(R.string.gesture_action_app_switcher)
+        GestureActionType.APP_RING_LAUNCHER -> stringResource(R.string.gesture_action_ring_launcher)
         GestureActionType.APP_CAROUSEL_SWITCHER -> stringResource(R.string.gesture_action_app_carousel_switcher)
         GestureActionType.FINGERTIP_RING -> stringResource(R.string.gesture_action_fingertip_ring)
         GestureActionType.HOLOGRAPHIC_LAUNCHER -> stringResource(R.string.gesture_action_holographic_launcher)
@@ -372,6 +414,7 @@ fun gestureActionLabel(action: GestureAction, settings: AppSettings? = null): St
         GestureActionType.HOME -> stringResource(R.string.gesture_action_home)
         GestureActionType.RECENTS -> stringResource(R.string.gesture_action_recents)
         GestureActionType.CLOSE_CURRENT_APP -> stringResource(R.string.gesture_action_close_current_app)
+        GestureActionType.FORCE_STOP_CURRENT_APP -> stringResource(R.string.gesture_action_force_stop_current_app)
         GestureActionType.FREE_WINDOW_CURRENT_APP -> stringResource(R.string.gesture_action_free_window_current_app)
         GestureActionType.CLICK_PASSTHROUGH -> stringResource(R.string.gesture_action_click_passthrough)
         GestureActionType.FLASHLIGHT -> stringResource(R.string.gesture_action_flashlight)
@@ -400,6 +443,8 @@ fun gestureActionLabel(action: GestureAction, settings: AppSettings? = null): St
         GestureActionType.SEARCH_PANEL -> stringResource(R.string.gesture_action_search_panel)
         GestureActionType.OPEN_LINK -> stringResource(R.string.gesture_action_open_link)
         GestureActionType.VOLUME_PANEL -> stringResource(R.string.gesture_action_volume_panel)
+        GestureActionType.VOLUME_UP -> stringResource(R.string.gesture_action_volume_up)
+        GestureActionType.VOLUME_DOWN -> stringResource(R.string.gesture_action_volume_down)
         GestureActionType.SCREEN_TRANSLATE -> stringResource(R.string.gesture_action_screen_translate)
         GestureActionType.REMIND,
         GestureActionType.REMIND_1M,
@@ -410,6 +455,7 @@ fun gestureActionLabel(action: GestureAction, settings: AppSettings? = null): St
         -> stringResource(R.string.gesture_action_remind)
         GestureActionType.UNIVERSAL_COPY -> stringResource(R.string.gesture_action_universal_copy)
         GestureActionType.SCREEN_SEARCH -> stringResource(R.string.gesture_action_screen_search)
+        GestureActionType.SMART_SCREENSHOT -> stringResource(R.string.gesture_action_smart_screenshot)
         GestureActionType.FREEZER_PANEL -> stringResource(R.string.gesture_action_freezer_panel)
         GestureActionType.REFREEZE -> stringResource(R.string.gesture_action_refreeze)
         GestureActionType.POWER_MENU -> stringResource(R.string.gesture_action_power_menu)
@@ -420,6 +466,7 @@ fun gestureActionLabel(action: GestureAction, settings: AppSettings? = null): St
         GestureActionType.SHELL_COMMAND_PANEL -> stringResource(R.string.gesture_action_shell_command_panel)
         GestureActionType.EXECUTE_SHELL_COMMAND -> stringResource(R.string.gesture_action_execute_shell_command)
         GestureActionType.QUICK_TOOLS_OVERLAY -> stringResource(R.string.gesture_action_quick_tools_overlay)
+    GestureActionType.QUICK_MENU -> stringResource(R.string.gesture_action_quick_menu)
         GestureActionType.WIDGET_POPUP_OVERLAY -> stringResource(R.string.gesture_action_widget_popup_overlay)
         GestureActionType.OPEN_STASH_PANEL -> stringResource(R.string.gesture_action_stash_panel)
         GestureActionType.OPEN_CLIPBOARD_PANEL -> stringResource(R.string.gesture_action_clipboard_panel)
@@ -448,6 +495,7 @@ fun gestureActionLabel(action: GestureAction, settings: AppSettings? = null): St
         GestureActionType.CORNER_INNER_PIN_WHEEL -> stringResource(R.string.gesture_action_corner_inner_pin_wheel)
         GestureActionType.LAUNCH_APP -> stringResource(R.string.gesture_action_launch_app)
         GestureActionType.LAUNCH_SHORTCUT -> stringResource(R.string.gesture_action_launch_shortcut)
+        GestureActionType.QUICK_WHEEL -> stringResource(R.string.gesture_action_quick_wheel)
     }
     }
 }
@@ -470,6 +518,7 @@ fun gestureActionSettingSubtitle(action: GestureAction): String {
             val name = if (action.keyName.isNotBlank()) action.keyName else com.slideindex.app.gesture.KeyEventPresets.getDisplayName(context, action.keyCode)
             stringResource(R.string.gesture_action_simulate_key_event_named, name)
         }
+        // 快捷轮盘不再暴露"哪个轮盘 / 形态方案"：摘要里只要知道"这个动作是调用轮盘"。
         else -> gestureActionLabel(action)
     }
 }
@@ -486,9 +535,13 @@ fun gestureActionDescription(action: GestureAction): String? = when (action.type
     GestureActionType.SEARCH_PANEL -> stringResource(R.string.gesture_action_search_panel_desc)
     GestureActionType.OPEN_LINK -> stringResource(R.string.gesture_action_open_link_desc)
     GestureActionType.VOLUME_PANEL -> stringResource(R.string.gesture_action_volume_panel_desc)
+    GestureActionType.VOLUME_UP -> stringResource(R.string.gesture_action_volume_up_desc)
+    GestureActionType.VOLUME_DOWN -> stringResource(R.string.gesture_action_volume_down_desc)
+    GestureActionType.FORCE_STOP_CURRENT_APP -> stringResource(R.string.gesture_action_force_stop_current_app_desc)
     GestureActionType.SCREEN_TRANSLATE -> stringResource(R.string.gesture_action_screen_translate_desc)
     GestureActionType.UNIVERSAL_COPY -> stringResource(R.string.gesture_action_universal_copy_desc)
     GestureActionType.SCREEN_SEARCH -> stringResource(R.string.gesture_action_screen_search_desc)
+    GestureActionType.SMART_SCREENSHOT -> stringResource(R.string.gesture_action_smart_screenshot_desc)
     GestureActionType.FREEZER_PANEL -> stringResource(R.string.gesture_action_freezer_panel_desc)
     GestureActionType.REFREEZE -> stringResource(R.string.gesture_action_refreeze_desc)
     GestureActionType.CLIPBOARD_PICK -> stringResource(R.string.gesture_action_clipboard_pick_desc)
@@ -578,14 +631,13 @@ fun gestureActionPermissionHintText(context: Context, action: GestureAction): St
         }
         GestureActionType.TOGGLE_WIFI, GestureActionType.TOGGLE_MOBILE_DATA,
         GestureActionType.EXECUTE_SHELL_COMMAND,
+        GestureActionType.FORCE_STOP_CURRENT_APP,
         -> {
             if (TaskManagerUtil.hasPermission()) return null
             context.getString(PrivilegeUiStrings.shellActionPermissionRes())
         }
         GestureActionType.FLASHLIGHT -> {
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
+            if (PermissionHelper.hasCameraPermission(context)) {
                 return null
             }
             context.getString(R.string.gesture_action_flashlight_permission)
@@ -607,6 +659,10 @@ fun gestureActionPermissionHintText(context: Context, action: GestureAction): St
         GestureActionType.QUICK_TOOLS_OVERLAY -> {
             if (PermissionHelper.isAccessibilityServiceEnabledForOverlays(context)) return null
             context.getString(R.string.gesture_action_quick_tools_overlay_permission)
+        }
+        GestureActionType.QUICK_MENU -> {
+            if (PermissionHelper.isAccessibilityServiceEnabledForOverlays(context)) return null
+            context.getString(R.string.gesture_action_quick_menu_permission)
         }
         GestureActionType.HOLOGRAPHIC_LAUNCHER -> {
             if (PermissionHelper.isAccessibilityServiceEnabledForOverlays(context)) return null
@@ -683,13 +739,15 @@ fun requestPermissionForAdjustAction(context: Context, action: GestureAction) {
         ->
             PermissionHelper.requestWriteSettingsAccess(context)
         GestureAction.Flashlight -> {
-            val intent = android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = android.net.Uri.fromParts("package", context.packageName, null)
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            runCatching { context.startActivity(intent) }
+            // 已授权（含「仅在使用时允许」）时绝不跳转；仅缺失时请求，而不是把用户丢到应用信息页。
+            com.slideindex.app.overlay.searchpanel.CameraPermissionTrampolineActivity.ensureGranted(context)
         }
         GestureAction.QuickToolsOverlay -> {
+            if (!PermissionHelper.isAccessibilityServiceEnabledForOverlays(context)) {
+                context.startActivity(PermissionHelper.accessibilitySettingsIntent())
+            }
+        }
+        GestureAction.QuickMenu -> {
             if (!PermissionHelper.isAccessibilityServiceEnabledForOverlays(context)) {
                 context.startActivity(PermissionHelper.accessibilitySettingsIntent())
             }

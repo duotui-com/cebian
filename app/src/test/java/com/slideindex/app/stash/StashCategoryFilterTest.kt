@@ -92,11 +92,18 @@ class StashCategoryFilterTest {
     }
 
     @Test
-    fun pinnedEntries_comeFirstInAllAndUncategorized() {
+    fun pinnedEntries_comeFirstInAll() {
         val list = listOf(entry("p1"), pinned(entry("p2")), entry("p3"), pinned(entry("c1", categoryId = "A")))
 
         assertEquals(listOf("p2", "c1", "p1", "p3"), StashCategoryFilter.All.apply(list).map { it.id })
-        assertEquals(listOf("p2", "p1", "p3"), StashCategoryFilter.Uncategorized.apply(list).map { it.id })
+    }
+
+    @Test
+    fun uncategorized_keepsTimelineOrder_evenWhenStarred() {
+        // 「未分类」是按日期分组的闪念时间线：星标不能把老条目顶到最前面。
+        val list = listOf(entry("p1"), pinned(entry("p2")), entry("p3"), pinned(entry("c1", categoryId = "A")))
+
+        assertEquals(listOf("p1", "p2", "p3"), StashCategoryFilter.Uncategorized.apply(list).map { it.id })
     }
 
     // ───────────────────────── 滑动切换分类的顺序 ─────────────────────────

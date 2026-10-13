@@ -235,6 +235,8 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             onBottomNavBlurRadiusChange = viewModel::setBottomNavBlurRadiusDp,
             onBottomNavBlurPreviewChange = ctx.onBottomNavBlurPreviewChange,
             onBottomNavBlurPreviewStop = ctx.onBottomNavBlurPreviewStop,
+            overlayBlurEnabled = settings.overlayBlurEnabled,
+            onOverlayBlurEnabledChange = viewModel::setOverlayBlurEnabled,
         )
     }
 
@@ -431,13 +433,14 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             onHideInLandscapeChange = viewModel::setCornerGestureHideInLandscape,
             onLandscapePreventFalseTouchChange = viewModel::setCornerGestureLandscapePreventFalseTouch,
             onOverrideSystemNavChange = viewModel::setCornerGestureOverrideSystemNav,
-            onOuterDiameterChange = viewModel::setCornerGestureOuterDiameterDp,
             onInnerDiameterChange = viewModel::setCornerGestureInnerDiameterDp,
+            onRingSpacingChange = viewModel::setCornerGestureRingSpacingDp,
             onBubbleSizeChange = viewModel::setCornerGestureBubbleSizeDp,
             onCancelOutsideWheelChange = viewModel::setCornerGestureCancelOutsideWheel,
             onProgressiveLayersChange = viewModel::setCornerGestureProgressiveLayers,
             onSlotHapticChange = viewModel::setCornerGestureSlotHaptic,
             onShowSelectedNameChange = viewModel::setCornerGestureShowSelectedName,
+            onShowEditButtonChange = viewModel::setCornerGestureShowEditButton,
             onSelectedHintIconSizeChange = viewModel::setCornerGestureSelectedHintIconSizeDp,
             onBackgroundStyleChange = viewModel::setCornerGestureBackgroundStyle,
             onBlurDpChange = viewModel::setCornerGestureBlurDp,
@@ -458,6 +461,7 @@ fun NavEntryBuilder.homeNavEntries(ctx: MainNavContext) {
             serviceEnabled = ctx.gestureActive(gestureSettings.serviceEnabled, permissions),
             onBack = { ctx.navigateBackTo(AppNavKey.HomeCornerGesture) },
             onUnifiedSlotsChange = viewModel::setCornerGestureUnifiedSlots,
+            onLayerCountChange = viewModel::setCornerGestureWheelLayerCount,
             onOpenInnerZoneActionPick = { ctx.navigate(AppNavKey.HomeCornerGestureInnerZoneActionPick) },
             onOpenLeftSlotActionPick = { slotIndex ->
                 ctx.navigate(AppNavKey.HomeCornerGestureSlotEditor("left", slotIndex))
@@ -1445,6 +1449,7 @@ private fun HomeTriggerCollectionRoute(
         serviceEnabled = true,
         initialManualLandscapeOverride = initialManualLandscapeOverride,
         onEnsureLandscapeInitialized = viewModel::ensureLandscapeTriggerHandlesInitialized,
+        onCopyPortraitToLandscape = viewModel::copyPortraitToLandscape,
         onBack = {
             TriggerSettingsLandscapeSession.releaseForExit(ctx.activity)
             ctx.navigateBackTo(AppNavKey.HomeMain)

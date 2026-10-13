@@ -25,9 +25,11 @@ import com.slideindex.app.overlay.StashPanelInitialTab
 import com.slideindex.app.overlay.FloatingPointerOverlayWindow
 import com.slideindex.app.clipboard.ClipboardFocusReader
 import com.slideindex.app.overlay.HoneycombAppPickerOverlayWindow
-import com.slideindex.app.overlay.appswitcher.AppSwitcherOverlayWindow
+import com.slideindex.app.overlay.ringlauncher.RingLauncherOverlayWindow
 import com.slideindex.app.overlay.holographic.HolographicLauncherOverlayWindow
+import com.slideindex.app.overlay.quickwheel.QuickWheelOverlayWindow
 import com.slideindex.app.overlay.OhoQuickToolsOverlayWindow
+import com.slideindex.app.overlay.quickmenu.QuickMenuOverlayWindow
 import com.slideindex.app.overlay.PanelSide
 import com.slideindex.app.overlay.WidgetPopupOverlayWindow
 import com.slideindex.app.service.ClipboardFloatLifecycle
@@ -134,14 +136,26 @@ class ActionExecutor(
         anchorRawX: Float? = null,
         anchorRawY: Float? = null,
         continueTouch: Boolean = false,
-        panelSide: PanelSide? = null
+        panelSide: PanelSide? = null,
+        // 悬浮球手势的「手指按下位置」；只有悬浮球手势派发会传，其它入口为 null。
+        gestureTouchDownRawX: Float? = null,
+        gestureTouchDownRawY: Float? = null
     ): Boolean {
         val resolvedSide = panelSide ?: side
+        val touchDownAnchor = FloatBallOverlayAnchorPolicy.anchorsAtTouchDown(
+            action = action,
+            enabled = settings.floatBallOverlayAnchorAtTouchDown
+        )
+        val overlayAnchorX =
+            FloatBallOverlayAnchorPolicy.resolve(touchDownAnchor, anchorRawX, gestureTouchDownRawX)
+        val overlayAnchorY =
+            FloatBallOverlayAnchorPolicy.resolve(touchDownAnchor, anchorRawY, gestureTouchDownRawY)
         return when (action) {
             GestureAction.OpenIndex,
-            is GestureAction.QuickLauncher,
             GestureAction.TaskSwitcher,
             -> overlayPanels.showEdgeHostedPanel(action, anchorRawY, resolvedSide)
+            is GestureAction.QuickLauncher ->
+                overlayPanels.showEdgeHostedPanel(action, overlayAnchorY, resolvedSide)
             GestureAction.ShellCommandPanel -> overlayPanels.openShellCommandPanelStandalone()
             is GestureAction.ExecuteShellCommand -> executeShellCommand(action)
             is GestureAction.OpenLink -> {
@@ -172,6 +186,18 @@ class ActionExecutor(
                 overlayPanels.showStandaloneOverlay(anchorRawY) { y ->
                     OhoQuickToolsOverlayWindow.show(context, settings, resolvedSide, y)
                 }
+            GestureAction.QuickMenu ->
+                // **打开 / 收起**：原来只有"打开"（show 幂等），所以手势再按一次没有任何反应。
+                // 收起后 Session 不再被丢弃（见 QuickMenuOverlayWindow.dismiss），所以再打开还停在原来那一页。
+                if (QuickMenuOverlayWindow.isShowing) {
+                    QuickMenuOverlayWindow.dismiss()
+                    // 与另一分支保持同一个返回类型（这个 when 的结果是 Boolean）
+                    true
+                } else {
+                    overlayPanels.showStandaloneOverlay(anchorRawY) { y ->
+                        QuickMenuOverlayWindow.show(context, settings, resolvedSide, y)
+                    }
+                }
             GestureAction.HoneycombLauncher ->
                 overlayPanels.showStandaloneOverlay(anchorRawY) { y ->
                     val x = anchorRawX ?: (context.resources.displayMetrics.widthPixels / 2f)
@@ -192,10 +218,10 @@ class ActionExecutor(
                         }
                     )
                 }
-            GestureAction.AppSwitcher ->
-                overlayPanels.showStandaloneOverlay(anchorRawY) { y ->
-                    val x = anchorRawX ?: (context.resources.displayMetrics.widthPixels / 2f)
-                    AppSwitcherOverlayWindow.show(
+            GestureAction.RingLauncher ->
+                overlayPanels.showStandaloneOverlay(overlayAnchorY) { y ->
+                    val x = overlayAnchorX ?: (context.resources.displayMetrics.widthPixels / 2f)
+                    RingLauncherOverlayWindow.show(
                         context = context,
                         settings = settings,
                         anchorRawX = x,
@@ -231,15 +257,31 @@ class ActionExecutor(
                         actionExecutor = this
                     )
                 }
+            is GestureAction.QuickWheel ->
+                overlayPanels.showStandaloneOverlay(anchorRawY) { y ->
+                    val x = anchorRawX ?: (context.resources.displayMetrics.widthPixels / 2f)
+                    QuickWheelOverlayWindow.show(
+                        context = context,
+                        settings = settings,
+                        wheelId = action.wheelId,
+                        anchorRawX = x,
+                        anchorRawY = y,
+                        actionExecutor = this,
+                        externalTracking = continueTouch,
+                        shape = action.shape,
+                        manualSectorMask = action.manualSectorMask,
+                        anchorMode = action.anchorMode,
+                    )
+                }
             GestureAction.WidgetPopupOverlay ->
                 overlayPanels.showStandaloneOverlay(anchorRawY) { y ->
                     WidgetPopupOverlayWindow.show(context, settings, resolvedSide, y)
                 }
-            GestureAction.StashPanel -> FloatBallStashPanel.show(
+            GestureAction.StashPanel -> FloatBallStashPanel.toggle(
                 context = context,
                 panelSide = resolvedSide
             )
-            GestureAction.ClipboardPanel -> FloatBallStashPanel.show(
+            GestureAction.ClipboardPanel -> FloatBallStashPanel.toggle(
                 context = context,
                 initialTab = StashPanelInitialTab.Clipboard,
                 panelSide = resolvedSide
@@ -284,7 +326,8 @@ class ActionExecutor(
                 )
                 true
             }
-            is GestureAction.LaunchApp -> launchHelper.launchApp(action.packageName, settings, longPressArmed)
+            is GestureAction.LaunchApp ->
+                launchHelper.launchApp(action.packageName, settings, longPressArmed, action.windowMode)
             is GestureAction.LaunchShortcut -> {
                 launchHelper.launchGestureShortcut(action, settings, longPressArmed)
                 true
@@ -293,6 +336,10 @@ class ActionExecutor(
                 SlideIndexAccessibilityService.perform(action)
             GestureAction.CloseCurrentApp -> {
                 launchHelper.closeCurrentApp()
+                true
+            }
+            GestureAction.ForceStopCurrentApp -> {
+                launchHelper.forceStopCurrentApp()
                 true
             }
             GestureAction.FreeWindowCurrentApp -> {
@@ -337,6 +384,14 @@ class ActionExecutor(
             GestureAction.MediaNext -> SystemGestureActions.dispatchMediaKey(context, KeyEvent.KEYCODE_MEDIA_NEXT)
             GestureAction.OpenInternetPanel -> SystemGestureActions.openNativeInternetPanel(context)
             GestureAction.OpenVolumePanel -> SystemGestureActions.openNativeVolumePanel(context)
+            GestureAction.VolumeUp -> {
+                SystemGestureActions.volumeUp(context)
+                true
+            }
+            GestureAction.VolumeDown -> {
+                SystemGestureActions.volumeDown(context)
+                true
+            }
             GestureAction.CurrentAppInfo -> SystemGestureActions.openCurrentAppInfo(context)
             GestureAction.ScreenOffKeepAwake -> {
                 com.slideindex.app.overlay.PseudoScreenOffOverlayWindow.toggle(context)
@@ -404,19 +459,32 @@ class ActionExecutor(
                 true
             }
             GestureAction.FreezerPanel -> {
-                FreezerLaunchState.setPendingInitialTab(FreezerTab.FROZEN)
-                FreezerOverlayWindow.show(context)
+                // 与暂存面板同规则：开着再触发就收起，否则打开了却关不掉（动作只调 show）。
+                if (FreezerOverlayWindow.isShowing) {
+                    FreezerOverlayWindow.dismiss()
+                } else {
+                    FreezerLaunchState.setPendingInitialTab(FreezerTab.FROZEN)
+                    FreezerOverlayWindow.show(context)
+                }
                 true
             }
             GestureAction.Refreeze -> {
                 CoroutineScope(Dispatchers.IO).launch {
-                    FreezerOperations.refreezeAll(context, settings.freezerAppPackages)
+                    // 按每个成员自己的意图还原（上次暂停的还它暂停），没有意图的按冰箱工作模式兜底。
+                    FreezerOperations.restoreIntents(
+                        context = context,
+                        packages = settings.freezerAppPackages,
+                        fallbackPause = settings.freezerWorkMode.isPause,
+                    )
                 }
                 true
             }
             GestureAction.SnoozeOverlays -> {
                 OverlaySnoozeController.snooze(context)
                 true
+            }
+            GestureAction.SmartScreenshot -> {
+                SlideIndexAccessibilityService.performSmartScreenshot()
             }
         }
     }

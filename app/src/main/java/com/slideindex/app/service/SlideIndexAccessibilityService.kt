@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Choreographer
 import android.view.accessibility.AccessibilityEvent
 import com.slideindex.app.di.AppDependencies
 import com.slideindex.app.diagnostic.EdgeDiag
@@ -29,14 +30,18 @@ import com.slideindex.app.gesture.PointerSwipeConfig
 import com.slideindex.app.message.MessageReminderOrchestrator
 import com.slideindex.app.overlay.EdgeOverlayHost
 import com.slideindex.app.overlay.FloatBallOcrRegions
+import com.slideindex.app.overlay.FloatBallOverlay
 import com.slideindex.app.overlay.FloatBallPickResultPanel
 import com.slideindex.app.overlay.FloatBallTextPickCoordinator
 import com.slideindex.app.overlay.FloatBallPickResult
 import com.slideindex.app.overlay.PickResultTextSource
 import com.slideindex.app.overlay.FloatingPointerOverlayWindow
+import com.slideindex.app.overlay.GlobalOverlayDismissHelper
 import com.slideindex.app.overlay.LayoutPreviewContent
 import com.slideindex.app.overlay.LayoutPreviewFocus
 import com.slideindex.app.overlay.PanelSide
+import com.slideindex.app.overlay.animation.GestureAnimationOverlayRegistry
+import com.slideindex.app.overlay.backpanel.BackPanelOverlayRegistry
 import com.slideindex.app.overlay.corner.CornerAnchor
 import com.slideindex.app.overlay.corner.CornerGestureHost
 import com.slideindex.app.xposed.bridge.ModuleHookBridgeContract
@@ -46,6 +51,28 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+
+/**
+ * 一次性整屏截图（无障碍截图）的结果。
+ *
+ * 之所以把失败原因带出来：无障碍截图在 Android 14+ 有**最小调用间隔**，太频繁会被系统拒绝。
+ * 调用方必须能把这种情况讲给用户听，而不是静默什么都不做。
+ *
+ * 放在文件顶层而不是伴生对象里：Kotlin 只允许通过 `外层类.成员` 访问伴生对象里的**函数/属性**，
+ * 伴生对象里的**类型**必须写成 `外层类.Companion.类型`，很别扭。
+ */
+sealed interface ScreenshotCaptureOutcome {
+    data class Success(val bitmap: android.graphics.Bitmap) : ScreenshotCaptureOutcome
+
+    /** 无障碍服务未连接，或系统低于 API 30。 */
+    data object ServiceUnavailable : ScreenshotCaptureOutcome
+
+    /** 系统限流：距上一次截图太近。 */
+    data object Throttled : ScreenshotCaptureOutcome
+
+    /** 其它失败，[errorCode] 为系统返回码。 */
+    data class Failed(val errorCode: Int) : ScreenshotCaptureOutcome
+}
 
 @dagger.hilt.android.AndroidEntryPoint
 class SlideIndexAccessibilityService : AccessibilityService() {
@@ -93,11 +120,17 @@ class SlideIndexAccessibilityService : AccessibilityService() {
         event ?: return
         when (event.eventType) {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                // 真实前台切换（Activity 变化）才丢弃前台包名缓存。
+                // 实测 resolveHostPackage 被调用 26.5 次/秒、累计占整段交互 26% 时间（PerfProbe），
+                // 这里是它唯一必须立刻看到新值的入口。
+                com.slideindex.app.util.AccessibilityForegroundResolver.invalidate()
                 foregroundTracker.handleWindowStateChanged(event)
                 ClipboardFloatImeCoordinator.onWindowsChanged(this)
                 KeyboardTriggerImeCoordinator.onWindowsChanged(this)
             }
             AccessibilityEvent.TYPE_WINDOWS_CHANGED -> {
+                // 注意：这里**不**失效前台包名缓存。WINDOWS_CHANGED 由输入法/弹窗/Toast 高频触发，
+                // 用它失效会让缓存失去意义；前台正确性由 WINDOW_STATE_CHANGED + TTL 双重保证。
                 foregroundTracker.handleWindowsChanged()
                 ClipboardFloatImeCoordinator.onWindowsChanged(this)
                 KeyboardTriggerImeCoordinator.onWindowsChanged(this)
@@ -110,6 +143,20 @@ class SlideIndexAccessibilityService : AccessibilityService() {
     companion object {
         @Volatile
         private var instance: SlideIndexAccessibilityService? = null
+
+        /**
+         * 无障碍实例代次：每绑定 / 重绑一个新实例就 +1。
+         *
+         * 为什么需要它：无障碍实例的窗口在实例销毁时会被系统**整片摘掉**，而客户端**不保证**收到
+         * `onViewDetachedFromWindow`（真机实测：`dumpsys window windows` 里已经没有那扇窗，
+         * `View.isAttachedToWindow` 仍是 true）。浮层宿主只能靠"代次变没变"来判断
+         * "我建窗时依赖的那个实例还在不在" —— 见 `OverlaySidePanelHost.attachedGeneration`。
+         */
+        @Volatile
+        private var instanceGeneration: Int = 0
+
+        /** 当前无障碍实例代次（浮层宿主用来丢弃"挂在旧实例窗口上的壳子"）。 */
+        fun overlayHostGeneration(): Int = instanceGeneration
 
         private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -342,6 +389,123 @@ class SlideIndexAccessibilityService : AccessibilityService() {
                 run()
             } else {
                 mainHandler.post(run)
+            }
+            return true
+        }
+
+        /**
+         * 一次性整屏截图（**无障碍截图**，不弹 MediaProjection 授权）。
+         *
+         * 与 [performSmartScreenshot] 的分工：那条路会把截图交给 `SmartScreenshotOverlay` 做标注/分享；
+         * 这里只把像素交回调用方（快捷菜单「截屏识别」要的是 Bitmap，不是标注面板）。
+         *
+         * ⚠️ 调用方**必须自行收起浮层**再调本方法，否则浮层会被一起截进去。
+         *
+         * @return false 表示压根没能发起（服务未连接 / 系统版本不够），此时**不会**回调。
+         */
+        fun captureDisplayBitmap(onResult: (ScreenshotCaptureOutcome) -> Unit): Boolean {
+            val service = instance ?: return false
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R) return false
+            service.takeScreenshot(
+                android.view.Display.DEFAULT_DISPLAY,
+                service.mainExecutor,
+                object : AccessibilityService.TakeScreenshotCallback {
+                    override fun onSuccess(screenshotResult: AccessibilityService.ScreenshotResult) {
+                        val bitmap = try {
+                            // 系统给的是硬件缓冲，必须拷成软件位图后再 close，照 performSmartScreenshot 的写法。
+                            val wrapped = android.graphics.Bitmap.wrapHardwareBuffer(
+                                screenshotResult.hardwareBuffer,
+                                screenshotResult.colorSpace,
+                            )
+                            val software = wrapped?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
+                            wrapped?.recycle()
+                            software
+                        } catch (error: Throwable) {
+                            Log.w(TAG, "captureDisplayBitmap decode failed", error)
+                            null
+                        } finally {
+                            runCatching { screenshotResult.hardwareBuffer.close() }
+                        }
+                        onResult(
+                            if (bitmap != null) {
+                                ScreenshotCaptureOutcome.Success(bitmap)
+                            } else {
+                                ScreenshotCaptureOutcome.Failed(0)
+                            },
+                        )
+                    }
+
+                    override fun onFailure(errorCode: Int) {
+                        Log.w(TAG, "captureDisplayBitmap takeScreenshot failed: $errorCode")
+                        onResult(
+                            if (errorCode == AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT) {
+                                ScreenshotCaptureOutcome.Throttled
+                            } else {
+                                ScreenshotCaptureOutcome.Failed(errorCode)
+                            },
+                        )
+                    }
+                },
+            )
+            return true
+        }
+
+        fun performSmartScreenshot(): Boolean {
+            val service = instance ?: return false
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R) {
+                return false
+            }
+            mainHandler.post {
+                GlobalOverlayDismissHelper.dismissAllPanels()
+                PanelSide.entries.forEach { side ->
+                    GestureAnimationOverlayRegistry.controller(side).hide()
+                    BackPanelOverlayRegistry.controller(side).hide()
+                }
+                FloatingPointerOverlayWindow.suppressForScreenshotCapture()
+                FloatBallOverlay.suppressForScreenshotCapture()
+                FloatBallPickResultPanel.suppressForScreenshotCapture()
+
+                Choreographer.getInstance().postFrameCallback {
+                    mainHandler.postDelayed({
+                        service.takeScreenshot(
+                            android.view.Display.DEFAULT_DISPLAY,
+                            service.mainExecutor,
+                            object : AccessibilityService.TakeScreenshotCallback {
+                                override fun onSuccess(screenshotResult: AccessibilityService.ScreenshotResult) {
+                                    try {
+                                        val wrapped = android.graphics.Bitmap.wrapHardwareBuffer(
+                                            screenshotResult.hardwareBuffer,
+                                            screenshotResult.colorSpace
+                                        )
+                                        val software = wrapped?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
+                                        wrapped?.recycle()
+                                        if (software != null) {
+                                            mainHandler.post {
+                                                com.slideindex.app.overlay.screenshot.SmartScreenshotOverlay.show(service, software)
+                                            }
+                                        }
+                                    } finally {
+                                        screenshotResult.hardwareBuffer.close()
+                                        mainHandler.post {
+                                            FloatingPointerOverlayWindow.restoreAfterScreenshotCapture()
+                                            FloatBallOverlay.restoreAfterScreenshotCapture()
+                                            FloatBallPickResultPanel.restoreAfterScreenshotCapture()
+                                        }
+                                    }
+                                }
+
+                                override fun onFailure(errorCode: Int) {
+                                    Log.w(TAG, "performSmartScreenshot takeScreenshot failed: $errorCode")
+                                    mainHandler.post {
+                                        FloatingPointerOverlayWindow.restoreAfterScreenshotCapture()
+                                        FloatBallOverlay.restoreAfterScreenshotCapture()
+                                        FloatBallPickResultPanel.restoreAfterScreenshotCapture()
+                                    }
+                                }
+                            }
+                        )
+                    }, 120L)
+                }
             }
             return true
         }
@@ -614,6 +778,18 @@ class SlideIndexAccessibilityService : AccessibilityService() {
             instance?.edgeOverlayHost?.resumeAllEdgeOverlays()
         }
 
+        /**
+         * 取词/截图前隐藏边缘触钮：触钮是画在触钮窗上的，不隐藏就会被 takeScreenshot 拍进全屏截图。
+         * 只隐藏绘制、不摘窗口，用完必须 [restoreEdgeChromeAfterCapture]。
+         */
+        fun suppressEdgeChromeForCapture() {
+            instance?.edgeOverlayHost?.suppressCaptureVisuals()
+        }
+
+        fun restoreEdgeChromeAfterCapture() {
+            instance?.edgeOverlayHost?.resumeCaptureVisuals()
+        }
+
         fun suspendEdgeCapturesForPassthrough() {
             instance?.edgeOverlayHost?.suspendEdgeCapturesForPassthrough()
         }
@@ -769,6 +945,7 @@ class SlideIndexAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
+        instanceGeneration++
         startOverlayHostLease()
         com.slideindex.app.overlay.OverlayStatePort.publish(this, "onServiceConnected")
         watchdog = SlideIndexAccessibilityWatchdog(this) { edgeOverlayHost }
@@ -874,6 +1051,7 @@ class SlideIndexAccessibilityService : AccessibilityService() {
         super.onRebind(intent)
         Log.i(TAG, "onRebind: accessibility service rebound by system")
         instance = this
+        instanceGeneration++
         startOverlayHostLease()
         com.slideindex.app.overlay.OverlayStatePort.publish(this, "onRebind")
         if (edgeOverlayHost == null) {

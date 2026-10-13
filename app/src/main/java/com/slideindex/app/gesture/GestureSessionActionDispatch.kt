@@ -94,15 +94,15 @@ internal fun GestureSession.trackContinuousGesture(
             }
         }
 
-        GestureAction.AppSwitcher -> {
-            if (!sessionContinuousPick.appSwitcher) {
-                val shown = sessionCallbacks.onShowAppSwitcher(continuousPick = true, rawX, rawY)
+        GestureAction.RingLauncher -> {
+            if (!sessionContinuousPick.ringLauncher) {
+                val shown = sessionCallbacks.onShowRingLauncher(continuousPick = true, rawX, rawY)
                 if (shown) {
-                    sessionContinuousPick.appSwitcher = true
+                    sessionContinuousPick.ringLauncher = true
                     sessionCallbacks.hapticConfirmLaunch()
                 }
             } else {
-                sessionCallbacks.onAppSwitcherPointerMove(rawX, rawY)
+                sessionCallbacks.onRingLauncherPointerMove(rawX, rawY)
             }
         }
 
@@ -121,6 +121,29 @@ internal fun GestureSession.trackContinuousGesture(
                 }
             } else {
                 com.slideindex.app.overlay.carousel.AppCarouselSwitcherOverlay.onExternalMove(rawX, rawY)
+            }
+        }
+
+        is GestureAction.QuickWheel -> {
+            if (!sessionContinuousPick.quickWheel) {
+                val shown = com.slideindex.app.overlay.quickwheel.QuickWheelOverlayWindow.show(
+                    context = sessionActionExecutor.context,
+                    settings = sessionSettings,
+                    wheelId = action.wheelId,
+                    anchorRawX = rawX,
+                    anchorRawY = rawY,
+                    actionExecutor = sessionActionExecutor,
+                    externalTracking = true,
+                    shape = action.shape,
+                    manualSectorMask = action.manualSectorMask,
+                    anchorMode = action.anchorMode
+                )
+                if (shown) {
+                    sessionContinuousPick.quickWheel = true
+                    sessionCallbacks.hapticConfirmLaunch()
+                }
+            } else {
+                com.slideindex.app.overlay.quickwheel.QuickWheelOverlayWindow.onExternalMove(rawX, rawY)
             }
         }
 
@@ -271,10 +294,10 @@ internal fun GestureSession.handleClassifiedGesture(
             }
         }
 
-        GestureAction.AppSwitcher -> {
-            sessionContinuousPick.appSwitcher = false
+        GestureAction.RingLauncher -> {
+            sessionContinuousPick.ringLauncher = false
             sessionCallbacks.hapticConfirmLaunch()
-            sessionCallbacks.onShowAppSwitcher(continuousPick = false, rawX, rawY)
+            sessionCallbacks.onShowRingLauncher(continuousPick = false, rawX, rawY)
             endSession()
         }
 
@@ -350,7 +373,8 @@ internal fun GestureSession.handleClassifiedGesture(
             endSession()
         }
 
-        GestureAction.CloseCurrentApp, GestureAction.FreeWindowCurrentApp -> {
+        GestureAction.CloseCurrentApp, GestureAction.ForceStopCurrentApp,
+        GestureAction.FreeWindowCurrentApp -> {
             sessionCallbacks.hapticConfirmLaunch()
             sessionActionExecutor.execute(action, sessionSettings)
             endSession()
@@ -410,6 +434,7 @@ internal fun GestureSession.handleClassifiedGesture(
         GestureAction.ScrollToTop,
         GestureAction.ScrollToBottom,
         GestureAction.QuickToolsOverlay,
+        GestureAction.QuickMenu,
         GestureAction.HolographicLauncher,
         GestureAction.WidgetPopupOverlay,
         GestureAction.StashPanel,
@@ -435,14 +460,18 @@ internal fun GestureSession.handleClassifiedGesture(
         GestureAction.Remind15m,
         GestureAction.OpenInternetPanel,
         GestureAction.OpenVolumePanel,
+        GestureAction.VolumeUp,
+        GestureAction.VolumeDown,
         GestureAction.CurrentAppInfo,
         GestureAction.ScreenOffKeepAwake,
         GestureAction.PinToScreen,
         GestureAction.ForegroundActivityInspector,
+        GestureAction.SmartScreenshot,
         is GestureAction.SimulateKeyEvent,
         is GestureAction.SimulatePointerSwipe,
         is GestureAction.ExecuteShellCommand,
         is GestureAction.OpenLink,
+        is GestureAction.QuickWheel,
         -> {
             sessionCallbacks.hapticConfirmLaunch()
             sessionActionExecutor.execute(
@@ -498,11 +527,11 @@ internal fun GestureSession.dispatchQuickLauncherAction(
             )
             return true
         }
-        GestureAction.AppSwitcher -> {
-            sessionContinuousPick.appSwitcher = false
+        GestureAction.RingLauncher -> {
+            sessionContinuousPick.ringLauncher = false
             if (confirmHaptic) sessionCallbacks.hapticConfirmLaunch()
             sessionActionExecutor.execute(
-                GestureAction.AppSwitcher,
+                GestureAction.RingLauncher,
                 sessionSettings,
                 anchorRawY = rawY
             )
@@ -535,6 +564,15 @@ internal fun GestureSession.dispatchQuickLauncherAction(
         }
         else -> {
             if (confirmHaptic) sessionCallbacks.hapticConfirmLaunch()
+            // 全屏截图取词会在几十毫秒内按快门。这里必须**先**把快速启动器面板收起来再执行动作：
+            // 面板画在 presentation 窗里且自带磨砂模糊，晚一帧收就会被拍进全屏截图
+            // （表现为"截图里有一块被快速启动器模糊遮挡"，且只在卡顿时偶发）。
+            // 会话已经在上面收掉了，返回 false 让调用方不要再收一次。
+            if (action == GestureAction.FullscreenScreenshotPick) {
+                endSession()
+                sessionActionExecutor.execute(action, sessionSettings, anchorRawY = rawY)
+                return false
+            }
             sessionActionExecutor.execute(action, sessionSettings, anchorRawY = rawY)
             return true
         }

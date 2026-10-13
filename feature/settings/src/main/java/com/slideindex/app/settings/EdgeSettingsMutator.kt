@@ -10,6 +10,7 @@ import com.slideindex.app.gesture.GestureRuleCodec
 import com.slideindex.app.gesture.GestureTriggerMode
 import com.slideindex.app.gesture.GestureTriggerType
 import com.slideindex.app.gesture.TriggerHandle
+import com.slideindex.app.gesture.TriggerHandleCodec
 import com.slideindex.app.gesture.TriggerHandleDesign
 import com.slideindex.app.gesture.TriggerRectanglePresetLogic
 import com.slideindex.app.gesture.TriggerDesignPreset
@@ -124,21 +125,27 @@ class EdgeSettingsMutator @Inject constructor(
         if (landscape) {
             editLandscapeProfile { it.withAddedBottomTriggerHandle() }
         } else {
-            editTriggerHandleProfile(landscape = false) { it.withAddedBottomTriggerHandle() }
+            editTriggerHandleProfile(landscape = false, writeGestureRules = true) {
+                it.withAddedBottomTriggerHandle()
+            }
         }
 
     suspend fun addTopTriggerHandle(landscape: Boolean = false) =
         if (landscape) {
             editLandscapeProfile { it.withAddedTopTriggerHandle() }
         } else {
-            editTriggerHandleProfile(landscape = false) { it.withAddedTopTriggerHandle() }
+            editTriggerHandleProfile(landscape = false, writeGestureRules = true) {
+                it.withAddedTopTriggerHandle()
+            }
         }
 
     suspend fun addTriggerHandlePair(landscape: Boolean = false) =
         if (landscape) {
             editLandscapeProfile { it.withAddedTriggerHandlePair() }
         } else {
-            editTriggerHandleProfile(landscape = false) { it.withAddedTriggerHandlePair() }
+            editTriggerHandleProfile(landscape = false, writeGestureRules = true) {
+                it.withAddedTriggerHandlePair()
+            }
         }
 
     suspend fun removeTriggerHandle(
@@ -182,6 +189,30 @@ class EdgeSettingsMutator @Inject constructor(
         if (updated != current) {
             SettingsTriggerStore.writeLandscapeSettings(prefs, updated)
         }
+    }
+
+    /**
+     * 「复制竖屏设置」：把竖屏当前的触钮与手势动作合并进横屏。
+     *
+     * 横屏没初始化过时先做一次初始化（否则横屏运行态仍会回退竖屏，复制看起来不生效）；
+     * 已配过槽位的触钮按「同侧 + 同序号」同步，横屏独有的触钮与其规则保留不动。
+     */
+    suspend fun copyPortraitToLandscape(): Result<Unit> = editor.edit { prefs ->
+        val snapshot = SettingsTriggerStore.readTriggerSettings(prefs)
+        val current = if (snapshot.landscapeTriggersInitialized) snapshot else snapshot.withLandscapeCopiedFromPortrait()
+        val merged = current.withPortraitCopiedToLandscape(current)
+        merged.handles.forEach { (side, handles) ->
+            prefs[landscapeHandlesKey(side)] = TriggerHandleCodec.encodeAll(handles)
+        }
+        prefs[SettingsPreferenceKeys.GESTURE_RULES_LANDSCAPE] = GestureRuleCodec.encodeAll(merged.rules)
+        prefs[SettingsPreferenceKeys.LANDSCAPE_TRIGGERS_INITIALIZED] = true
+    }
+
+    private fun landscapeHandlesKey(side: PanelSide) = when (side) {
+        PanelSide.LEFT -> SettingsPreferenceKeys.LEFT_TRIGGER_HANDLES_LANDSCAPE
+        PanelSide.RIGHT -> SettingsPreferenceKeys.RIGHT_TRIGGER_HANDLES_LANDSCAPE
+        PanelSide.BOTTOM -> SettingsPreferenceKeys.BOTTOM_TRIGGER_HANDLES_LANDSCAPE
+        PanelSide.TOP -> SettingsPreferenceKeys.TOP_TRIGGER_HANDLES_LANDSCAPE
     }
 
     suspend fun setTriggerAlignOppositeSide(
@@ -496,10 +527,48 @@ class EdgeSettingsMutator @Inject constructor(
             ?: mutableSetOf()
         excluded.add(packageName)
         it[SettingsPreferenceKeys.FREEZER_BOOTSTRAP_EXCLUDED_PACKAGES] = excluded
+        // 不在列表里就不该留意图，否则重新加入时会带着上一次的旧档位。
+        writeFreezerAppIntents(it, readFreezerAppIntents(it) - packageName)
+    }
+
+    /** 记下某个成员这次被设成冻结还是暂停；[intent] 为 null 表示清掉它的意图。 */
+    suspend fun setFreezerAppIntent(packageName: String, intent: FreezerAppIntent?) = editor.edit {
+        val current = readFreezerAppIntents(it).toMutableMap()
+        if (intent == null) {
+            current.remove(packageName)
+        } else {
+            current[packageName] = intent
+        }
+        writeFreezerAppIntents(it, current)
+    }
+
+    suspend fun clearFreezerAppIntents(packageNames: Set<String>) = editor.edit {
+        if (packageNames.isEmpty()) return@edit
+        writeFreezerAppIntents(it, readFreezerAppIntents(it) - packageNames)
+    }
+
+    private fun readFreezerAppIntents(
+        prefs: androidx.datastore.preferences.core.MutablePreferences,
+    ): Map<String, FreezerAppIntent> =
+        FreezerAppIntentCodec.decode(prefs[SettingsPreferenceKeys.FREEZER_APP_INTENTS])
+
+    private fun writeFreezerAppIntents(
+        prefs: androidx.datastore.preferences.core.MutablePreferences,
+        intents: Map<String, FreezerAppIntent>,
+    ) {
+        if (intents.isEmpty()) {
+            prefs.remove(SettingsPreferenceKeys.FREEZER_APP_INTENTS)
+        } else {
+            prefs[SettingsPreferenceKeys.FREEZER_APP_INTENTS] = FreezerAppIntentCodec.encode(intents)
+        }
     }
 
     suspend fun setFreezerShowInLauncher(enabled: Boolean) = editor.edit {
         it[SettingsPreferenceKeys.FREEZER_SHOW_IN_LAUNCHER] = enabled
+    }
+
+    suspend fun setFreezerWorkMode(modeId: Int) = editor.edit {
+        it[SettingsPreferenceKeys.FREEZER_WORK_MODE] = modeId
     }
 
     suspend fun setExpandPanelSlotAction(index: Int, action: com.slideindex.app.gesture.GestureAction?) = editor.edit {
@@ -692,8 +761,15 @@ class EdgeSettingsMutator @Inject constructor(
         SettingsTriggerStore.writeLandscapeSettings(prefs, snapshot.mergeLandscapeEdits(updated))
     }
 
+    /**
+     * 编辑触钮布局。[writeGestureRules] 用于"同时改了手势规则"的入口（新增触钮会顺便给新触钮
+     * 落一份出厂动作、补齐对侧时会镜像手势）：这些入口必须把 GESTURE_RULES 一并写回，
+     * 否则规则只进内存、落盘丢失（横屏走 [editLandscapeProfile]，规则由
+     * [SettingsTriggerStore.writeLandscapeSettings] 一并写入）。
+     */
     private suspend fun editTriggerHandleProfile(
         landscape: Boolean,
+        writeGestureRules: Boolean = false,
         block: (AppSettings) -> AppSettings,
     ): Result<Unit> = editor.edit { prefs ->
         val snapshot = SettingsSnapshotReader.read(prefs, context)
@@ -706,6 +782,9 @@ class EdgeSettingsMutator @Inject constructor(
             )
         } else {
             SettingsTriggerStore.writeTriggerHandles(prefs, updated)
+            if (writeGestureRules) {
+                prefs[SettingsPreferenceKeys.GESTURE_RULES] = GestureRuleCodec.encodeAll(updated.gestureRules)
+            }
             updated.leftTriggerHandles.firstOrNull()?.let {
                 prefs[SettingsPreferenceKeys.LEFT_TRIGGER_TOP] = it.topFraction
                 prefs[SettingsPreferenceKeys.LEFT_TRIGGER_HEIGHT] = it.heightFraction

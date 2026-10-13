@@ -123,12 +123,16 @@ object GestureActionIconBitmap {
             GestureActionType.CLIPBOARD_PASTE,
             GestureActionType.QUICK_LAUNCHER,
             GestureActionType.HONEYCOMB_LAUNCHER,
-            GestureActionType.APP_SWITCHER,
+            GestureActionType.APP_RING_LAUNCHER,
             GestureActionType.HOLOGRAPHIC_LAUNCHER,
             GestureActionType.SEARCH_PANEL,
             GestureActionType.QUICK_TOOLS_OVERLAY -> {
                 // 沉稳冷青灰
                 0xFF23353A.toInt() to 0xFF142226.toInt()
+            }
+            GestureActionType.QUICK_MENU -> {
+                // 暖琥珀：与「快速工具（悬浮窗）」的冷青灰刻意区分开
+                0xFF4A3A1E.toInt() to 0xFF2E2413.toInt()
             }
             else -> {
                 // 默认优雅深钛灰

@@ -1,25 +1,39 @@
+/*
+ * 移植自 GestureEVO（https://github.com/LumiaGG/GestureEVO，GPL-3.0-only）
+ *   源文件：screen_search/ScreenSearchFloating.kt
+ * 已按本项目的数据模型、主题与集成层改写（部分模块拆分为多文件、部分能力为本项目新增）；
+ * 版权与许可声明见 THIRD_PARTY_NOTICES.md，文件级映射见 docs/ATTRIBUTIONS.md。
+ */
+
 package com.slideindex.app.screensearch
 
 import android.accessibilityservice.AccessibilityService
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.SystemClock
+import android.view.Choreographer
 import android.view.accessibility.AccessibilityNodeInfo
 import com.slideindex.app.inspire.AccessibilityNodeManager
 import com.slideindex.app.ocr.OcrDependencyAccess
 import com.slideindex.app.ocr.OcrEngines
 import com.slideindex.app.overlay.FloatBallOverlay
 import com.slideindex.app.overlay.FloatingPointerOverlayWindow
+import com.slideindex.app.overlay.history.HistoryHandleCaptureVisibility
 import com.slideindex.app.inspire.InspireFloating
 import com.slideindex.app.service.RegionalScreenshotOcr
 import com.slideindex.app.service.SlideIndexAccessibilityService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.ArrayDeque
+import kotlin.coroutines.resume
 
 object ScreenSearchCapture {
     private const val CAPTURE_HIDE_DELAY_MS = 50L
+    /** [awaitCaptureFrame] 的兜底上限：Choreographer 回调丢了也不能把搜索卡住。 */
+    private const val CAPTURE_FRAME_TIMEOUT_MS = 150L
 
     data class CaptureResult(
         val matches: List<Rect>,
@@ -248,8 +262,14 @@ object ScreenSearchCapture {
             FloatingPointerOverlayWindow.suppressForScreenshotCapture()
             FloatBallOverlay.suppressForScreenshotCapture()
             InspireFloating.hide()
+            // 边缘触钮画在触钮窗上，不隐藏同样会被拍进截图。
+            SlideIndexAccessibilityService.suppressEdgeChromeForCapture()
+            // 贴边收纳把手是另一个常驻窗（HistoryFloatService），也会被拍进去。
+            HistoryHandleCaptureVisibility.suppress()
             hideSelf()
         }
+        // 等一帧，确保上面的撤销真的合成过（否则主线程一卡顿就会拍到浮层）。
+        awaitCaptureFrame()
         delay(CAPTURE_HIDE_DELAY_MS)
         return try {
             block()
@@ -257,7 +277,22 @@ object ScreenSearchCapture {
             withContext(Dispatchers.Main.immediate) {
                 FloatingPointerOverlayWindow.restoreAfterScreenshotCapture()
                 FloatBallOverlay.restoreAfterScreenshotCapture()
+                SlideIndexAccessibilityService.restoreEdgeChromeAfterCapture()
+                HistoryHandleCaptureVisibility.restore()
                 restoreSelf()
+            }
+        }
+    }
+
+    /** 等一次合成帧；回调丢失时最多等 [CAPTURE_FRAME_TIMEOUT_MS]。 */
+    private suspend fun awaitCaptureFrame() {
+        withContext(Dispatchers.Main.immediate) {
+            withTimeoutOrNull(CAPTURE_FRAME_TIMEOUT_MS) {
+                suspendCancellableCoroutine { continuation ->
+                    Choreographer.getInstance().postFrameCallback {
+                        if (continuation.isActive) continuation.resume(Unit)
+                    }
+                }
             }
         }
     }

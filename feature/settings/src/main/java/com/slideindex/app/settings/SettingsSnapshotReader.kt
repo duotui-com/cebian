@@ -238,6 +238,11 @@ internal object SettingsSnapshotReader {
             freezerBootstrapExcludedPackages =
                 prefs[SettingsPreferenceKeys.FREEZER_BOOTSTRAP_EXCLUDED_PACKAGES] ?: emptySet(),
             freezerShowInLauncher = prefs[SettingsPreferenceKeys.FREEZER_SHOW_IN_LAUNCHER] ?: false,
+            freezerWorkModeId = prefs[SettingsPreferenceKeys.FREEZER_WORK_MODE]
+                ?: FreezerWorkMode.DEFAULT.id,
+            freezerAppIntents = FreezerAppIntentCodec.decode(
+                prefs[SettingsPreferenceKeys.FREEZER_APP_INTENTS],
+            ),
             expandPanelSlotActions = readExpandPanelSlotActions(prefs),
             previousAppExcludedPackages =
                 prefs[SettingsPreferenceKeys.PREVIOUS_APP_EXCLUDED_PACKAGES] ?: emptySet(),
@@ -251,10 +256,11 @@ internal object SettingsSnapshotReader {
             ),
             honeycombDisplay = HoneycombDisplaySettings.fromPreferences(prefs),
             appCarouselSwitcher = AppCarouselSwitcherSettings.fromPreferences(prefs),
-            fvAppSwitcherVertical = FvAppSwitcherSettings.fromPreferences(prefs, FvAppSwitcherAxis.VERTICAL),
-            fvAppSwitcherHorizontal = FvAppSwitcherSettings.fromPreferences(prefs, FvAppSwitcherAxis.HORIZONTAL),
-            fvAppSwitcherLinkAppearanceAxes = FvAppSwitcherSettings.linkFlagsFromPreferences(prefs).linkAppearanceAxes,
-            fvAppSwitcherLinkSlotAxes = FvAppSwitcherSettings.linkFlagsFromPreferences(prefs).linkSlotAxes,
+            quickWheels = QuickWheelCodec.decode(prefs),
+            fvRingLauncherVertical = FvRingLauncherSettings.fromPreferences(prefs, FvRingLauncherAxis.VERTICAL),
+            fvRingLauncherHorizontal = FvRingLauncherSettings.fromPreferences(prefs, FvRingLauncherAxis.HORIZONTAL),
+            fvRingLauncherLinkAppearanceAxes = FvRingLauncherSettings.linkFlagsFromPreferences(prefs).linkAppearanceAxes,
+            fvRingLauncherLinkSlotAxes = FvRingLauncherSettings.linkFlagsFromPreferences(prefs).linkSlotAxes,
             holographicLauncher = HolographicLauncherSettings.fromPreferences(prefs),
             shellCommands = ShellCommandCodec.decodeAll(prefs[SettingsPreferenceKeys.SHELL_COMMANDS] ?: emptySet()),
             activityShortcuts = ActivityShortcutCodec.decodeAll(
@@ -459,10 +465,19 @@ internal object SettingsSnapshotReader {
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_TEXT_FIRST_PANEL] ?: false,
             floatBallPickPanelStyle =
                 PickResultPanelStyle.fromStorageKey(prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_PANEL_STYLE]),
+            floatBallPickPanelPlacement = PickResultPanelPlacement.fromStorageKey(
+                prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_PANEL_PLACEMENT],
+            ),
             floatBallPickSearchGridDefaultState =
                 PickResultSearchGridDefaultState.fromStorageKey(prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_SEARCH_GRID_DEFAULT_STATE]),
             floatBallPickSearchGridLastExpanded =
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_SEARCH_GRID_LAST_EXPANDED] ?: false,
+            floatBallPickTextModeDefault =
+                PickResultTextModeDefault.fromStorageKey(
+                    prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_TEXT_MODE_DEFAULT],
+                ),
+            floatBallPickTextModeLastMode =
+                prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_TEXT_MODE_LAST_MODE].orEmpty(),
             floatBallPickDefaultSearchEngineId =
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_PICK_DEFAULT_SEARCH_ENGINE_ID],
             floatBallPickAutoSelectAll =
@@ -504,12 +519,16 @@ internal object SettingsSnapshotReader {
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_SIDE_SWIPE_SHORT_PERCENT] ?: 320f,
             floatBallUpSwipeShortPercent =
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_UP_SWIPE_SHORT_PERCENT] ?: 256f,
-            floatBallInstantTranslate = prefs[SettingsPreferenceKeys.FLOAT_BALL_INSTANT_TRANSLATE] ?: false,
+            floatBallOverlayAnchorAtTouchDown =
+                prefs[SettingsPreferenceKeys.FLOAT_BALL_OVERLAY_ANCHOR_AT_TOUCH_DOWN] ?: false,
+            floatBallInstantTranslate = prefs[SettingsPreferenceKeys.FLOAT_BALL_INSTANT_TRANSLATE] ?: true,
             floatBallTranslateEngine = FloatBallTranslateEngine.fromStorageKey(
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_TRANSLATE_ENGINE],
             ),
             floatBallTranslateTargetLang = prefs[SettingsPreferenceKeys.FLOAT_BALL_TRANSLATE_TARGET_LANG]
                 ?: TranslateTargetLanguages.FOLLOW_APP,
+            floatBallTranslateAppPackage =
+                prefs[SettingsPreferenceKeys.FLOAT_BALL_TRANSLATE_APP_PACKAGE] ?: "",
             floatBallImageSearchPickPanelTransparency =
                 prefs[SettingsPreferenceKeys.FLOAT_BALL_IMAGE_SEARCH_PICK_PANEL_TRANSPARENCY]?.coerceIn(0f, 1f)
                     ?: prefs[SettingsPreferenceKeys.FLOAT_BALL_TRANSLATE_PICK_PANEL_TRANSPARENCY]?.coerceIn(0f, 1f)
@@ -643,6 +662,15 @@ internal object SettingsSnapshotReader {
                 AppSettings.STASH_PANEL_BLUR_RADIUS_MIN_DP,
                 AppSettings.STASH_PANEL_BLUR_RADIUS_MAX_DP,
             ),
+            stashPanelHandleOpenTab = prefs[SettingsPreferenceKeys.STASH_PANEL_HANDLE_OPEN_TAB]
+                ?.let { name -> runCatching { StashPanelHandleOpenTab.valueOf(name) }.getOrNull() }
+                ?: StashPanelHandleOpenTab.CLIPBOARD,
+            stashPanelWidthMode = prefs[SettingsPreferenceKeys.STASH_PANEL_WIDTH_MODE]
+                ?.let { name -> runCatching { StashPanelWidthMode.valueOf(name) }.getOrNull() }
+                ?: StashPanelWidthMode.COMPACT,
+            ),
+            overlayBlur = OverlayBlurSettings(
+                overlayBlurEnabled = prefs[SettingsPreferenceKeys.OVERLAY_BLUR_ENABLED] ?: true,
             ),
             defaultImageViewerPackage = prefs[SettingsPreferenceKeys.DEFAULT_IMAGE_VIEWER_PACKAGE],
             imageEditorDelayDeleteEnabled = prefs[SettingsPreferenceKeys.IMAGE_EDITOR_DELAY_DELETE_ENABLED] ?: false,
@@ -662,6 +690,8 @@ internal object SettingsSnapshotReader {
             searchPanelFileSearchEnabled = prefs[SettingsPreferenceKeys.SEARCH_PANEL_FILE_SEARCH_ENABLED] ?: true,
             searchPanelAppSearchEnabled = prefs[SettingsPreferenceKeys.SEARCH_PANEL_APP_SEARCH_ENABLED] ?: true,
             searchPanelSettingsSearchEnabled = prefs[SettingsPreferenceKeys.SEARCH_PANEL_SETTINGS_SEARCH_ENABLED] ?: true,
+            searchPanelShortcutSearchEnabled = prefs[SettingsPreferenceKeys.SEARCH_PANEL_SHORTCUT_SEARCH_ENABLED] ?: true,
+            searchPanelClipboardSearchEnabled = prefs[SettingsPreferenceKeys.SEARCH_PANEL_CLIPBOARD_SEARCH_ENABLED] ?: true,
             searchPanelFileTypesEnabled =
                 prefs[SettingsPreferenceKeys.SEARCH_PANEL_FILE_TYPES_ENABLED] ?: emptySet(),
             searchPanelFileShowFolders =
@@ -674,9 +704,6 @@ internal object SettingsSnapshotReader {
                 prefs[SettingsPreferenceKeys.SEARCH_PANEL_FILE_FOLDER_WHITELIST] ?: emptySet(),
             searchPanelFileFolderBlacklist =
                 prefs[SettingsPreferenceKeys.SEARCH_PANEL_FILE_FOLDER_BLACKLIST] ?: emptySet(),
-            searchPanelPresentationMode = SearchPanelPresentationMode.fromId(
-                prefs[SettingsPreferenceKeys.SEARCH_PANEL_PRESENTATION_MODE],
-            ),
             searchPanelBarPosition = SearchPanelBarPosition.fromId(
                 prefs[SettingsPreferenceKeys.SEARCH_PANEL_BAR_POSITION],
             ),
@@ -826,10 +853,23 @@ internal object SettingsSnapshotReader {
         )
 
     fun readCornerGestureSettings(prefs: Preferences): CornerGestureSettings {
-        val outer = prefs[SettingsPreferenceKeys.CORNER_GESTURE_OUTER_DIAMETER_DP] ?: 280f
-        val inner = prefs[SettingsPreferenceKeys.CORNER_GESTURE_INNER_DIAMETER_DP] ?: 72f
+        val inner = prefs[SettingsPreferenceKeys.CORNER_GESTURE_INNER_DIAMETER_DP] ?: 320f
         val legacyWidth = prefs[SettingsPreferenceKeys.CORNER_GESTURE_ZONE_WIDTH_DP]
         val legacyHeight = prefs[SettingsPreferenceKeys.CORNER_GESTURE_ZONE_HEIGHT_DP]
+        // 轮盘层数：3 层是历史默认，越界值（坏存档/手改）在这里钳回来。
+        val wheelLayerCount = CornerGestureSettings.clampWheelLayerCount(
+            prefs[SettingsPreferenceKeys.CORNER_GESTURE_WHEEL_LAYER_COUNT]
+                ?: CornerRadialMenuCodec.BASE_LAYER_COUNT,
+        )
+        val bubbleSizeDp = CornerGestureSettings.clampBubbleSizeDp(
+            prefs[SettingsPreferenceKeys.CORNER_GESTURE_BUBBLE_SIZE_DP] ?: 24f,
+        )
+        // 环间距下限跟着气泡直径，历史/手改出来的过小值在这里抬回来。
+        val ringSpacingDp = CornerGestureSettings.clampRingSpacingDp(
+            prefs[SettingsPreferenceKeys.CORNER_GESTURE_RING_SPACING_DP]
+                ?: CornerGestureSettings.DEFAULT_RING_SPACING_DP,
+            bubbleSizeDp,
+        )
         return CornerGestureSettings(
             enabled = prefs[SettingsPreferenceKeys.CORNER_GESTURE_ENABLED] ?: false,
             leftEnabled = prefs[SettingsPreferenceKeys.CORNER_GESTURE_LEFT_ENABLED] ?: true,
@@ -861,15 +901,15 @@ internal object SettingsSnapshotReader {
             landscapePreventFalseTouch = prefs[SettingsPreferenceKeys.CORNER_GESTURE_LANDSCAPE_PREVENT_FALSE_TOUCH]
                 ?: true,
             overrideSystemNav = prefs[SettingsPreferenceKeys.CORNER_GESTURE_OVERRIDE_SYSTEM_NAV] ?: false,
-            outerDiameterDp = CornerGestureSettings.clampOuterDiameterDp(outer),
-            innerDiameterDp = CornerGestureSettings.clampInnerDiameterDp(inner, outer),
-            bubbleSizeDp = CornerGestureSettings.clampBubbleSizeDp(
-                prefs[SettingsPreferenceKeys.CORNER_GESTURE_BUBBLE_SIZE_DP] ?: 17f,
-            ),
+            innerDiameterDp = CornerGestureSettings.clampInnerDiameterDp(inner),
+            ringSpacingDp = ringSpacingDp,
+            bubbleSizeDp = bubbleSizeDp,
+            wheelLayerCount = wheelLayerCount,
             cancelOutsideWheel = prefs[SettingsPreferenceKeys.CORNER_GESTURE_CANCEL_OUTSIDE_WHEEL] ?: true,
-            progressiveLayers = prefs[SettingsPreferenceKeys.CORNER_GESTURE_PROGRESSIVE_LAYERS] ?: true,
+            progressiveLayers = prefs[SettingsPreferenceKeys.CORNER_GESTURE_PROGRESSIVE_LAYERS] ?: false,
             slotHapticEnabled = prefs[SettingsPreferenceKeys.CORNER_GESTURE_SLOT_HAPTIC] ?: true,
             showSelectedName = prefs[SettingsPreferenceKeys.CORNER_GESTURE_SHOW_SELECTED_NAME] ?: true,
+            showEditButton = prefs[SettingsPreferenceKeys.CORNER_GESTURE_SHOW_EDIT_BUTTON] ?: true,
             selectedHintIconSizeDp = SelectedHintMetrics.clampIconSizeDp(
                 prefs[SettingsPreferenceKeys.CORNER_GESTURE_SELECTED_HINT_ICON_SIZE_DP]
                     ?: prefs[SettingsPreferenceKeys.SELECTED_HINT_ICON_SIZE_DP]
@@ -1090,6 +1130,12 @@ internal object SettingsSnapshotReader {
             unlockConfirmationAutoDismissSeconds =
                 (prefs[SettingsPreferenceKeys.MESSAGE_UNLOCK_CONFIRMATION_AUTO_DISMISS_SECONDS] ?: 3)
                     .coerceIn(0, 30),
+            unlockOpenDelayMs =
+                (prefs[SettingsPreferenceKeys.MESSAGE_UNLOCK_OPEN_DELAY_MS]
+                    ?: MessageSettings.DEFAULT_UNLOCK_OPEN_DELAY_MS)
+                    .coerceIn(0, MessageSettings.MAX_UNLOCK_OPEN_DELAY_MS),
+            keepFloatIconAfterUnlock =
+                prefs[SettingsPreferenceKeys.MESSAGE_KEEP_FLOAT_ICON_AFTER_UNLOCK] ?: false,
         )
     }
 

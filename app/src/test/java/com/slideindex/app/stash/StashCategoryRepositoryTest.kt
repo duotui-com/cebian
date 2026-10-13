@@ -28,14 +28,17 @@ class StashCategoryRepositoryTest {
         context = RuntimeEnvironment.getApplication()
         stashDir = File(context.filesDir, "stash")
         stashDir.deleteRecursively()
-        stash = StashRepository(context)
+        stash = StashRepository(context, StashMetaRepository(context))
         categories = StashCategoryRepository(context, stash)
     }
 
     private fun names(list: List<StashCategory>) = list.map { it.name }
 
     /** 用全新实例从磁盘重新读，确认分类确实落盘了。 */
-    private fun reloaded() = StashCategoryRepository(context, StashRepository(context)).categories.value
+    private fun reloaded() = StashCategoryRepository(
+        context,
+        StashRepository(context, StashMetaRepository(context))
+    ).categories.value
 
     @Test
     fun noFile_meansNoCategories() {

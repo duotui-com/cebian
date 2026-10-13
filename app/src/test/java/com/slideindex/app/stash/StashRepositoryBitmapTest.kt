@@ -30,7 +30,7 @@ class StashRepositoryBitmapTest {
         val stashDir = File(context.filesDir, "stash")
         stashDir.deleteRecursively()
         imageDir = File(stashDir, "images")
-        repository = StashRepository(context)
+        repository = StashRepository(context, StashMetaRepository(context))
     }
 
     private fun bitmap() = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)

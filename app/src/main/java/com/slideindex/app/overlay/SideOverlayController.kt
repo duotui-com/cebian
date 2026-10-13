@@ -65,7 +65,18 @@ class SideOverlayController(
         metrics: ScreenMetricsSnapshot = OverlayScreenMetrics.snapshot(context)
     ): AppSettings = source.withRuntimeLandscapeSettings(metrics.isLandscape)
 
-    internal fun shouldShowRuntimeVisuals(): Boolean = !runtimeVisualsSuppressed && !previewMode
+    /**
+     * 绘制用的权威屏幕尺寸：与触摸捕获窗同一个来源（服务上下文的真实屏幕，而不是浮层 WindowContext
+     * 的窗口边界），保证「看得见的触钮」和「划得到的触钮」用的是同一把尺子。
+     */
+    internal fun authoritativeScreenSizePx(): Pair<Int, Int> {
+        if (screenWidthPx > 0 && screenHeightPx > 0) return screenWidthPx to screenHeightPx
+        val metrics = OverlayScreenMetrics.snapshot(context)
+        return metrics.widthPx to metrics.heightPx
+    }
+
+    internal fun shouldShowRuntimeVisuals(): Boolean =
+        !runtimeVisualsSuppressed && !captureVisualsSuppressed && !previewMode
 
     internal fun syncRuntimeVisuals() {
         if (shouldShowRuntimeVisuals()) {
@@ -171,6 +182,20 @@ class SideOverlayController(
 
     internal var runtimeVisualsSuppressed = false
         private set
+
+    /**
+     * 截图期的临时压制（只隐藏触钮的绘制，不动窗口）。
+     *
+     * 和 [runtimeVisualsSuppressed] 分开记：那个是应用级显隐（预览、隐藏应用等），
+     * 截图恢复时只能清自己这一位，否则会把别人压制的触钮误显出来。
+     */
+    private var captureVisualsSuppressed = false
+
+    fun setCaptureVisualsSuppressed(suppressed: Boolean) {
+        if (captureVisualsSuppressed == suppressed) return
+        captureVisualsSuppressed = suppressed
+        syncRuntimeVisuals()
+    }
 
     fun setRuntimeVisualsSuppressed(suppressed: Boolean) {
         runtimeVisualsSuppressed = suppressed
@@ -366,6 +391,7 @@ class SideOverlayController(
             onOverlayPresentationResume = { resumePresentationIfNeeded() },
             onShellPanelAuxiliaryPrepare = { suspendEdgeOverlay() },
             onShellPanelAuxiliaryDismiss = { resumeEdgeOverlay() },
+            screenSizeProvider = { authoritativeScreenSizePx() },
             overlayBrightness = null
         ).also { view ->
             view.onPresentationTouchRequirementChanged = {

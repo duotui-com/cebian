@@ -9,6 +9,7 @@
   - 执行任何 `gradlew` 命令时，Shell 工具须请求 `required_permissions: ["all"]`，以绕过 Cursor 沙箱对 `GRADLE_USER_HOME` 的重定向（否则会重复下载 distribution）。
 - **设置 Git 锚点**：仅在用户明确指令升级版本号后，才修改版本号并执行 commit，备注格式保持为：“版本号：修改内容”。
 - **发版 / 换包**：同版本 `gh release upload --clobber` 必须同步用 **同一份 Lite APK** 更新 `update.json` 的 `apkSize` 并 push（见 `RELEASE.md`「同版本替换 Release APK」）；禁止只换 Release 附件不改清单。
+- **更新日志文风**：`CHANGELOG.md` 当版段落一律按 `RELEASE.md`「发版操作 → 1. 收集当版完整日志」里的文风硬要求书写（陈述式、一行一条、只写结论，禁止「此前…现…」对比叙事与类名/常量名，**历史条目不作参照**）；定稿需维护者确认后才提交与打 Tag，`update.json` 的 `notes` 与 Release 正文同步。
 
 ## 1. 编码前先思考 (Think Before Coding)
 - **不预设前提，不掩饰困惑，暴露权衡过程**。
@@ -50,3 +51,10 @@
 ## 5. Miuix 设置页 UI
 - 新增或修改设置子页前，先阅读 `app/src/main/java/com/slideindex/app/ui/miuix/README.md`。
 - 列表用 `MiuixListSettingsCard`；Tab 在白 Card 内用 `MiuixTabSettingsCard`；禁止手拼 `Card { Preference… }` 列表。
+
+## 6. Git 红线（完整版见根目录 `AGENTS.md`）
+- **提交只许包含用户点名的文件**：`git add <具体路径>`；禁止 `git add -A` / `git add .` / `git commit -a`。
+- **禁止自行 push**：默认只 commit。push 需用户当次明确指示；仓库装了 pre-push 门锁（`scripts/git-hooks/pre-push`），**只拦 AI 进程**（`DSH_SHELL` / `DSH_SESSION_ID`），AI 推送必须带 `XG_ALLOW_PUSH=1`，**AI 不得自行设置该变量**；用户自己在终端 / IDE 推送不受影响（只打印待推清单）。
+- **发现本地领先 `origin/main`、或工作区有用户自己的改动时，先停下报告清单**，由用户决定提交 / 推送范围；禁止替用户判断"反正迟早要推"。
+- **禁止整文件还原**（`git checkout -- <file>` / `git restore <file>`）：用户常在同一个文件里有未提交改动，会一并清掉。
+- **提交前把该文件行尾规范成 LF**：本仓库部分文件 HEAD 存 LF、工作区是 CRLF，直接提交会出现"整文件改写"的假 diff。

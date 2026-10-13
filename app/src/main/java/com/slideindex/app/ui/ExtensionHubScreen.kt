@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.slideindex.app.R
+import com.slideindex.app.gesture.GestureActionType
 import com.slideindex.app.settings.ExtensionHubSettings
 import com.slideindex.app.ui.miuix.MiuixHubScaffold
 import com.slideindex.app.ui.miuix.groupedCardItems
@@ -36,7 +37,9 @@ fun ExtensionHubScreen(
     bottomNavReselectCount: Int = 0,
     onOpenLayoutSettings: () -> Unit,
     onOpenQuickLauncher: () -> Unit,
+    onOpenQuickWheel: () -> Unit,
     onOpenHoneycombLauncher: () -> Unit,
+    onOpenRingLauncher: () -> Unit,
     onOpenHolographicLauncher: () -> Unit,
     onOpenActivityShortcuts: () -> Unit,
     onOpenExternalInvocations: () -> Unit,
@@ -105,6 +108,16 @@ fun ExtensionHubScreen(
                     }
                 )
                 add(
+                    settingsCardScopeItem("app-switcher") {
+                        RingLauncherEntryCard(
+                            settings = settings,
+                            enabled = gestureActive,
+                            outlinedLeadingIcons = true,
+                            onClick = onOpenRingLauncher
+                        )
+                    }
+                )
+                add(
                     settingsCardScopeItem("holographic-launcher") {
                         HolographicLauncherEntryCard(
                             hiddenAppCount = settings.holographicHiddenAppCount,
@@ -121,6 +134,15 @@ fun ExtensionHubScreen(
                             enabled = gestureActive,
                             outlinedLeadingIcons = true,
                             onClick = onOpenWidgetPanel
+                        )
+                    }
+                )
+                // 快捷轮盘刻意排在「启动与面板」这一组的最下面。
+                add(
+                    settingsCardScopeItem("quick-wheel") {
+                        QuickWheelEntryCard(
+                            outlinedLeadingIcons = true,
+                            onClick = onOpenQuickWheel,
                         )
                     }
                 )
@@ -321,6 +343,24 @@ fun SettingsCardScope.SettingsBackupEntryCard(
         icon = { label -> Icon(HubLeadingIcons.settingsBackup(outlinedLeadingIcons), contentDescription = label) },
         title = stringResource(R.string.settings_backup_entry_title),
         subtitle = stringResource(R.string.settings_backup_entry_desc),
+        onClick = onClick
+    )
+}
+
+@Composable
+fun SettingsCardScope.QuickWheelEntryCard(
+    outlinedLeadingIcons: Boolean = false,
+    onClick: () -> Unit
+) {
+    SettingNavigationRow(
+        icon = { label ->
+            Icon(
+                gestureActionTypeOutlinedIcon(GestureActionType.QUICK_WHEEL),
+                contentDescription = label,
+            )
+        },
+        title = stringResource(R.string.extension_quick_wheel_entry_title),
+        subtitle = stringResource(R.string.extension_quick_wheel_entry_desc),
         onClick = onClick
     )
 }

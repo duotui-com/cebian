@@ -7,6 +7,7 @@ fun NavEntryBuilder.extensionNavEntries(ctx: MainNavContext) {
     nativeEnginePackNavEntry(ctx)
     extensionHubNavEntries(ctx)
     quickLauncherNavEntries(ctx)
+    quickWheelNavEntries(ctx)
     honeycombLauncherNavEntries(ctx)
     holographicLauncherNavEntries(ctx)
     activityShortcutNavEntries(ctx)
@@ -17,4 +18,5 @@ fun NavEntryBuilder.extensionNavEntries(ctx: MainNavContext) {
     searchPanelNavEntries(ctx)
     floatBallNavEntries(ctx)
     floatingPointerNavEntries(ctx)
+    ringLauncherNavEntries(ctx)
 }

@@ -1,7 +1,8 @@
 {
-  "version": "1.32.0",
-  "versionCode": 67,
-  "apkUrl": "https://github.com/qpst4/XGesture/releases/download/v1.32.0/xgesture-1.32.0-lite.apk",
-  "apkSize": 28723434,
-  "notes": "## 修复\n- 剪贴板白名单：白名单中的应用此前无法在后台读取剪贴板——模块侧生效名单始终停留在仅含本应用的旧状态；现随设置变更同步下发，重启或覆盖安装后不再回退\n- 暂存夹 / 扩展 tab 的剪贴板状态：LSPosed 模式下曾被误判为「监听未就绪」（判定错误地依赖 Shizuku 授权）；现按实际运行的通道显示，两个入口结果一致\n- LSPosed 接管：手指抬起/取消时模块发来的「会话结束」不再被当作「取消手势」——此前快速启动器这类驻留面板刚打开就会被拆掉（表现为「松手触发弹不出来」）；真丢 UP/CANCEL 时由 10 秒看门狗兜底\n- 接管开关：切换后一度只有两三秒生效、随后回落到系统手势——模块侧不再被机器上遗留的旧配置顶掉\n- 悬浮球 / 双贴边线条接管：球线换位、拖动、切换线条后接管区域立即重新下发；此前不重发，且球的新位置恰好落在两侧触钮手柄之间的空隙（无矩形覆盖），表现为只出系统返回手势\n## 新增\n- 诊断：LSPosed 状态行新增「模块白名单已同步：N 个包（本地 M 个）」，数量不一致时提示「白名单未同步」\n- 诊断：新增边缘与接管链路的环形缓冲埋点及「扩展 → 诊断与日志」一键导出，报告中包含包名、进程、无障碍/宿主/接管状态与关键埋点\n## 变更\n- Weblate：修正 weblate.yml 中项目 slug 注释的笔误（仅配置注释，不影响翻译流程）"
+  "version": "1.40.2",
+  "versionCode": 76,
+  "apkUrl": "https://github.com/qpst4/XGesture/releases/download/v1.40.2/xgesture-1.40.2-lite.apk",
+  "apkSize": 30066910,
+  "notes": "## 修复\n- 修复系统里关掉应用通知或关闭剪贴板监听后，启动应用即闪退的问题\n- 修复系统里关掉应用通知后，悬浮球与边缘手势消失、需要重新打开应用才能恢复的问题\n- 修复闪念默认标签的显示名不跟随界面语言",
+  "notesEn": "## Fixed\n- Fix the app crashing on launch after app notifications are turned off in system settings or clipboard monitoring is disabled\n- Fix the floating ball and edge gestures disappearing after app notifications are turned off in system settings, requiring the app to be reopened\n- Fix the default idea tag names not following the interface language"
 }

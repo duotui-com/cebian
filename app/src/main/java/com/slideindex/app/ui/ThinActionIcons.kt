@@ -127,6 +127,58 @@ internal object ThinActionIcons {
         }
     }
 
+    /**
+     * 快捷轮盘：中心一个大圆 + 外围四个小圆（对应轮盘"中心盘 + 一圈容器"的结构）。
+     *
+     * 与「指尖环」等区分：中心圆明显更大，小圆只在四个正方向，整体是一个"环形阵列"的读法。
+     */
+    val QuickWheel: ImageVector by lazy {
+        createThinIcon("ThinQuickWheel") {
+            path(
+                stroke = strokeBrush,
+                strokeLineWidth = STROKE_WIDTH,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+            ) {
+                // 中心大圆：圆心 (12,12)、半径 3.0
+                moveTo(12f, 9f)
+                curveTo(13.66f, 9f, 15f, 10.34f, 15f, 12f)
+                curveTo(15f, 13.66f, 13.66f, 15f, 12f, 15f)
+                curveTo(10.34f, 15f, 9f, 13.66f, 9f, 12f)
+                curveTo(9f, 10.34f, 10.34f, 9f, 12f, 9f)
+                close()
+                // 上：圆心 (12,4.9)、半径 1.8
+                moveTo(12f, 3.1f)
+                curveTo(12.99f, 3.1f, 13.8f, 3.91f, 13.8f, 4.9f)
+                curveTo(13.8f, 5.89f, 12.99f, 6.7f, 12f, 6.7f)
+                curveTo(11.01f, 6.7f, 10.2f, 5.89f, 10.2f, 4.9f)
+                curveTo(10.2f, 3.91f, 11.01f, 3.1f, 12f, 3.1f)
+                close()
+                // 下：圆心 (12,19.1)
+                moveTo(12f, 17.3f)
+                curveTo(12.99f, 17.3f, 13.8f, 18.11f, 13.8f, 19.1f)
+                curveTo(13.8f, 20.09f, 12.99f, 20.9f, 12f, 20.9f)
+                curveTo(11.01f, 20.9f, 10.2f, 20.09f, 10.2f, 19.1f)
+                curveTo(10.2f, 18.11f, 11.01f, 17.3f, 12f, 17.3f)
+                close()
+                // 左：圆心 (4.9,12)
+                moveTo(4.9f, 10.2f)
+                curveTo(5.89f, 10.2f, 6.7f, 11.01f, 6.7f, 12f)
+                curveTo(6.7f, 12.99f, 5.89f, 13.8f, 4.9f, 13.8f)
+                curveTo(3.91f, 13.8f, 3.1f, 12.99f, 3.1f, 12f)
+                curveTo(3.1f, 11.01f, 3.91f, 10.2f, 4.9f, 10.2f)
+                close()
+                // 右：圆心 (19.1,12)
+                moveTo(19.1f, 10.2f)
+                curveTo(20.09f, 10.2f, 20.9f, 11.01f, 20.9f, 12f)
+                curveTo(20.9f, 12.99f, 20.09f, 13.8f, 19.1f, 13.8f)
+                curveTo(18.11f, 13.8f, 17.3f, 12.99f, 17.3f, 12f)
+                curveTo(17.3f, 11.01f, 18.11f, 10.2f, 19.1f, 10.2f)
+                close()
+            }
+        }
+    }
+
   /** 3D 球 / 全息启动器 */
     val Globe: ImageVector by lazy {
         createThinIcon("ThinGlobe") {
@@ -424,6 +476,29 @@ internal object ThinActionIcons {
         }
     }
 
+    /** 圈内叉：强行停止当前应用（区别于 NONE 的圈内斜杠与 Close 的裸叉）。 */
+    val ForceStopApp: ImageVector by lazy {
+        createThinIcon("ThinForceStopApp") {
+            path(
+                stroke = strokeBrush,
+                strokeLineWidth = STROKE_WIDTH,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+            ) {
+                moveTo(12f, 4.5f)
+                curveTo(7.86f, 4.5f, 4.5f, 7.86f, 4.5f, 12f)
+                curveTo(4.5f, 16.14f, 7.86f, 19.5f, 12f, 19.5f)
+                curveTo(16.14f, 19.5f, 19.5f, 16.14f, 19.5f, 12f)
+                curveTo(19.5f, 7.86f, 16.14f, 4.5f, 12f, 4.5f)
+                close()
+                moveTo(9.2f, 9.2f)
+                lineTo(14.8f, 14.8f)
+                moveTo(14.8f, 9.2f)
+                lineTo(9.2f, 14.8f)
+            }
+        }
+    }
+
     /** 100% 精准对齐：FreeWindow 箭头尾部恰好位于左竖线 (X:2.5) 与上横线 (Y:4.5) 的延伸交点 (2.5, 4.5) */
     val FreeWindow: ImageVector by lazy {
         createThinIcon("ThinFreeWindow") {
@@ -502,6 +577,52 @@ internal object ThinActionIcons {
                 curveTo(17.8f, 9.8f, 17.8f, 14.2f, 16.5f, 15.5f)
                 moveTo(19f, 6f)
                 curveTo(21.5f, 9f, 21.5f, 15f, 19f, 18f)
+            }
+        }
+    }
+
+    /** 扬声器 + 加号：音量增加。 */
+    val VolumeIncrease: ImageVector by lazy {
+        createThinIcon("ThinVolumeIncrease") {
+            path(
+                stroke = strokeBrush,
+                strokeLineWidth = STROKE_WIDTH,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+            ) {
+                moveTo(4f, 9f)
+                lineTo(7.5f, 9f)
+                lineTo(12f, 5.5f)
+                lineTo(12f, 18.5f)
+                lineTo(7.5f, 15f)
+                lineTo(4f, 15f)
+                close()
+                moveTo(18.5f, 9.5f)
+                lineTo(18.5f, 14.5f)
+                moveTo(16f, 12f)
+                lineTo(21f, 12f)
+            }
+        }
+    }
+
+    /** 扬声器 − 减号：音量减小。 */
+    val VolumeDecrease: ImageVector by lazy {
+        createThinIcon("ThinVolumeDecrease") {
+            path(
+                stroke = strokeBrush,
+                strokeLineWidth = STROKE_WIDTH,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+            ) {
+                moveTo(4f, 9f)
+                lineTo(7.5f, 9f)
+                lineTo(12f, 5.5f)
+                lineTo(12f, 18.5f)
+                lineTo(7.5f, 15f)
+                lineTo(4f, 15f)
+                close()
+                moveTo(16f, 12f)
+                lineTo(21f, 12f)
             }
         }
     }
